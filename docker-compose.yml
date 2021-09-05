@@ -1,0 +1,28 @@
+version: '2'
+services:
+    source:
+        image: alpine:3.6
+        volumes:
+            - .:/var/www/html
+
+    app:
+        build:
+            context: ./docker/web
+            args:
+                HOST_UID: ${HOST_UID}
+        hostname: "autonotes"
+        container_name: "autonotes"
+        volumes_from:
+            - source
+        depends_on:
+            - source
+
+    nginx:
+        build: ./docker/nginx
+        volumes_from:
+            - source
+        ports:
+            - "443:443"
+            - "80:80"
+        depends_on:
+            - app
