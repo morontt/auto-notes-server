@@ -16,6 +16,22 @@ services:
             - source
         depends_on:
             - source
+            - database
+
+    database:
+        build:
+            context: ./docker/db
+            args:
+                HOST_UID: ${HOST_UID}
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./var/db_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: docker
+            POSTGRES_USER: autonotes
+            POSTGRES_DB: autonotes
+            PGDATA: /var/lib/postgresql/data/pgdata
 
     nginx:
         build: ./docker/nginx
