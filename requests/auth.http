@@ -1,0 +1,17 @@
+POST http://localhost:8080/twirp/xelbot.com.autonotes.Auth/GetToken
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "morontt",
+  "password": "test"
+}
+
+###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.Auth/RefreshToken
+Accept: application/json
+Content-Type: application/json
+
+{
+  "token": "XYZ"
+}

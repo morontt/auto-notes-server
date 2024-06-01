@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package xelbot.com.autonotes;
+
 option go_package = "xelbot.com/auto-notes/server/proto";
 
 message LoginRequest {
@@ -8,10 +9,15 @@ message LoginRequest {
   string password = 2;
 }
 
+message RefreshTokenRequest {
+  string token = 1;
+}
+
 message LoginResponse {
-  string wsse_key = 1;
+  string token = 1;
 }
 
 service Auth {
-  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc GetToken(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
 }
