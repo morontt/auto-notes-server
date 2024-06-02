@@ -1,5 +1,6 @@
 port = 8080
 log_level = "debug"
+secret_key = "fiazRumF6Jl3xfCU7EcQt2sIcuDV4zQqNEenwtsJtvU="
 
 [database]
 dbname = "auto_notes"

@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"crypto/subtle"
+	"encoding/base64"
 	"errors"
+	"time"
 
+	"github.com/kataras/jwt"
 	"github.com/twitchtv/twirp"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/models"
@@ -12,6 +15,8 @@ import (
 	"xelbot.com/auto-notes/server/internal/security"
 	pb "xelbot.com/auto-notes/server/proto"
 )
+
+const tokenExpiresDuration = 30 * 24 * time.Hour
 
 type AuthService struct {
 	app application.Container
@@ -53,9 +58,36 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 		return nil, twirp.InvalidArgument.Error("invalid username or password")
 	}
 
-	return &pb.LoginResponse{Token: "Hello " + user.Username}, nil
+	tokenData, err := createToken(user)
+	if err != nil {
+		auth.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return &pb.LoginResponse{Token: string(tokenData)}, nil
 }
 
 func (auth *AuthService) RefreshToken(context.Context, *pb.RefreshTokenRequest) (*pb.LoginResponse, error) {
 	return nil, twirp.Internal.Error("Not implemented")
+}
+
+func createToken(user *models.User) ([]byte, error) {
+	secret, err := base64.StdEncoding.DecodeString(application.GetConfig().Secret)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	standardClaims := jwt.Claims{
+		Expiry:   now.Add(tokenExpiresDuration).Unix(),
+		IssuedAt: now.Unix(),
+	}
+
+	claims := security.UserClaims{
+		Username: user.Username,
+		ID:       user.ID,
+	}
+
+	return jwt.Sign(jwt.HS256, secret, claims, standardClaims)
 }

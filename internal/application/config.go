@@ -1,6 +1,9 @@
 package application
 
 import (
+	"encoding/base64"
+	"errors"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -10,6 +13,7 @@ type Config struct {
 	Database `toml:"database"`
 	Port     int    `toml:"port"`
 	LogLevel string `toml:"log_level"`
+	Secret   string `toml:"secret_key"`
 }
 
 type Database struct {
@@ -25,9 +29,22 @@ func LoadConfig() error {
 		return err
 	}
 
-	return nil
+	return validate()
 }
 
 func GetConfig() Config {
 	return cfg
+}
+
+func validate() error {
+	secret, err := base64.StdEncoding.DecodeString(cfg.Secret)
+	if err != nil {
+		return errors.New("config: invalid secret key (illegal base64)")
+	}
+
+	if len(secret) < 32 {
+		return errors.New("config: weak secret key (too short)")
+	}
+
+	return nil
 }
