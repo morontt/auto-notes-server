@@ -36,6 +36,15 @@ func GetConfig() Config {
 	return cfg
 }
 
+func GetSecretKey() []byte {
+	key, err := base64.StdEncoding.DecodeString(cfg.Secret)
+	if err != nil {
+		panic(err)
+	}
+
+	return key
+}
+
 func validate() error {
 	secret, err := base64.StdEncoding.DecodeString(cfg.Secret)
 	if err != nil {

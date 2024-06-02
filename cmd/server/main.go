@@ -12,10 +12,15 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/service"
 	"xelbot.com/auto-notes/server/proto"
 )
+
+func init() {
+	jwt.Unmarshal = jwt.UnmarshalWithRequired
+}
 
 func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)

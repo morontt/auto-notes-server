@@ -13,5 +13,5 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "token": "XYZ"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInVuYW1lIjoibW9yb250dCIsImlhdCI6MTcxNzM1OTcxNywiZXhwIjoxNzE5OTUxNzE3fQ.4fw_kxvCMyxVaK7Y5-XEIlrVvvWQLcpt1uVe35jLRDM"
 }
