@@ -4,15 +4,15 @@ import (
 	"context"
 	"github.com/twitchtv/twirp"
 
-	"xelbot.com/auto-notes/server/internal/app"
+	"xelbot.com/auto-notes/server/internal/application"
 	pb "xelbot.com/auto-notes/server/proto"
 )
 
 type AuthService struct {
-	app app.Container
+	app application.Container
 }
 
-func NewAuthService(app app.Container) *AuthService {
+func NewAuthService(app application.Container) *AuthService {
 	return &AuthService{app: app}
 }
 
