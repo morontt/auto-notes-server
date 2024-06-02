@@ -59,14 +59,7 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 		return nil, twirp.InvalidArgument.Error("invalid username or password")
 	}
 
-	tokenData, err := createToken(user)
-	if err != nil {
-		auth.app.ServerError(err)
-
-		return nil, twirp.InternalError("internal error")
-	}
-
-	return &pb.LoginResponse{Token: string(tokenData)}, nil
+	return auth.createLoginResponse(user)
 }
 
 func (auth *AuthService) RefreshToken(_ context.Context, req *pb.RefreshTokenRequest) (*pb.LoginResponse, error) {
@@ -105,6 +98,10 @@ func (auth *AuthService) RefreshToken(_ context.Context, req *pb.RefreshTokenReq
 		return nil, twirp.InternalError("internal error")
 	}
 
+	return auth.createLoginResponse(user)
+}
+
+func (auth *AuthService) createLoginResponse(user *models.User) (*pb.LoginResponse, error) {
 	tokenData, err := createToken(user)
 	if err != nil {
 		auth.app.ServerError(err)
