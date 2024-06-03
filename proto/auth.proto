@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package xelbot.com.autonotes;
 
-option go_package = "xelbot.com/auto-notes/server/proto";
+option go_package = "xelbot.com/auto-notes/server/internal/pb";
 
 message LoginRequest {
   string username = 1;

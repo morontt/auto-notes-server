@@ -14,8 +14,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
-	"xelbot.com/auto-notes/server/internal/service"
-	"xelbot.com/auto-notes/server/proto"
+	"xelbot.com/auto-notes/server/internal/pb"
+	"xelbot.com/auto-notes/server/internal/services"
 )
 
 func init() {
@@ -48,8 +48,8 @@ func main() {
 		DB:       db,
 	}
 
-	authImpl := service.NewAuthService(appContainer)
-	authHandler := proto.NewAuthServer(authImpl)
+	authImpl := services.NewAuthService(appContainer)
+	authHandler := pb.NewAuthServer(authImpl)
 
 	mux := http.NewServeMux()
 	mux.Handle(authHandler.PathPrefix(), authHandler)
