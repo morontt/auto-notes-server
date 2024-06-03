@@ -14,8 +14,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
-	"xelbot.com/auto-notes/server/internal/pb"
 	"xelbot.com/auto-notes/server/internal/services"
+	pb "xelbot.com/auto-notes/server/proto"
 )
 
 func init() {

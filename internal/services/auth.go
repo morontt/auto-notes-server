@@ -11,8 +11,8 @@ import (
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
-	"xelbot.com/auto-notes/server/internal/pb"
 	"xelbot.com/auto-notes/server/internal/security"
+	pb "xelbot.com/auto-notes/server/proto"
 )
 
 const tokenExpiresDuration = 30 * 24 * time.Hour
