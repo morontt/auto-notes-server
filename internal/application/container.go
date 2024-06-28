@@ -26,3 +26,14 @@ func (c *Container) ServerError(err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	c.ErrorLog.Println(trace)
 }
+
+func (c *Container) SetupDatabase() error {
+	db, err := getDBConnection(c.InfoLog)
+	if err != nil {
+		return err
+	}
+
+	c.DB = db
+
+	return nil
+}

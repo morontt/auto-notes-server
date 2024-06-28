@@ -14,6 +14,7 @@ type Config struct {
 	Port     int    `toml:"port"`
 	LogLevel string `toml:"log_level"`
 	Secret   string `toml:"secret_key"`
+	TimeZone string `toml:"timezone"`
 }
 
 type Database struct {

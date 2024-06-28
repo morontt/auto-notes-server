@@ -1,6 +1,7 @@
 port = 8080
 log_level = "debug"
 secret_key = "fiazRumF6Jl3xfCU7EcQt2sIcuDV4zQqNEenwtsJtvU="
+timezone = "Europe/Moscow"
 
 [database]
 dbname = "auto_notes"

@@ -1,4 +1,10 @@
 {
   "title": "Auto-notes tasks",
-  "tasks": []
+  "tasks": [
+    {
+      "text": "Graceful shutdown",
+      "priority": "medium",
+      "creation": 1719564468
+    }
+  ]
 }

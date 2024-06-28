@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"log/slog"
@@ -11,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/services"
@@ -37,16 +35,12 @@ func main() {
 	infoLog := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
 	infoLog.Debug("Loading configuration", "config", cnf)
 
-	db, err := getDBConnection(cnf, infoLog)
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-
 	appContainer := application.Container{
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
-		DB:       db,
 	}
+
+	handleError(appContainer.SetupDatabase(), errorLog)
 
 	authImpl := services.NewAuthService(appContainer)
 	authHandler := pb.NewAuthServer(authImpl)
@@ -63,48 +57,6 @@ func main() {
 
 	infoLog.Info("Starting server", "port", cnf.Port)
 	handleError(server.ListenAndServe(), errorLog)
-}
-
-func getDBConnection(cnf application.Config, logger *slog.Logger) (db *sql.DB, err error) {
-	var i int
-
-	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=Europe%%2fMoscow",
-		cnf.Database.User,
-		cnf.Database.Password,
-		cnf.Database.Host,
-		cnf.Database.Name,
-	)
-
-	for i < 5 {
-		logger.Info("Trying to connect to the database")
-		db, err = openDB(dsn)
-		if err == nil {
-			logger.Info("The database is connected")
-
-			return
-		} else {
-			logger.Error(err.Error())
-		}
-
-		i++
-		time.Sleep(1000 * time.Millisecond)
-	}
-
-	return nil, err
-}
-
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
 
 func handleError(err error, logger *log.Logger) {
