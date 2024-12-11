@@ -25,7 +25,7 @@ type Database struct {
 }
 
 func LoadConfig() error {
-	_, err := toml.DecodeFile("config.toml", &cfg)
+	_, err := toml.DecodeFile("config/config.toml", &cfg)
 	if err != nil {
 		return err
 	}

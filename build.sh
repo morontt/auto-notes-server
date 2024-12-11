@@ -2,4 +2,4 @@
 
 go fmt ./...
 
-cd ./cmd/server && go build -v
+go build -v ./cmd/server

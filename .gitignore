@@ -1,2 +1,2 @@
-/cmd/server/server
-/config.toml
+/server
+/config/config.toml
