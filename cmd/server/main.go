@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"runtime/debug"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/kataras/jwt"
@@ -21,6 +25,7 @@ func init() {
 }
 
 func main() {
+	var err error
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	handleError(application.LoadConfig(), errorLog)
@@ -55,8 +60,31 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 	}
 
-	infoLog.Info("Starting server", "port", cnf.Port)
-	handleError(server.ListenAndServe(), errorLog)
+	go func() {
+		infoLog.Info("Starting server", "port", cnf.Port)
+		err = server.ListenAndServe()
+		if !errors.Is(err, http.ErrServerClosed) {
+			handleError(err, errorLog)
+		}
+	}()
+
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
+
+	<-exit
+
+	infoLog.Info("Shutting down...")
+	err = server.Shutdown(context.Background())
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	infoLog.Info("Server stopped")
+
+	err = appContainer.Stop()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	infoLog.Info("Application stopped")
 }
 
 func handleError(err error, logger *log.Logger) {

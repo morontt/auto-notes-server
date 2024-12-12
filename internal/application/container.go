@@ -37,3 +37,13 @@ func (c *Container) SetupDatabase() error {
 
 	return nil
 }
+
+func (c *Container) Stop() error {
+	err := c.DB.Close()
+	if err != nil {
+		return err
+	}
+	c.InfoLog.Info("The database connection is closed")
+
+	return nil
+}

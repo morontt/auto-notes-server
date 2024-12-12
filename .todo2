@@ -4,7 +4,8 @@
     {
       "text": "Graceful shutdown",
       "priority": "medium",
-      "creation": 1719564468
+      "creation": 1719564468,
+      "completion": 1733990803
     },
     {
       "text": "Add telegram bot as client",
@@ -17,6 +18,11 @@
           "creation": 1722600915
         }
       ]
+    },
+    {
+      "text": "Remove sensitive data from logs",
+      "priority": "medium",
+      "creation": 1733990877
     }
   ]
 }
