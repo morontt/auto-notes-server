@@ -51,7 +51,7 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 		return nil, twirp.InternalError("internal error")
 	}
 
-	auth.app.Debug("Get token by user", "user", user)
+	auth.app.Debug("Get token by user", "user_id", user.ID, "user_name", user.Username)
 	passwordHash := security.EncodePassword(req.Password, user.Salt)
 	if subtle.ConstantTimeCompare([]byte(passwordHash), []byte(user.PasswordHash)) == 0 {
 		auth.app.Info("Auth.GetToken: invalid password", "username", req.Username)
