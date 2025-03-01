@@ -16,6 +16,7 @@ import (
 
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/middlewares"
 	"xelbot.com/auto-notes/server/internal/services"
 	pb "xelbot.com/auto-notes/server/proto"
 )
@@ -50,8 +51,12 @@ func main() {
 	authImpl := services.NewAuthService(appContainer)
 	authHandler := pb.NewAuthServer(authImpl)
 
+	userRepoImpl := services.NewUserRepositoryService(appContainer)
+	userRepoHandler := pb.NewUserRepositoryServer(userRepoImpl)
+
 	mux := http.NewServeMux()
 	mux.Handle(authHandler.PathPrefix(), authHandler)
+	mux.Handle(userRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, userRepoHandler))
 
 	server := &http.Server{
 		Handler:      mux,

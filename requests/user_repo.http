@@ -1,0 +1,6 @@
+POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetCars
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInVuYW1lIjoibW9yb250dCIsImlhdCI6MTc0MDg2MDI2MSwiZXhwIjoxNzQzNDUyMjYxfQ.Amv8enb2CQm2BF406LRCsfq2S5z-wY-ZYI-XaoijHWE
+Content-Type: application/json
+
+{}
