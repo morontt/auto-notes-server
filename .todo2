@@ -15,7 +15,8 @@
         {
           "text": "Login by generated temporary code",
           "priority": "medium",
-          "creation": 1722600915
+          "creation": 1722600915,
+          "completion": 1740858599
         }
       ]
     },
@@ -24,6 +25,11 @@
       "priority": "medium",
       "creation": 1733990877,
       "completion": 1739638627
+    },
+    {
+      "text": "Add request ID middleware",
+      "priority": "medium",
+      "creation": 1740858630
     }
   ]
 }
