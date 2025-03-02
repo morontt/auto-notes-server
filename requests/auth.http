@@ -13,5 +13,5 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInVuYW1lIjoibW9yb250dCIsImlhdCI6MTcxNzQyNTM5MiwiZXhwIjoxNzIwMDE3MzkyfQ.afrOxazij4tpWaud4uNZNkSQAKWjQlTkuNEpa8Aog4I"
+  "token": "{{auth_token}}"
 }
