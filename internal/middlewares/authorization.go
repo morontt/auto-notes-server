@@ -36,9 +36,9 @@ func WithAuthorization(app application.Container, next http.Handler) http.Handle
 			return
 		}
 
-		app.Debug("parsed claims from authorization token", "claims", claims)
-
-		ctx := context.WithValue(r.Context(), security.UserContextKey, claims)
+		ctx := r.Context()
+		app.Debug("parsed claims from authorization token", ctx, "claims", claims)
+		ctx = context.WithValue(ctx, application.CtxKeyUser, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -59,7 +59,7 @@ func main() {
 	mux.Handle(userRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, userRepoHandler))
 
 	server := &http.Server{
-		Handler:      mux,
+		Handler:      middlewares.RequestID(mux),
 		Addr:         ":" + strconv.Itoa(cnf.Port),
 		WriteTimeout: 10 * time.Second,
 		ReadTimeout:  10 * time.Second,

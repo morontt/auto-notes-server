@@ -1,11 +1,17 @@
 package application
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"log/slog"
 	"runtime/debug"
+)
+
+const (
+	CtxKeyUser      = "user_ctx_key"
+	CtxKeyRequestID = "req_id_ctx_key"
 )
 
 type Container struct {
@@ -14,12 +20,12 @@ type Container struct {
 	DB       *sql.DB
 }
 
-func (c *Container) Info(msg string, args ...any) {
-	c.InfoLog.Info(msg, args...)
+func (c *Container) Info(msg string, ctx context.Context, args ...any) {
+	c.InfoLog.Info(msg, logContext(ctx, args...)...)
 }
 
-func (c *Container) Debug(msg string, args ...any) {
-	c.InfoLog.Debug(msg, args...)
+func (c *Container) Debug(msg string, ctx context.Context, args ...any) {
+	c.InfoLog.Debug(msg, logContext(ctx, args...)...)
 }
 
 func (c *Container) ServerError(err error) {
@@ -46,4 +52,17 @@ func (c *Container) Stop() error {
 	c.InfoLog.Info("The database connection is closed")
 
 	return nil
+}
+
+func logContext(ctx context.Context, args ...any) []any {
+	var additional []any
+	if reqID, ok := ctx.Value(CtxKeyRequestID).(string); ok {
+		additional = append(additional, "request_id", reqID)
+	}
+
+	if len(additional) > 0 {
+		args = append(args, additional...)
+	}
+
+	return args
 }

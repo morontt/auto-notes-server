@@ -25,14 +25,14 @@ func NewAuthService(app application.Container) *AuthService {
 	return &AuthService{app: app}
 }
 
-func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (auth *AuthService) GetToken(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	if req.Username == "" {
-		auth.app.Debug("Auth.GetToken: Username is empty")
+		auth.app.Debug("Auth.GetToken: Username is empty", ctx)
 
 		return nil, twirp.InvalidArgument.Error("username is required")
 	}
 	if req.Password == "" {
-		auth.app.Debug("Auth.GetToken: Password is empty")
+		auth.app.Debug("Auth.GetToken: Password is empty", ctx)
 
 		return nil, twirp.InvalidArgument.Error("password is required")
 	}
@@ -41,7 +41,7 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 	user, err := repo.GetUserByUsername(req.Username)
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
-			auth.app.Info("Auth.GetToken: User not found", "username", req.Username)
+			auth.app.Info("Auth.GetToken: User not found", ctx, "username", req.Username)
 
 			return nil, twirp.InvalidArgument.Error("invalid username or password")
 		}
@@ -51,10 +51,10 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 		return nil, twirp.InternalError("internal error")
 	}
 
-	auth.app.Debug("Get token by user", "user_id", user.ID, "user_name", user.Username)
+	auth.app.Debug("Get token by user", ctx, "user_id", user.ID, "user_name", user.Username)
 	passwordHash := security.EncodePassword(req.Password, user.Salt)
 	if subtle.ConstantTimeCompare([]byte(passwordHash), []byte(user.PasswordHash)) == 0 {
-		auth.app.Info("Auth.GetToken: invalid password", "username", req.Username)
+		auth.app.Info("Auth.GetToken: invalid password", ctx, "username", req.Username)
 
 		return nil, twirp.InvalidArgument.Error("invalid username or password")
 	}
@@ -62,15 +62,17 @@ func (auth *AuthService) GetToken(_ context.Context, req *pb.LoginRequest) (*pb.
 	return auth.createLoginResponse(user)
 }
 
-func (auth *AuthService) RefreshToken(_ context.Context, req *pb.RefreshTokenRequest) (*pb.LoginResponse, error) {
+func (auth *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.LoginResponse, error) {
 	if req.Token == "" {
-		auth.app.Debug("Auth.RefreshToken: token is empty")
+		auth.app.Debug("Auth.RefreshToken: token is empty", ctx)
 
 		return nil, twirp.InvalidArgument.Error("token is required")
 	}
 
 	verifiedToken, err := jwt.Verify(jwt.HS256, application.GetSecretKey(), []byte(req.Token))
 	if err != nil {
+		auth.app.Debug("Auth.RefreshToken: invalid token", ctx, "err", err.Error())
+
 		return nil, twirp.InvalidArgument.Error("invalid token")
 	}
 
@@ -82,13 +84,13 @@ func (auth *AuthService) RefreshToken(_ context.Context, req *pb.RefreshTokenReq
 		return nil, twirp.InternalError("internal error")
 	}
 
-	auth.app.Debug("Auth.RefreshToken: parsed claims", "claims", claims)
+	auth.app.Debug("Auth.RefreshToken: parsed claims", ctx, "claims", claims)
 
 	repo := repository.UserRepository{DB: auth.app.DB}
 	user, err := repo.GetUserByUsername(claims.Username)
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
-			auth.app.Info("Auth.RefreshToken: User not found", "username", claims.Username)
+			auth.app.Info("Auth.RefreshToken: User not found", ctx, "username", claims.Username)
 
 			return nil, twirp.InvalidArgument.Error("invalid token")
 		}
