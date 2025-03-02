@@ -28,6 +28,10 @@ func (c *Container) Debug(msg string, ctx context.Context, args ...any) {
 	c.InfoLog.Debug(msg, logContext(ctx, args...)...)
 }
 
+func (c *Container) Warn(msg string, ctx context.Context, args ...any) {
+	c.InfoLog.Warn(msg, logContext(ctx, args...)...)
+}
+
 func (c *Container) ServerError(err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	c.ErrorLog.Println(trace)
