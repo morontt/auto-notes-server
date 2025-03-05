@@ -36,7 +36,7 @@ func (ur *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 	cars := make([]*models.Car, 0)
 
 	for rows.Next() {
-		car := &models.Car{}
+		car := models.Car{}
 		err = rows.Scan(
 			&car.ID,
 			&car.Brand,
@@ -51,7 +51,7 @@ func (ur *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 			return nil, err
 		}
 
-		cars = append(cars, car)
+		cars = append(cars, &car)
 	}
 
 	return cars, nil

@@ -25,6 +25,17 @@ service Auth {
   rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
 }
 
+message Limit {
+  int32 limit = 1;
+}
+
+message Cost {
+  // integer value, decimal(8, 2) in MySQL
+  int32 value = 1;
+  // currency code, for example RUB
+  string currency = 2;
+}
+
 message Car {
   int32 id = 1;
   string name = 2;
@@ -38,6 +49,28 @@ message CarCollection {
   repeated Car cars = 1;
 }
 
+message FillingStation {
+  int32 id = 1;
+  string name = 2;
+}
+
+message Fuel {
+  int32 id = 1;
+  Cost cost = 2;
+  // integer value, decimal(8, 2) in MySQL
+  int32 value = 3;
+  FillingStation station = 4;
+  google.protobuf.Timestamp date = 5;
+  int32 distance = 6;
+  Car car = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message FuelCollection {
+  repeated Fuel fuels = 1;
+}
+
 service UserRepository {
   rpc GetCars(google.protobuf.Empty) returns (CarCollection);
+  rpc GetFuels(Limit) returns (FuelCollection);
 }

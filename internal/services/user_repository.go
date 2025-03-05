@@ -63,3 +63,56 @@ func (ur *UserRepositoryService) GetCars(ctx context.Context, _ *emptypb.Empty) 
 
 	return &pb.CarCollection{Cars: cars}, nil
 }
+
+func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) (*pb.FuelCollection, error) {
+	var (
+		user security.UserClaims
+		ok   bool
+	)
+
+	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
+
+		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	}
+
+	repo := repository.FuelRepository{DB: ur.app.DB}
+	dbFuels, err := repo.GetFuelsByUser(user.ID)
+	if err != nil {
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	fuels := make([]*pb.Fuel, 0, len(dbFuels))
+	for _, dbFuel := range dbFuels {
+		fuel := &pb.Fuel{
+			Id: int32(dbFuel.ID),
+			Car: &pb.Car{
+				Id:   int32(dbFuel.Car.ID),
+				Name: dbFuel.Car.Brand + " " + dbFuel.Car.Model,
+			},
+			Cost: &pb.Cost{
+				Value:    dbFuel.Cost.Value,
+				Currency: dbFuel.Cost.CurrencyCode,
+			},
+			Value: dbFuel.Value,
+			Station: &pb.FillingStation{
+				Id:   int32(dbFuel.Station.ID),
+				Name: dbFuel.Station.Name,
+			},
+			Date:      timestamppb.New(dbFuel.Date),
+			CreatedAt: timestamppb.New(dbFuel.CreatedAt),
+		}
+
+		if dbFuel.Distance.Valid {
+			fuel.Distance = dbFuel.Distance.Int32
+		}
+
+		fuels = append(fuels, fuel)
+	}
+
+	ur.app.Info("UserRepositoryService: populate fuels", ctx, "cnt", len(dbFuels))
+
+	return &pb.FuelCollection{Fuels: fuels}, nil
+}
