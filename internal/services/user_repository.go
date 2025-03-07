@@ -77,7 +77,7 @@ func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 	}
 
 	repo := repository.FuelRepository{DB: ur.app.DB}
-	dbFuels, err := repo.GetFuelsByUser(user.ID)
+	dbFuels, err := repo.GetFuelsByUser(user.ID, uint(limit.Limit))
 	if err != nil {
 		ur.app.ServerError(err)
 

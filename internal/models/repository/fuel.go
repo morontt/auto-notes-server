@@ -10,7 +10,7 @@ type FuelRepository struct {
 	DB *sql.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID uint) ([]*models.Fuel, error) {
+func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fuel, error) {
 	query := `
 		SELECT
 			f.id,
@@ -31,9 +31,10 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint) ([]*models.Fuel, error) {
 		INNER JOIN currencies AS cur ON f.currency_id = cur.id
 		LEFT JOIN mileages AS m ON f.mileage_id = m.id
 		WHERE c.user_id = ?
-		ORDER BY f.date`
+		ORDER BY f.date DESC
+		LIMIT ?`
 
-	rows, err := fr.DB.Query(query, userID)
+	rows, err := fr.DB.Query(query, userID, limit)
 	if err != nil {
 		return nil, err
 	}
