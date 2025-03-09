@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/alecthomas/kong"
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/middlewares"
@@ -29,7 +29,13 @@ func main() {
 	var err error
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	handleError(application.LoadConfig(), errorLog)
+	var cli struct {
+		ConfigFile string `default:"config/config.toml" help:"Path to config file"`
+	}
+
+	kong.Parse(&cli, kong.Description("gRPC server for autonotes app."))
+
+	handleError(application.LoadConfig(cli.ConfigFile), errorLog)
 	cnf := application.GetConfig()
 
 	var logLevel = new(slog.LevelVar)
@@ -94,7 +100,7 @@ func main() {
 
 func handleError(err error, logger *log.Logger) {
 	if err != nil {
-		logger.Println(fmt.Sprintf("%s", debug.Stack()))
+		logger.Printf("%s\n", debug.Stack())
 		logger.Fatal(err)
 	}
 }

@@ -24,8 +24,8 @@ type Database struct {
 	Host     string `toml:"host"`
 }
 
-func LoadConfig() error {
-	_, err := toml.DecodeFile("config/config.toml", &cfg)
+func LoadConfig(configPath string) error {
+	_, err := toml.DecodeFile(configPath, &cfg)
 	if err != nil {
 		return err
 	}

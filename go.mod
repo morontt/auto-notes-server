@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/alecthomas/kong v1.8.1
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/kataras/jwt v0.1.14
 	github.com/twitchtv/twirp v8.1.3+incompatible
