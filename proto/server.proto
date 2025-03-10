@@ -70,7 +70,21 @@ message FuelCollection {
   repeated Fuel fuels = 1;
 }
 
+message Currency {
+  int32 id = 1;
+  string name = 2;
+  // currency code, for example RUB
+  string code = 3;
+  bool default = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message CurrencyCollection {
+  repeated Currency currencies = 1;
+}
+
 service UserRepository {
   rpc GetCars(google.protobuf.Empty) returns (CarCollection);
   rpc GetFuels(Limit) returns (FuelCollection);
+  rpc GetCurrencies(google.protobuf.Empty) returns (CurrencyCollection);
 }

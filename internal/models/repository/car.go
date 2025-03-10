@@ -10,7 +10,7 @@ type CarRepository struct {
 	DB *sql.DB
 }
 
-func (ur *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
+func (cr *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 	query := `
 		SELECT
 			c.id,
@@ -26,7 +26,7 @@ func (ur *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 		WHERE c.user_id = ?
 		ORDER BY c.id DESC`
 
-	rows, err := ur.DB.Query(query, userID)
+	rows, err := cr.DB.Query(query, userID)
 	if err != nil {
 		return nil, err
 	}

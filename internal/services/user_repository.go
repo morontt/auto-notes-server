@@ -116,3 +116,41 @@ func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 
 	return &pb.FuelCollection{Fuels: fuels}, nil
 }
+
+func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.Empty) (*pb.CurrencyCollection, error) {
+	var (
+		user security.UserClaims
+		ok   bool
+	)
+
+	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
+
+		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	}
+
+	repo := repository.CurrencyRepository{DB: ur.app.DB}
+	dbCurrencies, err := repo.GetCurrencies(user.ID)
+	if err != nil {
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	currencies := make([]*pb.Currency, 0, len(dbCurrencies))
+	for _, dbCurrency := range dbCurrencies {
+		curr := &pb.Currency{
+			Id:        int32(dbCurrency.ID),
+			Name:      dbCurrency.Name,
+			Code:      dbCurrency.Code,
+			Default:   dbCurrency.Default,
+			CreatedAt: timestamppb.New(dbCurrency.CreatedAt),
+		}
+
+		currencies = append(currencies, curr)
+	}
+
+	ur.app.Info("UserRepositoryService: populate currencies", ctx, "cnt", len(dbCurrencies))
+
+	return &pb.CurrencyCollection{Currencies: currencies}, nil
+}
