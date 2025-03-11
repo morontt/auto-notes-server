@@ -88,9 +88,18 @@ message CurrencyCollection {
   repeated Currency currencies = 1;
 }
 
+message UserSettings {
+  int32 id = 1;
+  Car default_car = 2;
+  Currency default_currency = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
 service UserRepository {
   rpc GetCars(google.protobuf.Empty) returns (CarCollection);
   rpc GetFuels(Limit) returns (FuelCollection);
   rpc GetCurrencies(google.protobuf.Empty) returns (CurrencyCollection);
   rpc GetDefaultCurrency(google.protobuf.Empty) returns (DefaultCurrency);
+  rpc GetUserSettings(google.protobuf.Empty) returns (UserSettings);
 }

@@ -31,6 +31,11 @@
       "priority": "medium",
       "creation": 1740858630,
       "completion": 1740902588
+    },
+    {
+      "text": "Twirp hooks for logging",
+      "priority": "medium",
+      "creation": 1741710243
     }
   ]
 }

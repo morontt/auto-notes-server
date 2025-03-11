@@ -2,11 +2,13 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/twitchtv/twirp"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
 	"xelbot.com/auto-notes/server/internal/security"
 	pb "xelbot.com/auto-notes/server/proto"
@@ -194,4 +196,51 @@ func (ur *UserRepositoryService) GetDefaultCurrency(ctx context.Context, _ *empt
 	ur.app.Info("UserRepositoryService: default currency", ctx, "found", result.Found)
 
 	return result, nil
+}
+
+func (ur *UserRepositoryService) GetUserSettings(ctx context.Context, _ *emptypb.Empty) (*pb.UserSettings, error) {
+	var (
+		user security.UserClaims
+		ok   bool
+	)
+
+	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
+
+		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	}
+
+	repo := repository.UserSettingRepository{DB: ur.app.DB}
+	dbUserSettings, err := repo.GetUserSettings(user.ID)
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+
+			return &pb.UserSettings{}, nil
+		}
+
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	settings := pb.UserSettings{
+		Id:        int32(dbUserSettings.ID),
+		CreatedAt: timestamppb.New(dbUserSettings.CreatedAt),
+	}
+
+	if dbUserSettings.CarID.Valid {
+		settings.DefaultCar = &pb.Car{
+			Id: dbUserSettings.CarID.Int32,
+		}
+	}
+	if dbUserSettings.CurrencyID.Valid {
+		settings.DefaultCurrency = &pb.Currency{
+			Id: dbUserSettings.CurrencyID.Int32,
+		}
+	}
+	if dbUserSettings.UpdatedAt.Valid {
+		settings.UpdatedAt = timestamppb.New(dbUserSettings.UpdatedAt.Time)
+	}
+
+	return &settings, nil
 }
