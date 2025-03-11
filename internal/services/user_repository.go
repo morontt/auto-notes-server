@@ -154,3 +154,44 @@ func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.E
 
 	return &pb.CurrencyCollection{Currencies: currencies}, nil
 }
+
+func (ur *UserRepositoryService) GetDefaultCurrency(ctx context.Context, _ *emptypb.Empty) (*pb.DefaultCurrency, error) {
+	var (
+		user security.UserClaims
+		ok   bool
+	)
+
+	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
+
+		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	}
+
+	repo := repository.CurrencyRepository{DB: ur.app.DB}
+	dbCurrencies, err := repo.GetCurrencies(user.ID)
+	if err != nil {
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	result := &pb.DefaultCurrency{}
+	for _, dbCurrency := range dbCurrencies {
+		if dbCurrency.Default == true {
+			result.Currency = &pb.Currency{
+				Id:        int32(dbCurrency.ID),
+				Name:      dbCurrency.Name,
+				Code:      dbCurrency.Code,
+				Default:   dbCurrency.Default,
+				CreatedAt: timestamppb.New(dbCurrency.CreatedAt),
+			}
+			result.Found = true
+
+			break
+		}
+	}
+
+	ur.app.Info("UserRepositoryService: default currency", ctx, "found", result.Found)
+
+	return result, nil
+}

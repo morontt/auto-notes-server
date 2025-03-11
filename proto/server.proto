@@ -79,6 +79,11 @@ message Currency {
   google.protobuf.Timestamp created_at = 5;
 }
 
+message DefaultCurrency {
+  Currency currency = 1;
+  bool found = 2;
+}
+
 message CurrencyCollection {
   repeated Currency currencies = 1;
 }
@@ -87,4 +92,5 @@ service UserRepository {
   rpc GetCars(google.protobuf.Empty) returns (CarCollection);
   rpc GetFuels(Limit) returns (FuelCollection);
   rpc GetCurrencies(google.protobuf.Empty) returns (CurrencyCollection);
+  rpc GetDefaultCurrency(google.protobuf.Empty) returns (DefaultCurrency);
 }
