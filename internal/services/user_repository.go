@@ -230,7 +230,8 @@ func (ur *UserRepositoryService) GetUserSettings(ctx context.Context, _ *emptypb
 
 	if dbUserSettings.CarID.Valid {
 		settings.DefaultCar = &pb.Car{
-			Id: dbUserSettings.CarID.Int32,
+			Id:   dbUserSettings.CarID.Int32,
+			Name: dbUserSettings.CarBrand.String + " " + dbUserSettings.CarModel.String,
 		}
 	}
 	if dbUserSettings.CurrencyID.Valid {
