@@ -210,10 +210,54 @@ func (ur *UserRepositoryService) GetUserSettings(ctx context.Context, _ *emptypb
 		return nil, twirp.Unauthenticated.Error("unauthenticated")
 	}
 
+	return ur.userSettingsFromDB(ctx, user.ID)
+}
+
+func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsReq *pb.UserSettings) (*pb.UserSettings, error) {
+	var (
+		user security.UserClaims
+		ok   bool
+	)
+
+	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
+
+		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	}
+
+	// TODO check settings owner
+	// TODO check car owner
+
 	repo := repository.UserSettingRepository{DB: ur.app.DB}
-	dbUserSettings, err := repo.GetUserSettings(user.ID)
+
+	settings := models.UserSetting{
+		ID: uint(settingsReq.Id),
+	}
+	if settingsReq.DefaultCar != nil {
+		settings.CarID.Valid = true
+		settings.CarID.Int32 = settingsReq.DefaultCar.Id
+	}
+	if settingsReq.DefaultCurrency != nil {
+		settings.CurrencyID.Valid = true
+		settings.CurrencyID.Int32 = settingsReq.DefaultCurrency.Id
+	}
+
+	err := repo.SaveUserSettings(&settings, user.ID)
+	if err != nil {
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return ur.userSettingsFromDB(ctx, user.ID)
+}
+
+func (ur *UserRepositoryService) userSettingsFromDB(ctx context.Context, userID uint) (*pb.UserSettings, error) {
+	repo := repository.UserSettingRepository{DB: ur.app.DB}
+	dbUserSettings, err := repo.GetUserSettings(userID)
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
+			ur.app.Info("UserRepositoryService: empty user settings", ctx)
 
 			return &pb.UserSettings{}, nil
 		}
@@ -236,12 +280,19 @@ func (ur *UserRepositoryService) GetUserSettings(ctx context.Context, _ *emptypb
 	}
 	if dbUserSettings.CurrencyID.Valid {
 		settings.DefaultCurrency = &pb.Currency{
-			Id: dbUserSettings.CurrencyID.Int32,
+			Id:   dbUserSettings.CurrencyID.Int32,
+			Name: dbUserSettings.CurrencyName.String,
+			Code: dbUserSettings.CurrencyCode.String,
+		}
+		if dbUserSettings.CurrencyCreatedAt.Valid {
+			settings.DefaultCurrency.CreatedAt = timestamppb.New(dbUserSettings.CurrencyCreatedAt.Time)
 		}
 	}
 	if dbUserSettings.UpdatedAt.Valid {
 		settings.UpdatedAt = timestamppb.New(dbUserSettings.UpdatedAt.Time)
 	}
+
+	ur.app.Info("UserRepositoryService: get user settings", ctx, "user_settings_id", settings.Id)
 
 	return &settings, nil
 }

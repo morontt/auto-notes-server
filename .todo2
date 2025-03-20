@@ -36,6 +36,23 @@
       "text": "Twirp hooks for logging",
       "priority": "medium",
       "creation": 1741710243
+    },
+    {
+      "text": "Save user settings",
+      "priority": "medium",
+      "creation": 1742453959,
+      "tasks": [
+        {
+          "text": "check settings owner",
+          "priority": "medium",
+          "creation": 1742453986
+        },
+        {
+          "text": "check car owner",
+          "priority": "medium",
+          "creation": 1742453996
+        }
+      ]
     }
   ]
 }

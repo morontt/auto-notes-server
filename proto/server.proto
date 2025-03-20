@@ -102,4 +102,5 @@ service UserRepository {
   rpc GetCurrencies(google.protobuf.Empty) returns (CurrencyCollection);
   rpc GetDefaultCurrency(google.protobuf.Empty) returns (DefaultCurrency);
   rpc GetUserSettings(google.protobuf.Empty) returns (UserSettings);
+  rpc SaveUserSettings(UserSettings) returns (UserSettings);
 }
