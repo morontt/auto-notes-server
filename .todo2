@@ -53,6 +53,11 @@
           "creation": 1742453996
         }
       ]
+    },
+    {
+      "text": "Limit = 0 =\u003e no limit",
+      "priority": "medium",
+      "creation": 1742661169
     }
   ]
 }

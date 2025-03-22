@@ -10,7 +10,6 @@ import (
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
-	"xelbot.com/auto-notes/server/internal/security"
 	pb "xelbot.com/auto-notes/server/proto"
 )
 
@@ -23,15 +22,9 @@ func NewUserRepositoryService(app application.Container) *UserRepositoryService 
 }
 
 func (ur *UserRepositoryService) GetCars(ctx context.Context, _ *emptypb.Empty) (*pb.CarCollection, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	repo := repository.CarRepository{DB: ur.app.DB}
@@ -67,15 +60,9 @@ func (ur *UserRepositoryService) GetCars(ctx context.Context, _ *emptypb.Empty) 
 }
 
 func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) (*pb.FuelCollection, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	repo := repository.FuelRepository{DB: ur.app.DB}
@@ -100,8 +87,9 @@ func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 			},
 			Value: dbFuel.Value,
 			Station: &pb.FillingStation{
-				Id:   int32(dbFuel.Station.ID),
-				Name: dbFuel.Station.Name,
+				Id:        int32(dbFuel.Station.ID),
+				Name:      dbFuel.Station.Name,
+				CreatedAt: timestamppb.New(dbFuel.Station.CreatedAt),
 			},
 			Date:      timestamppb.New(dbFuel.Date),
 			CreatedAt: timestamppb.New(dbFuel.CreatedAt),
@@ -120,15 +108,9 @@ func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 }
 
 func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.Empty) (*pb.CurrencyCollection, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	repo := repository.CurrencyRepository{DB: ur.app.DB}
@@ -158,15 +140,9 @@ func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.E
 }
 
 func (ur *UserRepositoryService) GetDefaultCurrency(ctx context.Context, _ *emptypb.Empty) (*pb.DefaultCurrency, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	repo := repository.CurrencyRepository{DB: ur.app.DB}
@@ -199,30 +175,18 @@ func (ur *UserRepositoryService) GetDefaultCurrency(ctx context.Context, _ *empt
 }
 
 func (ur *UserRepositoryService) GetUserSettings(ctx context.Context, _ *emptypb.Empty) (*pb.UserSettings, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	return ur.userSettingsFromDB(ctx, user.ID)
 }
 
 func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsReq *pb.UserSettings) (*pb.UserSettings, error) {
-	var (
-		user security.UserClaims
-		ok   bool
-	)
-
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
-		ur.app.Error("UserRepositoryService: unauthenticated", ctx)
-
-		return nil, twirp.Unauthenticated.Error("unauthenticated")
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	// TODO check settings owner
@@ -242,7 +206,7 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 		settings.CurrencyID.Int32 = settingsReq.DefaultCurrency.Id
 	}
 
-	err := repo.SaveUserSettings(&settings, user.ID)
+	err = repo.SaveUserSettings(&settings, user.ID)
 	if err != nil {
 		ur.app.ServerError(err)
 
@@ -250,6 +214,36 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 	}
 
 	return ur.userSettingsFromDB(ctx, user.ID)
+}
+
+func (ur *UserRepositoryService) GetFillingStations(ctx context.Context, _ *emptypb.Empty) (*pb.FillingStationCollection, error) {
+	_, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	repo := repository.FuelRepository{DB: ur.app.DB}
+	dbStations, err := repo.GetFillingStations()
+	if err != nil {
+		ur.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	stations := make([]*pb.FillingStation, 0, len(dbStations))
+	for _, dbItem := range dbStations {
+		item := &pb.FillingStation{
+			Id:        int32(dbItem.ID),
+			Name:      dbItem.Name,
+			CreatedAt: timestamppb.New(dbItem.CreatedAt),
+		}
+
+		stations = append(stations, item)
+	}
+
+	ur.app.Info("UserRepositoryService: populate stations", ctx, "cnt", len(dbStations))
+
+	return &pb.FillingStationCollection{Stations: stations}, nil
 }
 
 func (ur *UserRepositoryService) userSettingsFromDB(ctx context.Context, userID uint) (*pb.UserSettings, error) {

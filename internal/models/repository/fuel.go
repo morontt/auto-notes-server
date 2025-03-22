@@ -18,6 +18,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fue
 			CAST(f.value * 100 AS SIGNED INT) AS value,
 			azs.id AS station_id,
 			azs.name AS station_name,
+			azs.created_at AS station_created_at,
 			CAST(f.cost * 100 AS SIGNED INT) AS cost,
 			cur.code AS curr_code,
 			c.id AS car_id,
@@ -51,6 +52,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fue
 			&fuel.Value,
 			&fuel.Station.ID,
 			&fuel.Station.Name,
+			&fuel.Station.CreatedAt,
 			&fuel.Cost.Value,
 			&fuel.Cost.CurrencyCode,
 			&fuel.Car.ID,
@@ -67,4 +69,40 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fue
 	}
 
 	return fuels, nil
+}
+
+func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error) {
+	query := `
+		SELECT
+			fs.id,
+			fs.name,
+			fs.created_at
+		FROM filling_stations AS fs
+		ORDER BY fs.name
+`
+
+	rows, err := fr.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	stations := make([]*models.FillingStation, 0)
+
+	for rows.Next() {
+		item := models.FillingStation{}
+		err = rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.CreatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		stations = append(stations, &item)
+	}
+
+	return stations, nil
 }
