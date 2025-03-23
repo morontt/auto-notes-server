@@ -103,10 +103,13 @@ message UserSettings {
 
 service UserRepository {
   rpc GetCars(google.protobuf.Empty) returns (CarCollection);
-  rpc GetFuels(Limit) returns (FuelCollection);
-  rpc GetFillingStations(google.protobuf.Empty) returns (FillingStationCollection);
   rpc GetCurrencies(google.protobuf.Empty) returns (CurrencyCollection);
   rpc GetDefaultCurrency(google.protobuf.Empty) returns (DefaultCurrency);
   rpc GetUserSettings(google.protobuf.Empty) returns (UserSettings);
   rpc SaveUserSettings(UserSettings) returns (UserSettings);
+}
+
+service FuelRepository {
+  rpc GetFuels(Limit) returns (FuelCollection);
+  rpc GetFillingStations(google.protobuf.Empty) returns (FillingStationCollection);
 }

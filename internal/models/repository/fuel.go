@@ -78,8 +78,7 @@ func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error)
 			fs.name,
 			fs.created_at
 		FROM filling_stations AS fs
-		ORDER BY fs.name
-`
+		ORDER BY fs.name`
 
 	rows, err := fr.DB.Query(query)
 	if err != nil {

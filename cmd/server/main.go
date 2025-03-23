@@ -60,9 +60,13 @@ func main() {
 	userRepoImpl := services.NewUserRepositoryService(appContainer)
 	userRepoHandler := pb.NewUserRepositoryServer(userRepoImpl)
 
+	fuelRepoImpl := services.NewFuelRepositoryService(appContainer)
+	fuelRepoHandler := pb.NewFuelRepositoryServer(fuelRepoImpl)
+
 	mux := http.NewServeMux()
 	mux.Handle(authHandler.PathPrefix(), authHandler)
 	mux.Handle(userRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, userRepoHandler))
+	mux.Handle(fuelRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, fuelRepoHandler))
 
 	handler := middlewares.Clacks().Middleware(mux)
 	handler = middlewares.RequestID(handler)

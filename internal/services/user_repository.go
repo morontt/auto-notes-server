@@ -59,54 +59,6 @@ func (ur *UserRepositoryService) GetCars(ctx context.Context, _ *emptypb.Empty) 
 	return &pb.CarCollection{Cars: cars}, nil
 }
 
-func (ur *UserRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) (*pb.FuelCollection, error) {
-	user, err := userClaimsFromContext(ctx)
-	if err != nil {
-		return nil, twirp.Unauthenticated.Error(err.Error())
-	}
-
-	repo := repository.FuelRepository{DB: ur.app.DB}
-	dbFuels, err := repo.GetFuelsByUser(user.ID, uint(limit.Limit))
-	if err != nil {
-		ur.app.ServerError(err)
-
-		return nil, twirp.InternalError("internal error")
-	}
-
-	fuels := make([]*pb.Fuel, 0, len(dbFuels))
-	for _, dbFuel := range dbFuels {
-		fuel := &pb.Fuel{
-			Id: int32(dbFuel.ID),
-			Car: &pb.Car{
-				Id:   int32(dbFuel.Car.ID),
-				Name: dbFuel.Car.Brand + " " + dbFuel.Car.Model,
-			},
-			Cost: &pb.Cost{
-				Value:    dbFuel.Cost.Value,
-				Currency: dbFuel.Cost.CurrencyCode,
-			},
-			Value: dbFuel.Value,
-			Station: &pb.FillingStation{
-				Id:        int32(dbFuel.Station.ID),
-				Name:      dbFuel.Station.Name,
-				CreatedAt: timestamppb.New(dbFuel.Station.CreatedAt),
-			},
-			Date:      timestamppb.New(dbFuel.Date),
-			CreatedAt: timestamppb.New(dbFuel.CreatedAt),
-		}
-
-		if dbFuel.Distance.Valid {
-			fuel.Distance = dbFuel.Distance.Int32
-		}
-
-		fuels = append(fuels, fuel)
-	}
-
-	ur.app.Info("UserRepositoryService: populate fuels", ctx, "cnt", len(dbFuels))
-
-	return &pb.FuelCollection{Fuels: fuels}, nil
-}
-
 func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.Empty) (*pb.CurrencyCollection, error) {
 	user, err := userClaimsFromContext(ctx)
 	if err != nil {
@@ -214,36 +166,6 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 	}
 
 	return ur.userSettingsFromDB(ctx, user.ID)
-}
-
-func (ur *UserRepositoryService) GetFillingStations(ctx context.Context, _ *emptypb.Empty) (*pb.FillingStationCollection, error) {
-	_, err := userClaimsFromContext(ctx)
-	if err != nil {
-		return nil, twirp.Unauthenticated.Error(err.Error())
-	}
-
-	repo := repository.FuelRepository{DB: ur.app.DB}
-	dbStations, err := repo.GetFillingStations()
-	if err != nil {
-		ur.app.ServerError(err)
-
-		return nil, twirp.InternalError("internal error")
-	}
-
-	stations := make([]*pb.FillingStation, 0, len(dbStations))
-	for _, dbItem := range dbStations {
-		item := &pb.FillingStation{
-			Id:        int32(dbItem.ID),
-			Name:      dbItem.Name,
-			CreatedAt: timestamppb.New(dbItem.CreatedAt),
-		}
-
-		stations = append(stations, item)
-	}
-
-	ur.app.Info("UserRepositoryService: populate stations", ctx, "cnt", len(dbStations))
-
-	return &pb.FillingStationCollection{Stations: stations}, nil
 }
 
 func (ur *UserRepositoryService) userSettingsFromDB(ctx context.Context, userID uint) (*pb.UserSettings, error) {
