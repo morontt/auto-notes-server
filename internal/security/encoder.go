@@ -1,25 +1,13 @@
 package security
 
 import (
-	"crypto/sha512"
-	"encoding/base64"
+	"golang.org/x/crypto/bcrypt"
 )
 
-const iterations = 4600
-
-func EncodePassword(password string, salt string) string {
-	salted := []byte(password + "{" + salt + "}")
-	h := sha512.New384()
-
-	h.Write(salted)
-	digest := h.Sum(nil)
-
-	for i := 1; i < iterations; i++ {
-		h.Reset()
-		h.Write(digest)
-		h.Write(salted)
-		digest = h.Sum(nil)
+func PasswordVerify(password, hash string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
+		return false
 	}
 
-	return base64.StdEncoding.EncodeToString(digest)
+	return true
 }

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"crypto/subtle"
 	"errors"
 	"time"
 
@@ -52,8 +51,8 @@ func (auth *AuthService) GetToken(ctx context.Context, req *pb.LoginRequest) (*p
 	}
 
 	auth.app.Debug("Get token by user", ctx, "user_id", user.ID, "user_name", user.Username)
-	passwordHash := security.EncodePassword(req.Password, user.Salt)
-	if subtle.ConstantTimeCompare([]byte(passwordHash), []byte(user.PasswordHash)) == 0 {
+
+	if !security.PasswordVerify(req.Password, user.PasswordHash) {
 		auth.app.Info("Auth.GetToken: invalid password", ctx, "username", req.Username)
 
 		return nil, twirp.InvalidArgument.Error("invalid username or password")

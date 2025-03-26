@@ -17,7 +17,6 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 			u.id,
 			u.username,
 			u.password,
-			u.password_salt,
 			u.created_at
 		FROM users AS u
 		WHERE (u.username = ?)`
@@ -28,7 +27,6 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 		&user.ID,
 		&user.Username,
 		&user.PasswordHash,
-		&user.Salt,
 		&user.CreatedAt)
 
 	if err != nil {

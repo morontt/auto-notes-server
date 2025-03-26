@@ -9,6 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/kataras/jwt v0.1.14
 	github.com/twitchtv/twirp v8.1.3+incompatible
+	golang.org/x/crypto v0.36.0
 	google.golang.org/protobuf v1.36.5
 )
 
