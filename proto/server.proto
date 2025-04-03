@@ -112,4 +112,5 @@ service UserRepository {
 service FuelRepository {
   rpc GetFuels(Limit) returns (FuelCollection);
   rpc GetFillingStations(google.protobuf.Empty) returns (FillingStationCollection);
+  rpc SaveFuel(Fuel) returns (Fuel);
 }

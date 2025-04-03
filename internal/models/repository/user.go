@@ -21,13 +21,13 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 		FROM users AS u
 		WHERE (u.username = ?)`
 
-	user := models.User{}
+	obj := models.User{}
 
 	err := ur.DB.QueryRow(query, username).Scan(
-		&user.ID,
-		&user.Username,
-		&user.PasswordHash,
-		&user.CreatedAt)
+		&obj.ID,
+		&obj.Username,
+		&obj.PasswordHash,
+		&obj.CreatedAt)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -37,5 +37,5 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 		}
 	}
 
-	return &user, nil
+	return &obj, nil
 }

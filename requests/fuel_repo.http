@@ -1,0 +1,39 @@
+POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFuels
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "limit": 10
+}
+
+###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFillingStations
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/SaveFuel
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "id": 0,
+  "cost": {
+    "value": 200000,
+    "currency": "RUB"
+  },
+  "value": 2903,
+  "station": {
+    "id": 13
+  },
+  "date": "2024-08-21T09:00:00Z",
+  "distance": 0,
+  "car": {
+    "id": 2
+  }
+}

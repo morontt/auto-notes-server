@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"xelbot.com/auto-notes/server/internal/models"
 )
@@ -55,4 +56,31 @@ func (cr *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 	}
 
 	return cars, nil
+}
+
+func (cr *CarRepository) Find(id uint) (*models.Car, error) {
+	query := `
+		SELECT
+			c.id,
+			c.user_id,
+			c.created_at
+		FROM cars AS c
+		WHERE c.id = ?`
+
+	obj := models.Car{}
+
+	err := cr.DB.QueryRow(query, id).Scan(
+		&obj.ID,
+		&obj.UserID,
+		&obj.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &obj, nil
 }

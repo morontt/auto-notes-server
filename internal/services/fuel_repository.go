@@ -2,11 +2,13 @@ package services
 
 import (
 	"context"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"errors"
 
 	"github.com/twitchtv/twirp"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
 	pb "xelbot.com/auto-notes/server/proto"
 )
@@ -95,4 +97,38 @@ func (fr *FuelRepositoryService) GetFillingStations(ctx context.Context, _ *empt
 	fr.app.Info("FuelRepositoryService: populate stations", ctx, "cnt", len(dbStations))
 
 	return &pb.FillingStationCollection{Stations: stations}, nil
+}
+
+func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*pb.Fuel, error) {
+	_, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	currencyCode := fuel.Cost.GetCurrency()
+	if currencyCode == "" {
+		return nil, twirp.InvalidArgument.Error("empty currency code")
+	}
+
+	currencyRepo := repository.CurrencyRepository{DB: fr.app.DB}
+	_, err = currencyRepo.GetCurrencyByCode(currencyCode)
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+			return nil, twirp.InvalidArgument.Error("invalid currency")
+		} else {
+			return nil, twirp.InternalError("internal error")
+		}
+	}
+
+	carRepo := repository.CarRepository{DB: fr.app.DB}
+	_, err = carRepo.Find(uint(fuel.Car.GetId()))
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+			return nil, twirp.InvalidArgument.Error("invalid car")
+		} else {
+			return nil, twirp.InternalError("internal error")
+		}
+	}
+
+	return nil, nil
 }

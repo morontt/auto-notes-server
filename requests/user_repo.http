@@ -6,16 +6,6 @@ Content-Type: application/json
 {}
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFuels
-Accept: application/json
-Authorization: Bearer {{auth_token}}
-Content-Type: application/json
-
-{
-  "limit": 10
-}
-
-###
 POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetCurrencies
 Accept: application/json
 Authorization: Bearer {{auth_token}}
@@ -33,14 +23,6 @@ Content-Type: application/json
 
 ###
 POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetUserSettings
-Accept: application/json
-Authorization: Bearer {{auth_token}}
-Content-Type: application/json
-
-{}
-
-###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFillingStations
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json

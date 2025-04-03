@@ -63,6 +63,23 @@
       "text": "Compatibility with NativePasswordHasher (from symfony/password-hasher)",
       "priority": "medium",
       "creation": 1743240020
+    },
+    {
+      "text": "Save Fuel",
+      "priority": "medium",
+      "creation": 1743619244,
+      "tasks": [
+        {
+          "text": "Check car owner",
+          "priority": "medium",
+          "creation": 1743619271
+        },
+        {
+          "text": "Check mileage",
+          "priority": "medium",
+          "creation": 1743619283
+        }
+      ]
     }
   ]
 }

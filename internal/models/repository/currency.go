@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"xelbot.com/auto-notes/server/internal/models"
 )
@@ -48,4 +49,33 @@ func (cr *CurrencyRepository) GetCurrencies(userID uint) ([]*models.Currency, er
 	}
 
 	return currencies, nil
+}
+
+func (cr *CurrencyRepository) GetCurrencyByCode(code string) (*models.Currency, error) {
+	query := `
+		SELECT
+			c.id,
+			c.name,
+			c.code,
+			c.created_at
+		FROM currencies AS c
+		WHERE c.code = ?`
+
+	obj := models.Currency{}
+
+	err := cr.DB.QueryRow(query, code).Scan(
+		&obj.ID,
+		&obj.Name,
+		&obj.Code,
+		&obj.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &obj, nil
 }

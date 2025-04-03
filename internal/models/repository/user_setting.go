@@ -31,19 +31,19 @@ func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSett
 		LEFT JOIN currencies AS cr ON us.default_currency_id = cr.id
 		WHERE (us.user_id = ?)`
 
-	userSetting := models.UserSetting{}
+	obj := models.UserSetting{}
 
 	err := usr.DB.QueryRow(query, userID).Scan(
-		&userSetting.ID,
-		&userSetting.CarID,
-		&userSetting.CarBrand,
-		&userSetting.CarModel,
-		&userSetting.CurrencyID,
-		&userSetting.CurrencyName,
-		&userSetting.CurrencyCode,
-		&userSetting.CurrencyCreatedAt,
-		&userSetting.CreatedAt,
-		&userSetting.UpdatedAt)
+		&obj.ID,
+		&obj.CarID,
+		&obj.CarBrand,
+		&obj.CarModel,
+		&obj.CurrencyID,
+		&obj.CurrencyName,
+		&obj.CurrencyCode,
+		&obj.CurrencyCreatedAt,
+		&obj.CreatedAt,
+		&obj.UpdatedAt)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -53,7 +53,7 @@ func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSett
 		}
 	}
 
-	return &userSetting, nil
+	return &obj, nil
 }
 
 func (usr *UserSettingRepository) SaveUserSettings(settings *models.UserSetting, userId uint) error {
