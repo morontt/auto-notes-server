@@ -100,7 +100,7 @@ func (fr *FuelRepositoryService) GetFillingStations(ctx context.Context, _ *empt
 }
 
 func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*pb.Fuel, error) {
-	_, err := userClaimsFromContext(ctx)
+	user, err := userClaimsFromContext(ctx)
 	if err != nil {
 		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
@@ -121,7 +121,7 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 	}
 
 	carRepo := repository.CarRepository{DB: fr.app.DB}
-	_, err = carRepo.Find(uint(fuel.Car.GetId()))
+	car, err := carRepo.Find(uint(fuel.Car.GetId()))
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
 			return nil, twirp.InvalidArgument.Error("invalid car")
@@ -130,5 +130,9 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		}
 	}
 
-	return nil, nil
+	if car.UserID != user.ID {
+		return nil, twirp.InvalidArgument.Error("invalid car owner")
+	}
+
+	return &pb.Fuel{}, nil
 }

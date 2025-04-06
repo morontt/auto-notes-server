@@ -72,7 +72,8 @@
         {
           "text": "Check car owner",
           "priority": "medium",
-          "creation": 1743619271
+          "creation": 1743619271,
+          "completion": 1743698669
         },
         {
           "text": "Check mileage",

@@ -34,28 +34,28 @@ func (cr *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {
 
 	defer rows.Close()
 
-	cars := make([]*models.Car, 0)
+	items := make([]*models.Car, 0)
 
 	for rows.Next() {
-		car := models.Car{}
+		obj := models.Car{}
 		err = rows.Scan(
-			&car.ID,
-			&car.Brand,
-			&car.Model,
-			&car.Year,
-			&car.Vin,
-			&car.Default,
-			&car.CreatedAt,
-			&car.UpdatedAt)
+			&obj.ID,
+			&obj.Brand,
+			&obj.Model,
+			&obj.Year,
+			&obj.Vin,
+			&obj.Default,
+			&obj.CreatedAt,
+			&obj.UpdatedAt)
 
 		if err != nil {
 			return nil, err
 		}
 
-		cars = append(cars, &car)
+		items = append(items, &obj)
 	}
 
-	return cars, nil
+	return items, nil
 }
 
 func (cr *CarRepository) Find(id uint) (*models.Car, error) {

@@ -30,25 +30,25 @@ func (cr *CurrencyRepository) GetCurrencies(userID uint) ([]*models.Currency, er
 
 	defer rows.Close()
 
-	currencies := make([]*models.Currency, 0)
+	items := make([]*models.Currency, 0)
 
 	for rows.Next() {
-		curr := models.Currency{}
+		obj := models.Currency{}
 		err = rows.Scan(
-			&curr.ID,
-			&curr.Name,
-			&curr.Code,
-			&curr.Default,
-			&curr.CreatedAt)
+			&obj.ID,
+			&obj.Name,
+			&obj.Code,
+			&obj.Default,
+			&obj.CreatedAt)
 
 		if err != nil {
 			return nil, err
 		}
 
-		currencies = append(currencies, &curr)
+		items = append(items, &obj)
 	}
 
-	return currencies, nil
+	return items, nil
 }
 
 func (cr *CurrencyRepository) GetCurrencyByCode(code string) (*models.Currency, error) {

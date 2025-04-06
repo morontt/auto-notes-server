@@ -10,7 +10,7 @@ type FuelRepository struct {
 	DB *sql.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fuel, error) {
+func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, error) {
 	query := `
 		SELECT
 			f.id,
@@ -42,33 +42,37 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, limit uint) ([]*models.Fue
 
 	defer rows.Close()
 
-	fuels := make([]*models.Fuel, 0)
+	items := make([]*models.Fuel, 0)
 
 	for rows.Next() {
-		fuel := models.Fuel{}
+		obj := models.Fuel{}
 		err = rows.Scan(
-			&fuel.ID,
-			&fuel.Date,
-			&fuel.Value,
-			&fuel.Station.ID,
-			&fuel.Station.Name,
-			&fuel.Station.CreatedAt,
-			&fuel.Cost.Value,
-			&fuel.Cost.CurrencyCode,
-			&fuel.Car.ID,
-			&fuel.Car.Brand,
-			&fuel.Car.Model,
-			&fuel.Distance,
-			&fuel.CreatedAt)
+			&obj.ID,
+			&obj.Date,
+			&obj.Value,
+			&obj.Station.ID,
+			&obj.Station.Name,
+			&obj.Station.CreatedAt,
+			&obj.Cost.Value,
+			&obj.Cost.CurrencyCode,
+			&obj.Car.ID,
+			&obj.Car.Brand,
+			&obj.Car.Model,
+			&obj.Distance,
+			&obj.CreatedAt)
 
 		if err != nil {
 			return nil, err
 		}
 
-		fuels = append(fuels, &fuel)
+		items = append(items, &obj)
 	}
 
-	return fuels, nil
+	return items, nil
+}
+
+func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
+	return nil, nil
 }
 
 func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error) {
@@ -87,21 +91,21 @@ func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error)
 
 	defer rows.Close()
 
-	stations := make([]*models.FillingStation, 0)
+	items := make([]*models.FillingStation, 0)
 
 	for rows.Next() {
-		item := models.FillingStation{}
+		obj := models.FillingStation{}
 		err = rows.Scan(
-			&item.ID,
-			&item.Name,
-			&item.CreatedAt)
+			&obj.ID,
+			&obj.Name,
+			&obj.CreatedAt)
 
 		if err != nil {
 			return nil, err
 		}
 
-		stations = append(stations, &item)
+		items = append(items, &obj)
 	}
 
-	return stations, nil
+	return items, nil
 }
