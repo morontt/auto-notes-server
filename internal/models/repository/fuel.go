@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
+	"github.com/doug-martin/goqu/v9"
 	"xelbot.com/auto-notes/server/internal/models"
 )
 
@@ -11,31 +13,18 @@ type FuelRepository struct {
 }
 
 func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, error) {
-	query := `
-		SELECT
-			f.id,
-			CAST(CONCAT(f.date, ' 12:00:00') AS DATETIME) AS f_date,
-			CAST(f.value * 100 AS SIGNED INT) AS value,
-			azs.id AS station_id,
-			azs.name AS station_name,
-			azs.created_at AS station_created_at,
-			CAST(f.cost * 100 AS SIGNED INT) AS cost,
-			cur.code AS curr_code,
-			c.id AS car_id,
-			c.brand_name AS car_brand,
-			c.model_name AS car_model,
-			m.distance,
-			f.created_at
-		FROM fuels AS f
-		INNER JOIN filling_stations AS azs ON f.station_id = azs.id
-		INNER JOIN cars AS c ON f.car_id = c.id
-		INNER JOIN currencies AS cur ON f.currency_id = cur.id
-		LEFT JOIN mileages AS m ON f.mileage_id = m.id
-		WHERE c.user_id = ?
-		ORDER BY f.date DESC
-		LIMIT ?`
+	ds := fuelQueryExpression()
 
-	rows, err := fr.DB.Query(query, userID, limit)
+	ds = ds.Where(goqu.Ex{
+		"c.user_id": userID,
+	}).Order(goqu.I("f.date").Desc())
+
+	if limit > 0 {
+		ds = ds.Limit(limit)
+	}
+
+	query, params, _ := ds.Prepared(true).ToSQL()
+	rows, err := fr.DB.Query(query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +61,37 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 }
 
 func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
-	return nil, nil
+	ds := fuelQueryExpression()
+
+	ds = ds.Where(goqu.Ex{"f.id": id})
+	query, params, _ := ds.Prepared(true).ToSQL()
+
+	obj := models.Fuel{}
+
+	err := fr.DB.QueryRow(query, params...).Scan(
+		&obj.ID,
+		&obj.Date,
+		&obj.Value,
+		&obj.Station.ID,
+		&obj.Station.Name,
+		&obj.Station.CreatedAt,
+		&obj.Cost.Value,
+		&obj.Cost.CurrencyCode,
+		&obj.Car.ID,
+		&obj.Car.Brand,
+		&obj.Car.Model,
+		&obj.Distance,
+		&obj.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &obj, nil
 }
 
 func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error) {
@@ -108,4 +127,42 @@ func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error)
 	}
 
 	return items, nil
+}
+
+func fuelQueryExpression() *goqu.SelectDataset {
+	return goqu.Dialect("mysql8").From(goqu.T("fuels").As("f")).Select(
+		"f.id",
+		goqu.L("CAST(CONCAT(f.date, ' 12:00:00') AS DATETIME)").As("f_date"),
+		goqu.L("CAST(f.value * 100 AS SIGNED INT)").As("value"),
+		goqu.I("azs.id").As("station_id"),
+		goqu.I("azs.name").As("station_name"),
+		goqu.I("azs.created_at").As("station_created_at"),
+		goqu.L("CAST(f.cost * 100 AS SIGNED INT)").As("cost"),
+		goqu.I("cur.code").As("curr_code"),
+		goqu.I("c.id").As("car_id"),
+		goqu.I("c.brand_name").As("car_brand"),
+		goqu.I("c.model_name").As("car_model"),
+		"m.distance",
+		"f.created_at",
+	).InnerJoin(
+		goqu.T("filling_stations").As("azs"),
+		goqu.On(goqu.Ex{
+			"azs.id": goqu.I("f.station_id"),
+		}),
+	).InnerJoin(
+		goqu.T("cars").As("c"),
+		goqu.On(goqu.Ex{
+			"c.id": goqu.I("f.car_id"),
+		}),
+	).InnerJoin(
+		goqu.T("currencies").As("cur"),
+		goqu.On(goqu.Ex{
+			"cur.id": goqu.I("f.currency_id"),
+		}),
+	).LeftJoin(
+		goqu.T("mileages").As("m"),
+		goqu.On(goqu.Ex{
+			"m.id": goqu.I("f.mileage_id"),
+		}),
+	)
 }

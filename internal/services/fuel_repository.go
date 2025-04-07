@@ -37,31 +37,7 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 
 	fuels := make([]*pb.Fuel, 0, len(dbFuels))
 	for _, dbFuel := range dbFuels {
-		fuel := &pb.Fuel{
-			Id: int32(dbFuel.ID),
-			Car: &pb.Car{
-				Id:   int32(dbFuel.Car.ID),
-				Name: dbFuel.Car.Brand + " " + dbFuel.Car.Model,
-			},
-			Cost: &pb.Cost{
-				Value:    dbFuel.Cost.Value,
-				Currency: dbFuel.Cost.CurrencyCode,
-			},
-			Value: dbFuel.Value,
-			Station: &pb.FillingStation{
-				Id:        int32(dbFuel.Station.ID),
-				Name:      dbFuel.Station.Name,
-				CreatedAt: timestamppb.New(dbFuel.Station.CreatedAt),
-			},
-			Date:      timestamppb.New(dbFuel.Date),
-			CreatedAt: timestamppb.New(dbFuel.CreatedAt),
-		}
-
-		if dbFuel.Distance.Valid {
-			fuel.Distance = dbFuel.Distance.Int32
-		}
-
-		fuels = append(fuels, fuel)
+		fuels = append(fuels, dbFuel.ToRpcMessage())
 	}
 
 	fr.app.Info("FuelRepositoryService: populate fuels", ctx, "cnt", len(dbFuels))
@@ -134,5 +110,13 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		return nil, twirp.InvalidArgument.Error("invalid car owner")
 	}
 
-	return &pb.Fuel{}, nil
+	fuelRepo := repository.FuelRepository{DB: fr.app.DB}
+	dbFuel, err := fuelRepo.FindFuel(100)
+	if err != nil {
+		fr.app.ServerError(err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return dbFuel.ToRpcMessage(), nil
 }

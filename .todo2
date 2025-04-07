@@ -57,7 +57,8 @@
     {
       "text": "Limit = 0 =\u003e no limit",
       "priority": "medium",
-      "creation": 1742661169
+      "creation": 1742661169,
+      "completion": 1744005091
     },
     {
       "text": "Compatibility with NativePasswordHasher (from symfony/password-hasher)",
