@@ -3,8 +3,11 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
 )
 
@@ -92,6 +95,66 @@ func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
 	}
 
 	return &obj, nil
+}
+
+func (fr *FuelRepository) FuelOwner(fuelId uint) (uint, error) {
+	query := `
+		SELECT
+			c.user_id
+		FROM fuels AS f
+		INNER JOIN cars AS c ON f.car_id = c.id
+		WHERE f.id = ?`
+
+	var userId uint
+	err := fr.DB.QueryRow(query, fuelId).Scan(&userId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.RecordNotFound
+		} else {
+			return 0, err
+		}
+	}
+
+	return userId, nil
+}
+
+func (fr *FuelRepository) SaveFuel(fuel *models.Fuel) (uint, error) {
+	data := goqu.Record{}
+
+	data["date"] = fuel.Date.Format(time.DateOnly)
+	data["car_id"] = fuel.Car.ID
+	data["station_id"] = fuel.Station.ID
+	data["currency_id"] = fuel.Cost.CurrencyID
+	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Cost.Value))
+	data["value"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Value))
+
+	var ds exp.SQLExpression
+	if fuel.ID == 0 {
+		ds = goqu.Dialect("mysql8").Insert("fuels").Rows(data)
+	} else {
+		ds = goqu.Dialect("mysql8").Update("fuels").Set(data).Where(goqu.Ex{"id": fuel.ID})
+	}
+
+	query, _, err := ds.ToSQL()
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := fr.DB.Exec(query)
+	if err != nil {
+		return 0, err
+	}
+
+	if fuel.ID == 0 {
+		lastID, err := res.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+
+		return uint(lastID), nil
+	}
+
+	return fuel.ID, nil
 }
 
 func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error) {
