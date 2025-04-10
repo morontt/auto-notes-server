@@ -20,7 +20,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 
 	ds = ds.Where(goqu.Ex{
 		"c.user_id": userID,
-	}).Order(goqu.I("f.date").Desc())
+	}).Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
 
 	if limit > 0 {
 		ds = ds.Limit(limit)
