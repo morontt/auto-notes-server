@@ -1,0 +1,16 @@
+[Unit]
+Description=Autonotes-Server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=gopher
+Group=gopher
+Type=simple
+ExecStart=/path/to/autonotes/server \
+    --config-file /path/to/autonotes/server/config/config.toml
+StandardOutput=append:/path/to/autonotes/logs/out.log
+StandardError=append:/path/to/autonotes/logs/error.log
+
+[Install]
+WantedBy=multi-user.target
