@@ -2,7 +2,6 @@ package application
 
 import (
 	"database/sql"
-	"log"
 	"log/slog"
 )
 
@@ -12,13 +11,12 @@ const (
 )
 
 type Container struct {
-	ErrorLog *log.Logger
-	InfoLog  *slog.Logger
-	DB       *sql.DB
+	DB     *sql.DB
+	logger *slog.Logger
 }
 
 func (c *Container) SetupDatabase() error {
-	db, err := getDBConnection(c.InfoLog)
+	db, err := getDBConnection(c.logger)
 	if err != nil {
 		return err
 	}
@@ -33,7 +31,7 @@ func (c *Container) Stop() error {
 	if err != nil {
 		return err
 	}
-	c.InfoLog.Info("The database connection is closed")
+	c.logger.Info("The database connection is closed")
 
 	return nil
 }

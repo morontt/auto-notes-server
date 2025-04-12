@@ -47,10 +47,8 @@ func main() {
 	infoLog := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
 	infoLog.Debug("Loading configuration", "log_level", cnf.LogLevel, "time_zone", cnf.TimeZone)
 
-	appContainer := application.Container{
-		InfoLog:  infoLog,
-		ErrorLog: errorLog,
-	}
+	appContainer := application.Container{}
+	appContainer.SetLogger(infoLog)
 
 	handleError(appContainer.SetupDatabase(), errorLog)
 
