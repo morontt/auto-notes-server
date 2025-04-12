@@ -30,7 +30,7 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) 
 	repo := repository.FuelRepository{DB: fr.app.DB}
 	dbFuels, err := repo.GetFuelsByUser(user.ID, uint(limit.Limit))
 	if err != nil {
-		fr.app.ServerError(err)
+		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
@@ -54,7 +54,7 @@ func (fr *FuelRepositoryService) GetFillingStations(ctx context.Context, _ *empt
 	repo := repository.FuelRepository{DB: fr.app.DB}
 	dbStations, err := repo.GetFillingStations()
 	if err != nil {
-		fr.app.ServerError(err)
+		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
@@ -145,14 +145,14 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 
 	fuelID, err := fuelRepo.SaveFuel(&fuelModel)
 	if err != nil {
-		fr.app.ServerError(err)
+		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
 
 	dbFuel, err := fuelRepo.FindFuel(fuelID)
 	if err != nil {
-		fr.app.ServerError(err)
+		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}

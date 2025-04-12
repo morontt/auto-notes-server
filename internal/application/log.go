@@ -3,28 +3,34 @@ package application
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"runtime/debug"
 )
 
+func (c *Container) SetLogger(logger *slog.Logger) {
+	c.logger = logger
+}
+
 func (c *Container) Info(msg string, ctx context.Context, args ...any) {
-	c.InfoLog.Info(msg, logContext(ctx, args...)...)
+	c.logger.Info(msg, logContext(ctx, args...)...)
 }
 
 func (c *Container) Debug(msg string, ctx context.Context, args ...any) {
-	c.InfoLog.Debug(msg, logContext(ctx, args...)...)
+	c.logger.Debug(msg, logContext(ctx, args...)...)
 }
 
 func (c *Container) Warn(msg string, ctx context.Context, args ...any) {
-	c.InfoLog.Warn(msg, logContext(ctx, args...)...)
+	c.logger.Warn(msg, logContext(ctx, args...)...)
 }
 
 func (c *Container) Error(msg string, ctx context.Context, args ...any) {
-	c.InfoLog.Error(msg, logContext(ctx, args...)...)
+	c.logger.Error(msg, logContext(ctx, args...)...)
 }
 
-func (c *Container) ServerError(err error) {
+func (c *Container) ServerError(ctx context.Context, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	c.ErrorLog.Println(trace)
+
+	c.logger.Error("server internal error", logContext(ctx, "trace", trace)...)
 }
 
 func logContext(ctx context.Context, args ...any) []any {

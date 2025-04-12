@@ -34,7 +34,7 @@ func getDBConnection(logger *slog.Logger) (db *sql.DB, err error) {
 		}
 
 		i++
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(2 * time.Second)
 	}
 
 	return nil, err

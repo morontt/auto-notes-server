@@ -45,7 +45,7 @@ func (auth *AuthService) GetToken(ctx context.Context, req *pb.LoginRequest) (*p
 			return nil, twirp.InvalidArgument.Error("invalid username or password")
 		}
 
-		auth.app.ServerError(err)
+		auth.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
@@ -58,7 +58,7 @@ func (auth *AuthService) GetToken(ctx context.Context, req *pb.LoginRequest) (*p
 		return nil, twirp.InvalidArgument.Error("invalid username or password")
 	}
 
-	return auth.createLoginResponse(user)
+	return auth.createLoginResponse(ctx, user)
 }
 
 func (auth *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.LoginResponse, error) {
@@ -78,7 +78,7 @@ func (auth *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 	claims := security.UserClaims{}
 	err = verifiedToken.Claims(&claims)
 	if err != nil {
-		auth.app.ServerError(err)
+		auth.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
@@ -94,18 +94,18 @@ func (auth *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 			return nil, twirp.InvalidArgument.Error("invalid token")
 		}
 
-		auth.app.ServerError(err)
+		auth.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
 
-	return auth.createLoginResponse(user)
+	return auth.createLoginResponse(ctx, user)
 }
 
-func (auth *AuthService) createLoginResponse(user *models.User) (*pb.LoginResponse, error) {
+func (auth *AuthService) createLoginResponse(ctx context.Context, user *models.User) (*pb.LoginResponse, error) {
 	tokenData, err := createToken(user)
 	if err != nil {
-		auth.app.ServerError(err)
+		auth.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
