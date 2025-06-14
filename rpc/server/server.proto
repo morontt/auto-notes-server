@@ -1,31 +1,13 @@
 syntax = "proto3";
 
-package xelbot.com.autonotes;
+package xelbot.com.autonotes.server;
 
-option go_package = "xelbot.com/auto-notes/server/proto";
-option php_namespace = "AutoNotes";
-option php_metadata_namespace = "AutoNotes\\Meta";
+option go_package = "xelbot.com/auto-notes/server/rpc/server";
+option php_namespace = "AutoNotes\\Server";
+option php_metadata_namespace = "AutoNotes\\Server\\Meta";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-
-message LoginRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message RefreshTokenRequest {
-  string token = 1;
-}
-
-message LoginResponse {
-  string token = 1;
-}
-
-service Auth {
-  rpc GetToken(LoginRequest) returns (LoginResponse);
-  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
-}
 
 message Limit {
   int32 limit = 1;

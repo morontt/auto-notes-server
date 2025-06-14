@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package xelbot.com.autonotes.auth;
+
+option go_package = "xelbot.com/auto-notes/server/rpc/auth";
+option php_namespace = "AutoNotes\\Auth";
+option php_metadata_namespace = "AutoNotes\\Auth\\Meta";
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message RefreshTokenRequest {
+  string token = 1;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
+service Auth {
+  rpc GetToken(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
+}
