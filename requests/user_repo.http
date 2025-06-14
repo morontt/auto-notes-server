@@ -1,4 +1,4 @@
-POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetCars
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.UserRepository/GetCars
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -6,7 +6,7 @@ Content-Type: application/json
 {}
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetCurrencies
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.UserRepository/GetCurrencies
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -14,7 +14,7 @@ Content-Type: application/json
 {}
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetDefaultCurrency
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.UserRepository/GetDefaultCurrency
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -22,7 +22,7 @@ Content-Type: application/json
 {}
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.UserRepository/GetUserSettings
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.UserRepository/GetUserSettings
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json

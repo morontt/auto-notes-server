@@ -1,4 +1,4 @@
-package services
+package server
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
-	pb "xelbot.com/auto-notes/server/proto"
+	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 type FuelRepositoryService struct {

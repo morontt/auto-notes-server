@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
-	pb "xelbot.com/auto-notes/server/proto"
+	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 type FillingStation struct {

@@ -1,4 +1,4 @@
-package services
+package auth
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/repository"
 	"xelbot.com/auto-notes/server/internal/security"
-	pb "xelbot.com/auto-notes/server/proto"
+	pb "xelbot.com/auto-notes/server/rpc/auth"
 )
 
 const tokenExpiresDuration = 30 * 24 * time.Hour

@@ -17,8 +17,10 @@ import (
 	"github.com/kataras/jwt"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/middlewares"
-	"xelbot.com/auto-notes/server/internal/services"
-	pb "xelbot.com/auto-notes/server/proto"
+	"xelbot.com/auto-notes/server/internal/services/auth"
+	"xelbot.com/auto-notes/server/internal/services/server"
+	pbAuth "xelbot.com/auto-notes/server/rpc/auth"
+	pbServer "xelbot.com/auto-notes/server/rpc/server"
 )
 
 func init() {
@@ -52,14 +54,14 @@ func main() {
 
 	handleError(appContainer.SetupDatabase(), errorLog)
 
-	authImpl := services.NewAuthService(appContainer)
-	authHandler := pb.NewAuthServer(authImpl)
+	authImpl := auth.NewAuthService(appContainer)
+	authHandler := pbAuth.NewAuthServer(authImpl)
 
-	userRepoImpl := services.NewUserRepositoryService(appContainer)
-	userRepoHandler := pb.NewUserRepositoryServer(userRepoImpl)
+	userRepoImpl := server.NewUserRepositoryService(appContainer)
+	userRepoHandler := pbServer.NewUserRepositoryServer(userRepoImpl)
 
-	fuelRepoImpl := services.NewFuelRepositoryService(appContainer)
-	fuelRepoHandler := pb.NewFuelRepositoryServer(fuelRepoImpl)
+	fuelRepoImpl := server.NewFuelRepositoryService(appContainer)
+	fuelRepoHandler := pbServer.NewFuelRepositoryServer(fuelRepoImpl)
 
 	mux := http.NewServeMux()
 	mux.Handle(authHandler.PathPrefix(), authHandler)

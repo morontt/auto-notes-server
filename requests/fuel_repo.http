@@ -1,4 +1,4 @@
-POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFuels
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.FuelRepository/GetFuels
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -8,7 +8,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/GetFillingStations
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.FuelRepository/GetFillingStations
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
@@ -16,7 +16,7 @@ Content-Type: application/json
 {}
 
 ###
-POST http://localhost:8080/twirp/xelbot.com.autonotes.FuelRepository/SaveFuel
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.FuelRepository/SaveFuel
 Accept: application/json
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
