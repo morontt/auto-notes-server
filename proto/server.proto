@@ -3,6 +3,8 @@ syntax = "proto3";
 package xelbot.com.autonotes;
 
 option go_package = "xelbot.com/auto-notes/server/proto";
+option php_namespace = "AutoNotes";
+option php_metadata_namespace = "AutoNotes\\Meta";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
