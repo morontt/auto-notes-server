@@ -15,3 +15,9 @@ openssl rand -base64 32
 ```
 
 после сохранить в config.toml
+
+## Генерация исходных файлов по .proto
+
+```sh
+go generate ./...
+```

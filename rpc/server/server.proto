@@ -31,6 +31,7 @@ message Car {
 
 message CarCollection {
   repeated Car cars = 1;
+  PaginationMeta meta = 2;
 }
 
 message FillingStation {
@@ -41,6 +42,12 @@ message FillingStation {
 
 message FillingStationCollection {
   repeated FillingStation stations = 1;
+  PaginationMeta meta = 2;
+}
+
+message FuelType {
+  int32 id = 1;
+  string name = 2;
 }
 
 message Fuel {
@@ -53,10 +60,12 @@ message Fuel {
   int32 distance = 6;
   Car car = 7;
   google.protobuf.Timestamp created_at = 8;
+  FuelType type = 9;
 }
 
 message FuelCollection {
   repeated Fuel fuels = 1;
+  PaginationMeta meta = 2;
 }
 
 message Currency {
@@ -75,6 +84,11 @@ message DefaultCurrency {
 
 message CurrencyCollection {
   repeated Currency currencies = 1;
+}
+
+message PaginationMeta {
+  int32 current = 1;
+  int32 last = 2;
 }
 
 message UserSettings {
