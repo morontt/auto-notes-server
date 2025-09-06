@@ -131,7 +131,7 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 
 	fuelModel := models.Fuel{
 		ID:  uint(fuel.GetId()),
-		Car: *car,
+		Car: car,
 		Cost: models.Cost{
 			Value:      fuel.Cost.GetValue(),
 			CurrencyID: currency.ID,

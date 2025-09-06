@@ -14,7 +14,7 @@ cp config.dist.toml config.toml
 openssl rand -base64 32
 ```
 
-после сохранить в config.toml
+После сохранить в config.toml
 
 ## Генерация исходных файлов по .proto
 

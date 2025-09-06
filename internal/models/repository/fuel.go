@@ -19,7 +19,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 	ds := fuelQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
-		"c.user_id": userID,
+		"f.user_id": userID,
 	}).Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
 
 	if limit > 0 {
@@ -38,6 +38,11 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 
 	for rows.Next() {
 		obj := models.Fuel{}
+		carFields := struct {
+			ID    sql.NullInt32
+			Brand sql.NullString
+			Model sql.NullString
+		}{}
 		err = rows.Scan(
 			&obj.ID,
 			&obj.Date,
@@ -47,14 +52,25 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 			&obj.Station.CreatedAt,
 			&obj.Cost.Value,
 			&obj.Cost.CurrencyCode,
-			&obj.Car.ID,
-			&obj.Car.Brand,
-			&obj.Car.Model,
+			&carFields.ID,
+			&carFields.Brand,
+			&carFields.Model,
 			&obj.Distance,
+			&obj.Type.ID,
+			&obj.Type.Name,
 			&obj.CreatedAt)
 
 		if err != nil {
 			return nil, err
+		}
+
+		if carFields.ID.Valid {
+			car := models.Car{
+				ID:    uint(carFields.ID.Int32),
+				Brand: carFields.Brand.String,
+				Model: carFields.Model.String,
+			}
+			obj.Car = &car
 		}
 
 		items = append(items, &obj)
@@ -70,6 +86,11 @@ func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
 	query, params, _ := ds.Prepared(true).ToSQL()
 
 	obj := models.Fuel{}
+	carFields := struct {
+		ID    sql.NullInt32
+		Brand sql.NullString
+		Model sql.NullString
+	}{}
 
 	err := fr.DB.QueryRow(query, params...).Scan(
 		&obj.ID,
@@ -80,10 +101,12 @@ func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
 		&obj.Station.CreatedAt,
 		&obj.Cost.Value,
 		&obj.Cost.CurrencyCode,
-		&obj.Car.ID,
-		&obj.Car.Brand,
-		&obj.Car.Model,
+		&carFields.ID,
+		&carFields.Brand,
+		&carFields.Model,
 		&obj.Distance,
+		&obj.Type.ID,
+		&obj.Type.Name,
 		&obj.CreatedAt)
 
 	if err != nil {
@@ -92,6 +115,15 @@ func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
 		} else {
 			return nil, err
 		}
+	}
+
+	if carFields.ID.Valid {
+		car := models.Car{
+			ID:    uint(carFields.ID.Int32),
+			Brand: carFields.Brand.String,
+			Model: carFields.Model.String,
+		}
+		obj.Car = &car
 	}
 
 	return &obj, nil
@@ -206,13 +238,15 @@ func fuelQueryExpression() *goqu.SelectDataset {
 		goqu.I("c.brand_name").As("car_brand"),
 		goqu.I("c.model_name").As("car_model"),
 		"m.distance",
+		goqu.I("ft.id").As("type_id"),
+		goqu.I("ft.name").As("type_name"),
 		"f.created_at",
 	).InnerJoin(
 		goqu.T("filling_stations").As("azs"),
 		goqu.On(goqu.Ex{
 			"azs.id": goqu.I("f.station_id"),
 		}),
-	).InnerJoin(
+	).LeftJoin(
 		goqu.T("cars").As("c"),
 		goqu.On(goqu.Ex{
 			"c.id": goqu.I("f.car_id"),
@@ -221,6 +255,11 @@ func fuelQueryExpression() *goqu.SelectDataset {
 		goqu.T("currencies").As("cur"),
 		goqu.On(goqu.Ex{
 			"cur.id": goqu.I("f.currency_id"),
+		}),
+	).InnerJoin(
+		goqu.T("fuel_types").As("ft"),
+		goqu.On(goqu.Ex{
+			"ft.id": goqu.I("f.type_id"),
 		}),
 	).LeftJoin(
 		goqu.T("mileages").As("m"),
