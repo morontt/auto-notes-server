@@ -79,7 +79,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, er
 	return items, nil
 }
 
-func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
+func (fr *FuelRepository) Find(id uint) (*models.Fuel, error) {
 	ds := fuelQueryExpression()
 
 	ds = ds.Where(goqu.Ex{"f.id": id})
@@ -132,9 +132,8 @@ func (fr *FuelRepository) FindFuel(id uint) (*models.Fuel, error) {
 func (fr *FuelRepository) FuelOwner(fuelId uint) (uint, error) {
 	query := `
 		SELECT
-			c.user_id
+			f.user_id
 		FROM fuels AS f
-		INNER JOIN cars AS c ON f.car_id = c.id
 		WHERE f.id = ?`
 
 	var userId uint
@@ -150,18 +149,50 @@ func (fr *FuelRepository) FuelOwner(fuelId uint) (uint, error) {
 	return userId, nil
 }
 
-func (fr *FuelRepository) SaveFuel(fuel *models.Fuel) (uint, error) {
+func (fr *FuelRepository) FindType(id uint) (*models.FuelType, error) {
+	query := `
+		SELECT
+			ft.id,
+			ft.name
+		FROM fuel_types AS ft
+		WHERE ft.id = ?`
+
+	obj := models.FuelType{}
+
+	err := fr.DB.QueryRow(query, id).Scan(
+		&obj.ID,
+		&obj.Name)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &obj, nil
+}
+
+func (fr *FuelRepository) SaveFuel(fuel *models.Fuel, userId uint) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = fuel.Date.Format(time.DateOnly)
-	data["car_id"] = fuel.Car.ID
 	data["station_id"] = fuel.Station.ID
 	data["currency_id"] = fuel.Cost.CurrencyID
 	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Cost.Value))
 	data["value"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Value))
+	data["type_id"] = fuel.Type.ID
+
+	if fuel.Car != nil {
+		data["car_id"] = fuel.Car.ID
+	} else {
+		data["car_id"] = nil
+	}
 
 	var ds exp.SQLExpression
 	if fuel.ID == 0 {
+		data["user_id"] = userId
 		ds = goqu.Dialect("mysql8").Insert("fuels").Rows(data)
 	} else {
 		ds = goqu.Dialect("mysql8").Update("fuels").Set(data).Where(goqu.Ex{"id": fuel.ID})

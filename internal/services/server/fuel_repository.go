@@ -90,6 +90,10 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		return nil, twirp.InvalidArgument.Error("empty filling station")
 	}
 
+	if fuel.Type.GetId() == 0 {
+		return nil, twirp.InvalidArgument.Error("empty fuel type")
+	}
+
 	fuelRepo := repository.FuelRepository{DB: fr.app.DB}
 	if fuel.GetId() > 0 {
 		ownerId, err := fuelRepo.FuelOwner(uint(fuel.GetId()))
@@ -97,11 +101,24 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 			if errors.Is(err, models.RecordNotFound) {
 				return nil, twirp.NotFound.Error("fuel not found")
 			} else {
+				fr.app.ServerError(ctx, err)
+
 				return nil, twirp.InternalError("internal error")
 			}
 		}
 		if ownerId != user.ID {
 			return nil, twirp.InvalidArgument.Error("invalid fuel owner")
+		}
+	}
+
+	fuelType, err := fuelRepo.FindType(uint(fuel.Type.GetId()))
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+			return nil, twirp.InvalidArgument.Error("invalid fuel type")
+		} else {
+			fr.app.ServerError(ctx, err)
+
+			return nil, twirp.InternalError("internal error")
 		}
 	}
 
@@ -111,22 +128,29 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		if errors.Is(err, models.RecordNotFound) {
 			return nil, twirp.InvalidArgument.Error("invalid currency")
 		} else {
+			fr.app.ServerError(ctx, err)
+
 			return nil, twirp.InternalError("internal error")
 		}
 	}
 
-	carRepo := repository.CarRepository{DB: fr.app.DB}
-	car, err := carRepo.Find(uint(fuel.Car.GetId()))
-	if err != nil {
-		if errors.Is(err, models.RecordNotFound) {
-			return nil, twirp.InvalidArgument.Error("invalid car")
-		} else {
-			return nil, twirp.InternalError("internal error")
-		}
-	}
+	var car *models.Car
+	if fuel.Car.GetId() > 0 {
+		carRepo := repository.CarRepository{DB: fr.app.DB}
+		car, err = carRepo.Find(uint(fuel.Car.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid car")
+			} else {
+				fr.app.ServerError(ctx, err)
 
-	if car.UserID != user.ID {
-		return nil, twirp.InvalidArgument.Error("invalid car owner")
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+
+		if car.UserID != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid car owner")
+		}
 	}
 
 	fuelModel := models.Fuel{
@@ -141,16 +165,19 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		Station: models.FillingStation{
 			ID: uint(fuel.Station.GetId()),
 		},
+		Type: models.FuelType{
+			ID: fuelType.ID,
+		},
 	}
 
-	fuelID, err := fuelRepo.SaveFuel(&fuelModel)
+	fuelID, err := fuelRepo.SaveFuel(&fuelModel, user.ID)
 	if err != nil {
 		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
 	}
 
-	dbFuel, err := fuelRepo.FindFuel(fuelID)
+	dbFuel, err := fuelRepo.Find(fuelID)
 	if err != nil {
 		fr.app.ServerError(ctx, err)
 
