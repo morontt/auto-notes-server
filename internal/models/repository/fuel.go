@@ -255,6 +255,39 @@ func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error)
 	return items, nil
 }
 
+func (fr *FuelRepository) GetFuelTypes() ([]*models.FuelType, error) {
+	query := `
+		SELECT
+			ft.id,
+			ft.name
+		FROM fuel_types AS ft
+		ORDER BY ft.name`
+
+	rows, err := fr.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	items := make([]*models.FuelType, 0)
+
+	for rows.Next() {
+		obj := models.FuelType{}
+		err = rows.Scan(
+			&obj.ID,
+			&obj.Name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, &obj)
+	}
+
+	return items, nil
+}
+
 func fuelQueryExpression() *goqu.SelectDataset {
 	return goqu.Dialect("mysql8").From(goqu.T("fuels").As("f")).Select(
 		"f.id",

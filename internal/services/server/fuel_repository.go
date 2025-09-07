@@ -75,6 +75,35 @@ func (fr *FuelRepositoryService) GetFillingStations(ctx context.Context, _ *empt
 	return &pb.FillingStationCollection{Stations: stations}, nil
 }
 
+func (fr *FuelRepositoryService) GetFuelTypes(ctx context.Context, _ *emptypb.Empty) (*pb.FuelTypeCollection, error) {
+	_, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	repo := repository.FuelRepository{DB: fr.app.DB}
+	dbTypes, err := repo.GetFuelTypes()
+	if err != nil {
+		fr.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	types := make([]*pb.FuelType, 0, len(dbTypes))
+	for _, dbItem := range dbTypes {
+		item := &pb.FuelType{
+			Id:   int32(dbItem.ID),
+			Name: dbItem.Name,
+		}
+
+		types = append(types, item)
+	}
+
+	fr.app.Info("FuelRepositoryService: populate stations", ctx, "cnt", len(dbTypes))
+
+	return &pb.FuelTypeCollection{Types: types}, nil
+}
+
 func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*pb.Fuel, error) {
 	user, err := userClaimsFromContext(ctx)
 	if err != nil {

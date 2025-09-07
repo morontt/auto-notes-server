@@ -320,7 +320,6 @@ func (x *FillingStation) GetCreatedAt() *timestamppb.Timestamp {
 type FillingStationCollection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Stations      []*FillingStation      `protobuf:"bytes,1,rep,name=stations,proto3" json:"stations,omitempty"`
-	Meta          *PaginationMeta        `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -358,13 +357,6 @@ func (*FillingStationCollection) Descriptor() ([]byte, []int) {
 func (x *FillingStationCollection) GetStations() []*FillingStation {
 	if x != nil {
 		return x.Stations
-	}
-	return nil
-}
-
-func (x *FillingStationCollection) GetMeta() *PaginationMeta {
-	if x != nil {
-		return x.Meta
 	}
 	return nil
 }
@@ -421,6 +413,50 @@ func (x *FuelType) GetName() string {
 	return ""
 }
 
+type FuelTypeCollection struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Types         []*FuelType            `protobuf:"bytes,1,rep,name=types,proto3" json:"types,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FuelTypeCollection) Reset() {
+	*x = FuelTypeCollection{}
+	mi := &file_server_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FuelTypeCollection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FuelTypeCollection) ProtoMessage() {}
+
+func (x *FuelTypeCollection) ProtoReflect() protoreflect.Message {
+	mi := &file_server_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FuelTypeCollection.ProtoReflect.Descriptor instead.
+func (*FuelTypeCollection) Descriptor() ([]byte, []int) {
+	return file_server_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *FuelTypeCollection) GetTypes() []*FuelType {
+	if x != nil {
+		return x.Types
+	}
+	return nil
+}
+
 type Fuel struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Id    int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -439,7 +475,7 @@ type Fuel struct {
 
 func (x *Fuel) Reset() {
 	*x = Fuel{}
-	mi := &file_server_proto_msgTypes[7]
+	mi := &file_server_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +487,7 @@ func (x *Fuel) String() string {
 func (*Fuel) ProtoMessage() {}
 
 func (x *Fuel) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[7]
+	mi := &file_server_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +500,7 @@ func (x *Fuel) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Fuel.ProtoReflect.Descriptor instead.
 func (*Fuel) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{7}
+	return file_server_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Fuel) GetId() int32 {
@@ -540,7 +576,7 @@ type FuelCollection struct {
 
 func (x *FuelCollection) Reset() {
 	*x = FuelCollection{}
-	mi := &file_server_proto_msgTypes[8]
+	mi := &file_server_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -552,7 +588,7 @@ func (x *FuelCollection) String() string {
 func (*FuelCollection) ProtoMessage() {}
 
 func (x *FuelCollection) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[8]
+	mi := &file_server_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +601,7 @@ func (x *FuelCollection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FuelCollection.ProtoReflect.Descriptor instead.
 func (*FuelCollection) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{8}
+	return file_server_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *FuelCollection) GetFuels() []*Fuel {
@@ -596,7 +632,7 @@ type Currency struct {
 
 func (x *Currency) Reset() {
 	*x = Currency{}
-	mi := &file_server_proto_msgTypes[9]
+	mi := &file_server_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -608,7 +644,7 @@ func (x *Currency) String() string {
 func (*Currency) ProtoMessage() {}
 
 func (x *Currency) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[9]
+	mi := &file_server_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -621,7 +657,7 @@ func (x *Currency) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Currency.ProtoReflect.Descriptor instead.
 func (*Currency) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{9}
+	return file_server_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Currency) GetId() int32 {
@@ -669,7 +705,7 @@ type DefaultCurrency struct {
 
 func (x *DefaultCurrency) Reset() {
 	*x = DefaultCurrency{}
-	mi := &file_server_proto_msgTypes[10]
+	mi := &file_server_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -681,7 +717,7 @@ func (x *DefaultCurrency) String() string {
 func (*DefaultCurrency) ProtoMessage() {}
 
 func (x *DefaultCurrency) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[10]
+	mi := &file_server_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -694,7 +730,7 @@ func (x *DefaultCurrency) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DefaultCurrency.ProtoReflect.Descriptor instead.
 func (*DefaultCurrency) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{10}
+	return file_server_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DefaultCurrency) GetCurrency() *Currency {
@@ -720,7 +756,7 @@ type CurrencyCollection struct {
 
 func (x *CurrencyCollection) Reset() {
 	*x = CurrencyCollection{}
-	mi := &file_server_proto_msgTypes[11]
+	mi := &file_server_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -732,7 +768,7 @@ func (x *CurrencyCollection) String() string {
 func (*CurrencyCollection) ProtoMessage() {}
 
 func (x *CurrencyCollection) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[11]
+	mi := &file_server_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -745,7 +781,7 @@ func (x *CurrencyCollection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CurrencyCollection.ProtoReflect.Descriptor instead.
 func (*CurrencyCollection) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{11}
+	return file_server_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CurrencyCollection) GetCurrencies() []*Currency {
@@ -765,7 +801,7 @@ type PaginationMeta struct {
 
 func (x *PaginationMeta) Reset() {
 	*x = PaginationMeta{}
-	mi := &file_server_proto_msgTypes[12]
+	mi := &file_server_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -777,7 +813,7 @@ func (x *PaginationMeta) String() string {
 func (*PaginationMeta) ProtoMessage() {}
 
 func (x *PaginationMeta) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[12]
+	mi := &file_server_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -790,7 +826,7 @@ func (x *PaginationMeta) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginationMeta.ProtoReflect.Descriptor instead.
 func (*PaginationMeta) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{12}
+	return file_server_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *PaginationMeta) GetCurrent() int32 {
@@ -820,7 +856,7 @@ type UserSettings struct {
 
 func (x *UserSettings) Reset() {
 	*x = UserSettings{}
-	mi := &file_server_proto_msgTypes[13]
+	mi := &file_server_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -832,7 +868,7 @@ func (x *UserSettings) String() string {
 func (*UserSettings) ProtoMessage() {}
 
 func (x *UserSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_server_proto_msgTypes[13]
+	mi := &file_server_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -845,7 +881,7 @@ func (x *UserSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserSettings.ProtoReflect.Descriptor instead.
 func (*UserSettings) Descriptor() ([]byte, []int) {
-	return file_server_proto_rawDescGZIP(), []int{13}
+	return file_server_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UserSettings) GetId() int32 {
@@ -908,13 +944,14 @@ const file_server_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
 	"\n" +
-	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xa4\x01\n" +
+	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"c\n" +
 	"\x18FillingStationCollection\x12G\n" +
-	"\bstations\x18\x01 \x03(\v2+.xelbot.com.autonotes.server.FillingStationR\bstations\x12?\n" +
-	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\".\n" +
+	"\bstations\x18\x01 \x03(\v2+.xelbot.com.autonotes.server.FillingStationR\bstations\".\n" +
 	"\bFuelType\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xa0\x03\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"Q\n" +
+	"\x12FuelTypeCollection\x12;\n" +
+	"\x05types\x18\x01 \x03(\v2%.xelbot.com.autonotes.server.FuelTypeR\x05types\"\xa0\x03\n" +
 	"\x04Fuel\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x125\n" +
 	"\x04cost\x18\x02 \x01(\v2!.xelbot.com.autonotes.server.CostR\x04cost\x12\x14\n" +
@@ -960,10 +997,11 @@ const file_server_proto_rawDesc = "" +
 	"\rGetCurrencies\x12\x16.google.protobuf.Empty\x1a/.xelbot.com.autonotes.server.CurrencyCollection\x12Z\n" +
 	"\x12GetDefaultCurrency\x12\x16.google.protobuf.Empty\x1a,.xelbot.com.autonotes.server.DefaultCurrency\x12T\n" +
 	"\x0fGetUserSettings\x12\x16.google.protobuf.Empty\x1a).xelbot.com.autonotes.server.UserSettings\x12h\n" +
-	"\x10SaveUserSettings\x12).xelbot.com.autonotes.server.UserSettings\x1a).xelbot.com.autonotes.server.UserSettings2\xa4\x02\n" +
+	"\x10SaveUserSettings\x12).xelbot.com.autonotes.server.UserSettings\x1a).xelbot.com.autonotes.server.UserSettings2\xfd\x02\n" +
 	"\x0eFuelRepository\x12[\n" +
 	"\bGetFuels\x12\".xelbot.com.autonotes.server.Limit\x1a+.xelbot.com.autonotes.server.FuelCollection\x12c\n" +
-	"\x12GetFillingStations\x12\x16.google.protobuf.Empty\x1a5.xelbot.com.autonotes.server.FillingStationCollection\x12P\n" +
+	"\x12GetFillingStations\x12\x16.google.protobuf.Empty\x1a5.xelbot.com.autonotes.server.FillingStationCollection\x12W\n" +
+	"\fGetFuelTypes\x12\x16.google.protobuf.Empty\x1a/.xelbot.com.autonotes.server.FuelTypeCollection\x12P\n" +
 	"\bSaveFuel\x12!.xelbot.com.autonotes.server.Fuel\x1a!.xelbot.com.autonotes.server.FuelBTZ'xelbot.com/auto-notes/server/rpc/server\xca\x02\x10AutoNotes\\Server\xe2\x02\x15AutoNotes\\Server\\Metab\x06proto3"
 
 var (
@@ -978,7 +1016,7 @@ func file_server_proto_rawDescGZIP() []byte {
 	return file_server_proto_rawDescData
 }
 
-var file_server_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_server_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_server_proto_goTypes = []any{
 	(*Limit)(nil),                    // 0: xelbot.com.autonotes.server.Limit
 	(*Cost)(nil),                     // 1: xelbot.com.autonotes.server.Cost
@@ -987,56 +1025,59 @@ var file_server_proto_goTypes = []any{
 	(*FillingStation)(nil),           // 4: xelbot.com.autonotes.server.FillingStation
 	(*FillingStationCollection)(nil), // 5: xelbot.com.autonotes.server.FillingStationCollection
 	(*FuelType)(nil),                 // 6: xelbot.com.autonotes.server.FuelType
-	(*Fuel)(nil),                     // 7: xelbot.com.autonotes.server.Fuel
-	(*FuelCollection)(nil),           // 8: xelbot.com.autonotes.server.FuelCollection
-	(*Currency)(nil),                 // 9: xelbot.com.autonotes.server.Currency
-	(*DefaultCurrency)(nil),          // 10: xelbot.com.autonotes.server.DefaultCurrency
-	(*CurrencyCollection)(nil),       // 11: xelbot.com.autonotes.server.CurrencyCollection
-	(*PaginationMeta)(nil),           // 12: xelbot.com.autonotes.server.PaginationMeta
-	(*UserSettings)(nil),             // 13: xelbot.com.autonotes.server.UserSettings
-	(*timestamppb.Timestamp)(nil),    // 14: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 15: google.protobuf.Empty
+	(*FuelTypeCollection)(nil),       // 7: xelbot.com.autonotes.server.FuelTypeCollection
+	(*Fuel)(nil),                     // 8: xelbot.com.autonotes.server.Fuel
+	(*FuelCollection)(nil),           // 9: xelbot.com.autonotes.server.FuelCollection
+	(*Currency)(nil),                 // 10: xelbot.com.autonotes.server.Currency
+	(*DefaultCurrency)(nil),          // 11: xelbot.com.autonotes.server.DefaultCurrency
+	(*CurrencyCollection)(nil),       // 12: xelbot.com.autonotes.server.CurrencyCollection
+	(*PaginationMeta)(nil),           // 13: xelbot.com.autonotes.server.PaginationMeta
+	(*UserSettings)(nil),             // 14: xelbot.com.autonotes.server.UserSettings
+	(*timestamppb.Timestamp)(nil),    // 15: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 16: google.protobuf.Empty
 }
 var file_server_proto_depIdxs = []int32{
-	14, // 0: xelbot.com.autonotes.server.Car.created_at:type_name -> google.protobuf.Timestamp
+	15, // 0: xelbot.com.autonotes.server.Car.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 1: xelbot.com.autonotes.server.CarCollection.cars:type_name -> xelbot.com.autonotes.server.Car
-	12, // 2: xelbot.com.autonotes.server.CarCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
-	14, // 3: xelbot.com.autonotes.server.FillingStation.created_at:type_name -> google.protobuf.Timestamp
+	13, // 2: xelbot.com.autonotes.server.CarCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
+	15, // 3: xelbot.com.autonotes.server.FillingStation.created_at:type_name -> google.protobuf.Timestamp
 	4,  // 4: xelbot.com.autonotes.server.FillingStationCollection.stations:type_name -> xelbot.com.autonotes.server.FillingStation
-	12, // 5: xelbot.com.autonotes.server.FillingStationCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
+	6,  // 5: xelbot.com.autonotes.server.FuelTypeCollection.types:type_name -> xelbot.com.autonotes.server.FuelType
 	1,  // 6: xelbot.com.autonotes.server.Fuel.cost:type_name -> xelbot.com.autonotes.server.Cost
 	4,  // 7: xelbot.com.autonotes.server.Fuel.station:type_name -> xelbot.com.autonotes.server.FillingStation
-	14, // 8: xelbot.com.autonotes.server.Fuel.date:type_name -> google.protobuf.Timestamp
+	15, // 8: xelbot.com.autonotes.server.Fuel.date:type_name -> google.protobuf.Timestamp
 	2,  // 9: xelbot.com.autonotes.server.Fuel.car:type_name -> xelbot.com.autonotes.server.Car
-	14, // 10: xelbot.com.autonotes.server.Fuel.created_at:type_name -> google.protobuf.Timestamp
+	15, // 10: xelbot.com.autonotes.server.Fuel.created_at:type_name -> google.protobuf.Timestamp
 	6,  // 11: xelbot.com.autonotes.server.Fuel.type:type_name -> xelbot.com.autonotes.server.FuelType
-	7,  // 12: xelbot.com.autonotes.server.FuelCollection.fuels:type_name -> xelbot.com.autonotes.server.Fuel
-	12, // 13: xelbot.com.autonotes.server.FuelCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
-	14, // 14: xelbot.com.autonotes.server.Currency.created_at:type_name -> google.protobuf.Timestamp
-	9,  // 15: xelbot.com.autonotes.server.DefaultCurrency.currency:type_name -> xelbot.com.autonotes.server.Currency
-	9,  // 16: xelbot.com.autonotes.server.CurrencyCollection.currencies:type_name -> xelbot.com.autonotes.server.Currency
+	8,  // 12: xelbot.com.autonotes.server.FuelCollection.fuels:type_name -> xelbot.com.autonotes.server.Fuel
+	13, // 13: xelbot.com.autonotes.server.FuelCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
+	15, // 14: xelbot.com.autonotes.server.Currency.created_at:type_name -> google.protobuf.Timestamp
+	10, // 15: xelbot.com.autonotes.server.DefaultCurrency.currency:type_name -> xelbot.com.autonotes.server.Currency
+	10, // 16: xelbot.com.autonotes.server.CurrencyCollection.currencies:type_name -> xelbot.com.autonotes.server.Currency
 	2,  // 17: xelbot.com.autonotes.server.UserSettings.default_car:type_name -> xelbot.com.autonotes.server.Car
-	9,  // 18: xelbot.com.autonotes.server.UserSettings.default_currency:type_name -> xelbot.com.autonotes.server.Currency
-	14, // 19: xelbot.com.autonotes.server.UserSettings.created_at:type_name -> google.protobuf.Timestamp
-	14, // 20: xelbot.com.autonotes.server.UserSettings.updated_at:type_name -> google.protobuf.Timestamp
-	15, // 21: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
-	15, // 22: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
-	15, // 23: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
-	15, // 24: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
-	13, // 25: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
+	10, // 18: xelbot.com.autonotes.server.UserSettings.default_currency:type_name -> xelbot.com.autonotes.server.Currency
+	15, // 19: xelbot.com.autonotes.server.UserSettings.created_at:type_name -> google.protobuf.Timestamp
+	15, // 20: xelbot.com.autonotes.server.UserSettings.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 21: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
+	16, // 22: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
+	16, // 23: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
+	16, // 24: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
+	14, // 25: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
 	0,  // 26: xelbot.com.autonotes.server.FuelRepository.GetFuels:input_type -> xelbot.com.autonotes.server.Limit
-	15, // 27: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
-	7,  // 28: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
-	3,  // 29: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
-	11, // 30: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
-	10, // 31: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
-	13, // 32: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	13, // 33: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	8,  // 34: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
-	5,  // 35: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
-	7,  // 36: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
-	29, // [29:37] is the sub-list for method output_type
-	21, // [21:29] is the sub-list for method input_type
+	16, // 27: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
+	16, // 28: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:input_type -> google.protobuf.Empty
+	8,  // 29: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
+	3,  // 30: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
+	12, // 31: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
+	11, // 32: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
+	14, // 33: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	14, // 34: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	9,  // 35: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
+	5,  // 36: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
+	7,  // 37: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:output_type -> xelbot.com.autonotes.server.FuelTypeCollection
+	8,  // 38: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
+	30, // [30:39] is the sub-list for method output_type
+	21, // [21:30] is the sub-list for method input_type
 	21, // [21:21] is the sub-list for extension type_name
 	21, // [21:21] is the sub-list for extension extendee
 	0,  // [0:21] is the sub-list for field type_name
@@ -1053,7 +1094,7 @@ func file_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_proto_rawDesc), len(file_server_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
