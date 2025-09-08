@@ -141,7 +141,6 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
-	// TODO check settings owner
 	// TODO check car owner
 
 	repo := repository.UserSettingRepository{DB: ur.app.DB}
@@ -149,13 +148,26 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 	settings := models.UserSetting{
 		ID: uint(settingsReq.Id),
 	}
-	if settingsReq.DefaultCar != nil {
-		settings.CarID.Valid = true
-		settings.CarID.Int32 = settingsReq.DefaultCar.Id
+
+	/* TODO check settings owner
+	if settings.UserID != user.ID {
+		ur.app.Error("Invalid settings owner", ctx, "user_id", user.ID, "owner_id", settings.UserID)
+
+		return nil, twirp.InvalidArgument.Error("invalid settings owner")
 	}
-	if settingsReq.DefaultCurrency != nil {
+	*/
+
+	if settingsReq.DefaultCar.GetId() > 0 {
+		settings.CarID.Valid = true
+		settings.CarID.Int32 = settingsReq.DefaultCar.GetId()
+	}
+	if settingsReq.DefaultCurrency.GetId() > 0 {
 		settings.CurrencyID.Valid = true
-		settings.CurrencyID.Int32 = settingsReq.DefaultCurrency.Id
+		settings.CurrencyID.Int32 = settingsReq.DefaultCurrency.GetId()
+	}
+	if settingsReq.DefaultFuelType.GetId() > 0 {
+		settings.FuelTypeID.Valid = true
+		settings.FuelTypeID.Int32 = settingsReq.DefaultFuelType.GetId()
 	}
 
 	err = repo.SaveUserSettings(&settings, user.ID)
@@ -202,6 +214,12 @@ func (ur *UserRepositoryService) userSettingsFromDB(ctx context.Context, userID 
 		}
 		if dbUserSettings.CurrencyCreatedAt.Valid {
 			settings.DefaultCurrency.CreatedAt = timestamppb.New(dbUserSettings.CurrencyCreatedAt.Time)
+		}
+	}
+	if dbUserSettings.FuelTypeID.Valid {
+		settings.DefaultFuelType = &pb.FuelType{
+			Id:   dbUserSettings.FuelTypeID.Int32,
+			Name: dbUserSettings.FuelTypeName.String,
 		}
 	}
 	if dbUserSettings.UpdatedAt.Valid {

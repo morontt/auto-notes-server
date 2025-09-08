@@ -14,6 +14,9 @@ type UserSetting struct {
 	CarBrand sql.NullString
 	CarModel sql.NullString
 
+	FuelTypeID   sql.NullInt32
+	FuelTypeName sql.NullString
+
 	CurrencyID        sql.NullInt32
 	CurrencyName      sql.NullString
 	CurrencyCode      sql.NullString

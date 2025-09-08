@@ -24,11 +24,14 @@ func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSett
 			cr.name,
 			cr.code,
 			cr.created_at AS cr_created_at,
+			ft.id AS ft_id,
+			ft.name AS ft_name,
 			us.created_at,
 			us.updated_at
 		FROM user_settings AS us
 		LEFT JOIN cars AS c ON us.default_car_id = c.id
 		LEFT JOIN currencies AS cr ON us.default_currency_id = cr.id
+		LEFT JOIN fuel_types AS ft ON us.default_fuel_type_id = ft.id
 		WHERE (us.user_id = ?)`
 
 	obj := models.UserSetting{}
@@ -42,6 +45,8 @@ func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSett
 		&obj.CurrencyName,
 		&obj.CurrencyCode,
 		&obj.CurrencyCreatedAt,
+		&obj.FuelTypeID,
+		&obj.FuelTypeName,
 		&obj.CreatedAt,
 		&obj.UpdatedAt)
 
@@ -71,6 +76,11 @@ func (usr *UserSettingRepository) SaveUserSettings(settings *models.UserSetting,
 		data["default_currency_id"] = settings.CurrencyID.Int32
 	} else {
 		data["default_currency_id"] = nil
+	}
+	if settings.FuelTypeID.Int32 > 0 {
+		data["default_fuel_type_id"] = settings.FuelTypeID.Int32
+	} else {
+		data["default_fuel_type_id"] = nil
 	}
 
 	var ds exp.SQLExpression

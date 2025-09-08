@@ -850,6 +850,7 @@ type UserSettings struct {
 	DefaultCurrency *Currency              `protobuf:"bytes,3,opt,name=default_currency,json=defaultCurrency,proto3" json:"default_currency,omitempty"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DefaultFuelType *FuelType              `protobuf:"bytes,6,opt,name=default_fuel_type,json=defaultFuelType,proto3" json:"default_fuel_type,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -919,6 +920,13 @@ func (x *UserSettings) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *UserSettings) GetDefaultFuelType() *FuelType {
+	if x != nil {
+		return x.DefaultFuelType
+	}
+	return nil
+}
+
 var File_server_proto protoreflect.FileDescriptor
 
 const file_server_proto_rawDesc = "" +
@@ -982,7 +990,7 @@ const file_server_proto_rawDesc = "" +
 	"currencies\">\n" +
 	"\x0ePaginationMeta\x12\x18\n" +
 	"\acurrent\x18\x01 \x01(\x05R\acurrent\x12\x12\n" +
-	"\x04last\x18\x02 \x01(\x05R\x04last\"\xa9\x02\n" +
+	"\x04last\x18\x02 \x01(\x05R\x04last\"\xfc\x02\n" +
 	"\fUserSettings\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12A\n" +
 	"\vdefault_car\x18\x02 \x01(\v2 .xelbot.com.autonotes.server.CarR\n" +
@@ -991,7 +999,8 @@ const file_server_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xd5\x03\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12Q\n" +
+	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType2\xd5\x03\n" +
 	"\x0eUserRepository\x12M\n" +
 	"\aGetCars\x12\x16.google.protobuf.Empty\x1a*.xelbot.com.autonotes.server.CarCollection\x12X\n" +
 	"\rGetCurrencies\x12\x16.google.protobuf.Empty\x1a/.xelbot.com.autonotes.server.CurrencyCollection\x12Z\n" +
@@ -1058,29 +1067,30 @@ var file_server_proto_depIdxs = []int32{
 	10, // 18: xelbot.com.autonotes.server.UserSettings.default_currency:type_name -> xelbot.com.autonotes.server.Currency
 	15, // 19: xelbot.com.autonotes.server.UserSettings.created_at:type_name -> google.protobuf.Timestamp
 	15, // 20: xelbot.com.autonotes.server.UserSettings.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 21: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
-	16, // 22: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
-	16, // 23: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
-	16, // 24: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
-	14, // 25: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
-	0,  // 26: xelbot.com.autonotes.server.FuelRepository.GetFuels:input_type -> xelbot.com.autonotes.server.Limit
-	16, // 27: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
-	16, // 28: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:input_type -> google.protobuf.Empty
-	8,  // 29: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
-	3,  // 30: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
-	12, // 31: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
-	11, // 32: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
-	14, // 33: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	14, // 34: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	9,  // 35: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
-	5,  // 36: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
-	7,  // 37: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:output_type -> xelbot.com.autonotes.server.FuelTypeCollection
-	8,  // 38: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
-	30, // [30:39] is the sub-list for method output_type
-	21, // [21:30] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	6,  // 21: xelbot.com.autonotes.server.UserSettings.default_fuel_type:type_name -> xelbot.com.autonotes.server.FuelType
+	16, // 22: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
+	16, // 23: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
+	16, // 24: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
+	16, // 25: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
+	14, // 26: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
+	0,  // 27: xelbot.com.autonotes.server.FuelRepository.GetFuels:input_type -> xelbot.com.autonotes.server.Limit
+	16, // 28: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
+	16, // 29: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:input_type -> google.protobuf.Empty
+	8,  // 30: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
+	3,  // 31: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
+	12, // 32: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
+	11, // 33: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
+	14, // 34: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	14, // 35: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	9,  // 36: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
+	5,  // 37: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
+	7,  // 38: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:output_type -> xelbot.com.autonotes.server.FuelTypeCollection
+	8,  // 39: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
+	31, // [31:40] is the sub-list for method output_type
+	22, // [22:31] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_server_proto_init() }
