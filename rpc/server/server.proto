@@ -118,3 +118,73 @@ service FuelRepository {
   rpc GetFuelTypes(google.protobuf.Empty) returns (FuelTypeCollection);
   rpc SaveFuel(Fuel) returns (Fuel);
 }
+
+message OrderType {
+  int32 id = 1;
+  string name = 2;
+}
+
+message OrderTypeCollection {
+  repeated OrderType types = 1;
+}
+
+message Order {
+  int32 id = 1;
+  Cost cost = 2;
+  string description = 3;
+  string capacity = 4;
+  google.protobuf.Timestamp date = 5;
+  google.protobuf.Timestamp used_at = 6;
+  int32 distance = 7;
+  Car car = 8;
+  OrderType type = 9;
+}
+
+message OrderCollection {
+  repeated Order orders = 1;
+  PaginationMeta meta = 2;
+}
+
+enum ExpenseType {
+  EMPTY = 0;
+  GARAGE = 1;
+  TOOLS = 2;
+  TAX = 3;
+  INSURANCE = 4;
+  ROAD = 5;
+  WASHING = 6;
+  PARKING = 7;
+  OTHER = 99;
+}
+
+message Expense {
+  int32 id = 1;
+  Cost cost = 2;
+  string description = 3;
+  google.protobuf.Timestamp date = 4;
+  Car car = 5;
+  ExpenseType type = 6;
+}
+
+message ExpenseCollection {
+  repeated Expense expenses = 1;
+  PaginationMeta meta = 2;
+}
+
+message OrderFilter {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+message ExpenseFilter {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+service OrderRepository {
+  rpc GetOrders(OrderFilter) returns (OrderCollection);
+  rpc GetOrderTypes(google.protobuf.Empty) returns (OrderTypeCollection);
+  rpc SaveOrder(Order) returns (Order);
+  rpc GetExpenses(ExpenseFilter) returns (ExpenseCollection);
+  rpc SaveExpense(Expense) returns (Expense);
+}
