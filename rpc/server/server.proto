@@ -9,10 +9,6 @@ option php_metadata_namespace = "AutoNotes\\Server\\Meta";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-message Limit {
-  int32 limit = 1;
-}
-
 message Cost {
   // integer value, decimal(8, 2) in MySQL
   int32 value = 1;
@@ -111,8 +107,13 @@ service UserRepository {
   rpc SaveUserSettings(UserSettings) returns (UserSettings);
 }
 
+message FuelFilter {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
 service FuelRepository {
-  rpc GetFuels(Limit) returns (FuelCollection);
+  rpc GetFuels(FuelFilter) returns (FuelCollection);
   rpc GetFillingStations(google.protobuf.Empty) returns (FillingStationCollection);
   rpc GetFuelTypes(google.protobuf.Empty) returns (FuelTypeCollection);
   rpc SaveFuel(Fuel) returns (Fuel);

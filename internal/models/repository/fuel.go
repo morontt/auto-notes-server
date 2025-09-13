@@ -9,21 +9,25 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
+	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 type FuelRepository struct {
 	DB *sql.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID, limit uint) ([]*models.Fuel, error) {
+func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]*models.Fuel, error) {
 	ds := fuelQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"f.user_id": userID,
 	}).Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
 
-	if limit > 0 {
-		ds = ds.Limit(limit)
+	if filter.Limit > 0 {
+		ds = ds.Limit(uint(filter.Limit))
+	}
+	if filter.Offset > 0 {
+		ds = ds.Offset(uint(filter.Offset))
 	}
 
 	query, params, _ := ds.Prepared(true).ToSQL()

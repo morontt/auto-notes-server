@@ -21,14 +21,14 @@ func NewFuelRepositoryService(app application.Container) *FuelRepositoryService 
 	return &FuelRepositoryService{app: app}
 }
 
-func (fr *FuelRepositoryService) GetFuels(ctx context.Context, limit *pb.Limit) (*pb.FuelCollection, error) {
+func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFilter) (*pb.FuelCollection, error) {
 	user, err := userClaimsFromContext(ctx)
 	if err != nil {
 		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
 	repo := repository.FuelRepository{DB: fr.app.DB}
-	dbFuels, err := repo.GetFuelsByUser(user.ID, uint(limit.Limit))
+	dbFuels, err := repo.GetFuelsByUser(user.ID, filter)
 	if err != nil {
 		fr.app.ServerError(ctx, err)
 
