@@ -170,10 +170,20 @@ message ExpenseCollection {
   PaginationMeta meta = 2;
 }
 
+message OrderFilter {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+message ExpenseFilter {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
 service OrderRepository {
-  rpc GetOrders(Limit) returns (OrderCollection);
+  rpc GetOrders(OrderFilter) returns (OrderCollection);
   rpc GetOrderTypes(google.protobuf.Empty) returns (OrderTypeCollection);
   rpc SaveOrder(Order) returns (Order);
-  rpc GetExpenses(Limit) returns (ExpenseCollection);
+  rpc GetExpenses(ExpenseFilter) returns (ExpenseCollection);
   rpc SaveExpense(Expense) returns (Expense);
 }
