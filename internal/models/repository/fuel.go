@@ -25,9 +25,9 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]
 
 	if filter.Limit > 0 {
 		ds = ds.Limit(uint(filter.Limit))
-	}
-	if filter.Offset > 0 {
-		ds = ds.Offset(uint(filter.Offset))
+		if filter.Page > 1 {
+			ds = ds.Offset(uint(filter.Limit * (filter.Page - 1)))
+		}
 	}
 
 	query, params, _ := ds.Prepared(true).ToSQL()

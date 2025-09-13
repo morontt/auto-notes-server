@@ -886,7 +886,7 @@ func (x *UserSettings) GetDefaultFuelType() *FuelType {
 type FuelFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -928,9 +928,9 @@ func (x *FuelFilter) GetLimit() int32 {
 	return 0
 }
 
-func (x *FuelFilter) GetOffset() int32 {
+func (x *FuelFilter) GetPage() int32 {
 	if x != nil {
-		return x.Offset
+		return x.Page
 	}
 	return 0
 }
@@ -1006,11 +1006,11 @@ const file_server_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12Q\n" +
-	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\":\n" +
+	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\"6\n" +
 	"\n" +
 	"FuelFilter\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset2\xd5\x03\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page2\xd5\x03\n" +
 	"\x0eUserRepository\x12M\n" +
 	"\aGetCars\x12\x16.google.protobuf.Empty\x1a*.xelbot.com.autonotes.server.CarCollection\x12X\n" +
 	"\rGetCurrencies\x12\x16.google.protobuf.Empty\x1a/.xelbot.com.autonotes.server.CurrencyCollection\x12Z\n" +
