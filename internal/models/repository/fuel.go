@@ -9,11 +9,12 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/utils/database"
 	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 type FuelRepository struct {
-	DB *sql.DB
+	DB *database.DB
 }
 
 func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]*models.Fuel, error) {

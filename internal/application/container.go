@@ -1,8 +1,9 @@
 package application
 
 import (
-	"database/sql"
 	"log/slog"
+
+	"xelbot.com/auto-notes/server/internal/utils/database"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 )
 
 type Container struct {
-	DB     *sql.DB
+	DB     *database.DB
 	logger *slog.Logger
 }
 
@@ -21,7 +22,7 @@ func (c *Container) SetupDatabase() error {
 		return err
 	}
 
-	c.DB = db
+	c.DB = database.Wrap(db, c.logger)
 
 	return nil
 }

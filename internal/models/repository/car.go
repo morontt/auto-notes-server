@@ -5,10 +5,11 @@ import (
 	"errors"
 
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/utils/database"
 )
 
 type CarRepository struct {
-	DB *sql.DB
+	DB *database.DB
 }
 
 func (cr *CarRepository) GetCarsByUser(userID uint) ([]*models.Car, error) {

@@ -5,10 +5,11 @@ import (
 	"errors"
 
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/utils/database"
 )
 
 type UserRepository struct {
-	DB *sql.DB
+	DB *database.DB
 }
 
 func (ur *UserRepository) GetUserByUsername(username string) (*models.User, error) {

@@ -7,10 +7,11 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/utils/database"
 )
 
 type UserSettingRepository struct {
-	DB *sql.DB
+	DB *database.DB
 }
 
 func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSetting, error) {
