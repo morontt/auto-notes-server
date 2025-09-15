@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"regexp"
+	"strings"
 	"time"
 )
+
+var regSpaces = regexp.MustCompile(`\s+`)
 
 type DB struct {
 	db     *sql.DB
@@ -48,5 +52,13 @@ func (dbw *DB) Close() error {
 }
 
 func (dbw *DB) logQuery(t time.Time, query string, args ...any) {
-	dbw.logger.Debug("[SQL]", "query", query, "params", fmt.Sprintf("%+v", args), "duration", time.Since(t))
+	dbw.logger.Debug("[SQL]", "query", cleanQueryString(query), "params", fmt.Sprintf("%+v", args), "duration", time.Since(t))
+}
+
+func cleanQueryString(query string) string {
+	query = strings.Replace(query, "\n", " ", -1)
+	query = strings.Replace(query, "\t", " ", -1)
+	query = regSpaces.ReplaceAllString(query, " ")
+
+	return strings.TrimSpace(query)
 }
