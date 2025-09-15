@@ -27,12 +27,25 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFi
 		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
+	if filter.Page == 0 {
+		filter.Page = 1
+	}
+
 	repo := repository.FuelRepository{DB: fr.app.DB}
-	dbFuels, err := repo.GetFuelsByUser(user.ID, filter)
+	dbFuels, cntFuels, err := repo.GetFuelsByUser(user.ID, filter)
 	if err != nil {
 		fr.app.ServerError(ctx, err)
 
 		return nil, twirp.InternalError("internal error")
+	}
+
+	var lastPage int32 = 1
+	if filter.Limit > 0 {
+		lastPage += int32(float32(cntFuels) / float32(filter.Limit))
+	}
+
+	if filter.Page > lastPage {
+		return nil, twirp.NotFoundError("fuels not found")
 	}
 
 	fuels := make([]*pb.Fuel, 0, len(dbFuels))
@@ -42,7 +55,13 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFi
 
 	fr.app.Info("FuelRepositoryService: populate fuels", ctx, "cnt", len(dbFuels))
 
-	return &pb.FuelCollection{Fuels: fuels}, nil
+	return &pb.FuelCollection{
+		Fuels: fuels,
+		Meta: &pb.PaginationMeta{
+			Current: filter.Page,
+			Last:    lastPage,
+		},
+	}, nil
 }
 
 func (fr *FuelRepositoryService) GetFillingStations(ctx context.Context, _ *emptypb.Empty) (*pb.FillingStationCollection, error) {

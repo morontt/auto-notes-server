@@ -17,12 +17,19 @@ type FuelRepository struct {
 	DB *database.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]*models.Fuel, error) {
-	ds := fuelQueryExpression()
+func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]*models.Fuel, int, error) {
+	cntDs := fuelListQueryExpression(userID, filter)
+	cntDs = cntDs.ClearSelect().Select(goqu.COUNT("f.id"))
 
-	ds = ds.Where(goqu.Ex{
-		"f.user_id": userID,
-	}).Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
+	var count int
+	cntQuery, cntParams, _ := cntDs.Prepared(true).ToSQL()
+	err := fr.DB.QueryRow(cntQuery, cntParams...).Scan(&count)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	ds := fuelListQueryExpression(userID, filter)
+	ds = ds.Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
 
 	if filter.Limit > 0 {
 		ds = ds.Limit(uint(filter.Limit))
@@ -34,7 +41,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]
 	query, params, _ := ds.Prepared(true).ToSQL()
 	rows, err := fr.DB.Query(query, params...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer rows.Close()
@@ -66,7 +73,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]
 			&obj.CreatedAt)
 
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		if carFields.ID.Valid {
@@ -81,7 +88,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]
 		items = append(items, &obj)
 	}
 
-	return items, nil
+	return items, count, nil
 }
 
 func (fr *FuelRepository) Find(id uint) (*models.Fuel, error) {
@@ -293,10 +300,20 @@ func (fr *FuelRepository) GetFuelTypes() ([]*models.FuelType, error) {
 	return items, nil
 }
 
+func fuelListQueryExpression(userID uint, _ *pb.FuelFilter) *goqu.SelectDataset {
+	ds := fuelQueryExpression()
+
+	ds = ds.Where(goqu.Ex{
+		"f.user_id": userID,
+	})
+
+	return ds
+}
+
 func fuelQueryExpression() *goqu.SelectDataset {
 	return goqu.Dialect("mysql8").From(goqu.T("fuels").As("f")).Select(
 		"f.id",
-		goqu.L("CAST(CONCAT(f.date, ' 12:00:00') AS DATETIME)").As("f_date"),
+		goqu.I("f.date").As("f_date"),
 		goqu.L("CAST(f.value * 100 AS SIGNED INT)").As("value"),
 		goqu.I("azs.id").As("station_id"),
 		goqu.I("azs.name").As("station_name"),
