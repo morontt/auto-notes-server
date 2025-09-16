@@ -63,10 +63,14 @@ func main() {
 	fuelRepoImpl := server.NewFuelRepositoryService(appContainer)
 	fuelRepoHandler := pbServer.NewFuelRepositoryServer(fuelRepoImpl)
 
+	orderRepoImpl := server.NewOrderRepositoryService(appContainer)
+	orderRepoHandler := pbServer.NewOrderRepositoryServer(orderRepoImpl)
+
 	mux := http.NewServeMux()
 	mux.Handle(authHandler.PathPrefix(), authHandler)
 	mux.Handle(userRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, userRepoHandler))
 	mux.Handle(fuelRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, fuelRepoHandler))
+	mux.Handle(orderRepoHandler.PathPrefix(), middlewares.WithAuthorization(appContainer, orderRepoHandler))
 
 	handler := middlewares.Clacks().Middleware(mux)
 	handler = middlewares.RequestID(handler)
