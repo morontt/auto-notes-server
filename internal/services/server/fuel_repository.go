@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/models/repository"
 	pb "xelbot.com/auto-notes/server/rpc/server"
 )
@@ -21,15 +22,13 @@ func NewFuelRepositoryService(app application.Container) *FuelRepositoryService 
 	return &FuelRepositoryService{app: app}
 }
 
-func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFilter) (*pb.FuelCollection, error) {
+func (fr *FuelRepositoryService) GetFuels(ctx context.Context, pbFilter *pb.FuelFilter) (*pb.FuelCollection, error) {
 	user, err := userClaimsFromContext(ctx)
 	if err != nil {
 		return nil, twirp.Unauthenticated.Error(err.Error())
 	}
 
-	if filter.Page == 0 {
-		filter.Page = 1
-	}
+	filter := filters.NewFuelFilter(pbFilter)
 
 	repo := repository.FuelRepository{DB: fr.app.DB}
 	dbFuels, cntFuels, err := repo.GetFuelsByUser(user.ID, filter)
@@ -39,12 +38,7 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFi
 		return nil, twirp.InternalError("internal error")
 	}
 
-	var lastPage int32 = 1
-	if filter.Limit > 0 {
-		lastPage += int32(float32(cntFuels) / float32(filter.Limit))
-	}
-
-	if filter.Page > lastPage {
+	if pageOutOfRange(filter, cntFuels) {
 		return nil, twirp.NotFoundError("fuels not found")
 	}
 
@@ -58,8 +52,8 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, filter *pb.FuelFi
 	return &pb.FuelCollection{
 		Fuels: fuels,
 		Meta: &pb.PaginationMeta{
-			Current: filter.Page,
-			Last:    lastPage,
+			Current: int32(filter.GetPage()),
+			Last:    int32(filters.GetLastPage(filter, cntFuels)),
 		},
 	}, nil
 }

@@ -9,15 +9,15 @@ import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
+	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/utils/database"
-	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 type FuelRepository struct {
 	DB *database.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]*models.Fuel, int, error) {
+func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *filters.FuelFilter) ([]*models.Fuel, int, error) {
 	cntDs := fuelListQueryExpression(userID, filter)
 	cntDs = cntDs.ClearSelect().Select(goqu.COUNT("f.id"))
 
@@ -31,10 +31,10 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *pb.FuelFilter) ([]
 	ds := fuelListQueryExpression(userID, filter)
 	ds = ds.Order(goqu.I("f.date").Desc(), goqu.I("f.id").Desc())
 
-	if filter.Limit > 0 {
-		ds = ds.Limit(uint(filter.Limit))
-		if filter.Page > 1 {
-			ds = ds.Offset(uint(filter.Limit * (filter.Page - 1)))
+	if filter.GetLimit() > 0 {
+		ds = ds.Limit(uint(filter.GetLimit()))
+		if filter.GetPage() > 1 {
+			ds = ds.Offset(uint(filter.GetLimit() * (filter.GetPage() - 1)))
 		}
 	}
 
@@ -300,7 +300,7 @@ func (fr *FuelRepository) GetFuelTypes() ([]*models.FuelType, error) {
 	return items, nil
 }
 
-func fuelListQueryExpression(userID uint, _ *pb.FuelFilter) *goqu.SelectDataset {
+func fuelListQueryExpression(userID uint, _ *filters.FuelFilter) *goqu.SelectDataset {
 	ds := fuelQueryExpression()
 
 	ds = ds.Where(goqu.Ex{

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/security"
 )
 
@@ -21,4 +22,16 @@ func userClaimsFromContext(ctx context.Context) (*security.UserClaims, error) {
 	}
 
 	return &user, nil
+}
+
+func pageOutOfRange(filter filters.PaginationPart, cntItems int) bool {
+	if filter.GetPage() < 1 {
+		return true
+	}
+
+	if filter.GetPage() > filters.GetLastPage(filter, cntItems) {
+		return true
+	}
+
+	return false
 }
