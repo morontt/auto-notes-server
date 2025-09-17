@@ -228,3 +228,38 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 
 	return dbFuel.ToRpcMessage(), nil
 }
+
+func (fr *FuelRepositoryService) FindFuel(ctx context.Context, idReq *pb.IdRequest) (*pb.Fuel, error) {
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	fuelRepo := repository.FuelRepository{DB: fr.app.DB}
+	if idReq.GetId() > 0 {
+		ownerId, err := fuelRepo.FuelOwner(uint(idReq.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.NotFound.Error("fuel not found")
+			} else {
+				fr.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+		if ownerId != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid fuel owner")
+		}
+	} else {
+		return nil, twirp.InvalidArgument.Error("invalid id")
+	}
+
+	dbFuel, err := fuelRepo.Find(uint(idReq.GetId()))
+	if err != nil {
+		fr.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return dbFuel.ToRpcMessage(), nil
+}

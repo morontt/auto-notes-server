@@ -1646,6 +1646,8 @@ func (s *userRepositoryServer) PathPrefix() string {
 type FuelRepository interface {
 	GetFuels(context.Context, *FuelFilter) (*FuelCollection, error)
 
+	FindFuel(context.Context, *IdRequest) (*Fuel, error)
+
 	GetFillingStations(context.Context, *google_protobuf.Empty) (*FillingStationCollection, error)
 
 	GetFuelTypes(context.Context, *google_protobuf.Empty) (*FuelTypeCollection, error)
@@ -1659,7 +1661,7 @@ type FuelRepository interface {
 
 type fuelRepositoryProtobufClient struct {
 	client      HTTPClient
-	urls        [4]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -1687,8 +1689,9 @@ func NewFuelRepositoryProtobufClient(baseURL string, client HTTPClient, opts ...
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "FuelRepository")
-	urls := [4]string{
+	urls := [5]string{
 		serviceURL + "GetFuels",
+		serviceURL + "FindFuel",
 		serviceURL + "GetFillingStations",
 		serviceURL + "GetFuelTypes",
 		serviceURL + "SaveFuel",
@@ -1748,6 +1751,52 @@ func (c *fuelRepositoryProtobufClient) callGetFuels(ctx context.Context, in *Fue
 	return out, nil
 }
 
+func (c *fuelRepositoryProtobufClient) FindFuel(ctx context.Context, in *IdRequest) (*Fuel, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "FuelRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindFuel")
+	caller := c.callFindFuel
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Fuel, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindFuel(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Fuel)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Fuel) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *fuelRepositoryProtobufClient) callFindFuel(ctx context.Context, in *IdRequest) (*Fuel, error) {
+	out := new(Fuel)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *fuelRepositoryProtobufClient) GetFillingStations(ctx context.Context, in *google_protobuf.Empty) (*FillingStationCollection, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
 	ctx = ctxsetters.WithServiceName(ctx, "FuelRepository")
@@ -1779,7 +1828,7 @@ func (c *fuelRepositoryProtobufClient) GetFillingStations(ctx context.Context, i
 
 func (c *fuelRepositoryProtobufClient) callGetFillingStations(ctx context.Context, in *google_protobuf.Empty) (*FillingStationCollection, error) {
 	out := new(FillingStationCollection)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1825,7 +1874,7 @@ func (c *fuelRepositoryProtobufClient) GetFuelTypes(ctx context.Context, in *goo
 
 func (c *fuelRepositoryProtobufClient) callGetFuelTypes(ctx context.Context, in *google_protobuf.Empty) (*FuelTypeCollection, error) {
 	out := new(FuelTypeCollection)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1871,7 +1920,7 @@ func (c *fuelRepositoryProtobufClient) SaveFuel(ctx context.Context, in *Fuel) (
 
 func (c *fuelRepositoryProtobufClient) callSaveFuel(ctx context.Context, in *Fuel) (*Fuel, error) {
 	out := new(Fuel)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1892,7 +1941,7 @@ func (c *fuelRepositoryProtobufClient) callSaveFuel(ctx context.Context, in *Fue
 
 type fuelRepositoryJSONClient struct {
 	client      HTTPClient
-	urls        [4]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -1920,8 +1969,9 @@ func NewFuelRepositoryJSONClient(baseURL string, client HTTPClient, opts ...twir
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "FuelRepository")
-	urls := [4]string{
+	urls := [5]string{
 		serviceURL + "GetFuels",
+		serviceURL + "FindFuel",
 		serviceURL + "GetFillingStations",
 		serviceURL + "GetFuelTypes",
 		serviceURL + "SaveFuel",
@@ -1981,6 +2031,52 @@ func (c *fuelRepositoryJSONClient) callGetFuels(ctx context.Context, in *FuelFil
 	return out, nil
 }
 
+func (c *fuelRepositoryJSONClient) FindFuel(ctx context.Context, in *IdRequest) (*Fuel, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "FuelRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindFuel")
+	caller := c.callFindFuel
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Fuel, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindFuel(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Fuel)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Fuel) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *fuelRepositoryJSONClient) callFindFuel(ctx context.Context, in *IdRequest) (*Fuel, error) {
+	out := new(Fuel)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *fuelRepositoryJSONClient) GetFillingStations(ctx context.Context, in *google_protobuf.Empty) (*FillingStationCollection, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
 	ctx = ctxsetters.WithServiceName(ctx, "FuelRepository")
@@ -2012,7 +2108,7 @@ func (c *fuelRepositoryJSONClient) GetFillingStations(ctx context.Context, in *g
 
 func (c *fuelRepositoryJSONClient) callGetFillingStations(ctx context.Context, in *google_protobuf.Empty) (*FillingStationCollection, error) {
 	out := new(FillingStationCollection)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2058,7 +2154,7 @@ func (c *fuelRepositoryJSONClient) GetFuelTypes(ctx context.Context, in *google_
 
 func (c *fuelRepositoryJSONClient) callGetFuelTypes(ctx context.Context, in *google_protobuf.Empty) (*FuelTypeCollection, error) {
 	out := new(FuelTypeCollection)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2104,7 +2200,7 @@ func (c *fuelRepositoryJSONClient) SaveFuel(ctx context.Context, in *Fuel) (*Fue
 
 func (c *fuelRepositoryJSONClient) callSaveFuel(ctx context.Context, in *Fuel) (*Fuel, error) {
 	out := new(Fuel)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2218,6 +2314,9 @@ func (s *fuelRepositoryServer) ServeHTTP(resp http.ResponseWriter, req *http.Req
 	switch method {
 	case "GetFuels":
 		s.serveGetFuels(ctx, resp, req)
+		return
+	case "FindFuel":
+		s.serveFindFuel(ctx, resp, req)
 		return
 	case "GetFillingStations":
 		s.serveGetFillingStations(ctx, resp, req)
@@ -2392,6 +2491,186 @@ func (s *fuelRepositoryServer) serveGetFuelsProtobuf(ctx context.Context, resp h
 	}
 	if respContent == nil {
 		s.writeError(ctx, resp, twirp.InternalError("received a nil *FuelCollection and nil error while calling GetFuels. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *fuelRepositoryServer) serveFindFuel(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveFindFuelJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveFindFuelProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *fuelRepositoryServer) serveFindFuelJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindFuel")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.FuelRepository.FindFuel
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Fuel, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.FuelRepository.FindFuel(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Fuel)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Fuel) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Fuel
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Fuel and nil error while calling FindFuel. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *fuelRepositoryServer) serveFindFuelProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindFuel")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.FuelRepository.FindFuel
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Fuel, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.FuelRepository.FindFuel(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Fuel)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Fuel) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Fuel
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Fuel and nil error while calling FindFuel. nil responses are not supported"))
 		return
 	}
 
@@ -2977,11 +3256,15 @@ func (s *fuelRepositoryServer) PathPrefix() string {
 type OrderRepository interface {
 	GetOrders(context.Context, *OrderFilter) (*OrderCollection, error)
 
+	FindOrder(context.Context, *IdRequest) (*Order, error)
+
 	GetOrderTypes(context.Context, *google_protobuf.Empty) (*OrderTypeCollection, error)
 
 	SaveOrder(context.Context, *Order) (*Order, error)
 
 	GetExpenses(context.Context, *ExpenseFilter) (*ExpenseCollection, error)
+
+	FindExpense(context.Context, *IdRequest) (*Expense, error)
 
 	SaveExpense(context.Context, *Expense) (*Expense, error)
 }
@@ -2992,7 +3275,7 @@ type OrderRepository interface {
 
 type orderRepositoryProtobufClient struct {
 	client      HTTPClient
-	urls        [5]string
+	urls        [7]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -3020,11 +3303,13 @@ func NewOrderRepositoryProtobufClient(baseURL string, client HTTPClient, opts ..
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "OrderRepository")
-	urls := [5]string{
+	urls := [7]string{
 		serviceURL + "GetOrders",
+		serviceURL + "FindOrder",
 		serviceURL + "GetOrderTypes",
 		serviceURL + "SaveOrder",
 		serviceURL + "GetExpenses",
+		serviceURL + "FindExpense",
 		serviceURL + "SaveExpense",
 	}
 
@@ -3082,6 +3367,52 @@ func (c *orderRepositoryProtobufClient) callGetOrders(ctx context.Context, in *O
 	return out, nil
 }
 
+func (c *orderRepositoryProtobufClient) FindOrder(ctx context.Context, in *IdRequest) (*Order, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindOrder")
+	caller := c.callFindOrder
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Order, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindOrder(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Order)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Order) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *orderRepositoryProtobufClient) callFindOrder(ctx context.Context, in *IdRequest) (*Order, error) {
+	out := new(Order)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *orderRepositoryProtobufClient) GetOrderTypes(ctx context.Context, in *google_protobuf.Empty) (*OrderTypeCollection, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
 	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
@@ -3113,7 +3444,7 @@ func (c *orderRepositoryProtobufClient) GetOrderTypes(ctx context.Context, in *g
 
 func (c *orderRepositoryProtobufClient) callGetOrderTypes(ctx context.Context, in *google_protobuf.Empty) (*OrderTypeCollection, error) {
 	out := new(OrderTypeCollection)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3159,7 +3490,7 @@ func (c *orderRepositoryProtobufClient) SaveOrder(ctx context.Context, in *Order
 
 func (c *orderRepositoryProtobufClient) callSaveOrder(ctx context.Context, in *Order) (*Order, error) {
 	out := new(Order)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3205,7 +3536,53 @@ func (c *orderRepositoryProtobufClient) GetExpenses(ctx context.Context, in *Exp
 
 func (c *orderRepositoryProtobufClient) callGetExpenses(ctx context.Context, in *ExpenseFilter) (*ExpenseCollection, error) {
 	out := new(ExpenseCollection)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *orderRepositoryProtobufClient) FindExpense(ctx context.Context, in *IdRequest) (*Expense, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindExpense")
+	caller := c.callFindExpense
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Expense, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindExpense(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Expense)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Expense) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *orderRepositoryProtobufClient) callFindExpense(ctx context.Context, in *IdRequest) (*Expense, error) {
+	out := new(Expense)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3251,7 +3628,7 @@ func (c *orderRepositoryProtobufClient) SaveExpense(ctx context.Context, in *Exp
 
 func (c *orderRepositoryProtobufClient) callSaveExpense(ctx context.Context, in *Expense) (*Expense, error) {
 	out := new(Expense)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[6], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3272,7 +3649,7 @@ func (c *orderRepositoryProtobufClient) callSaveExpense(ctx context.Context, in 
 
 type orderRepositoryJSONClient struct {
 	client      HTTPClient
-	urls        [5]string
+	urls        [7]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -3300,11 +3677,13 @@ func NewOrderRepositoryJSONClient(baseURL string, client HTTPClient, opts ...twi
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "OrderRepository")
-	urls := [5]string{
+	urls := [7]string{
 		serviceURL + "GetOrders",
+		serviceURL + "FindOrder",
 		serviceURL + "GetOrderTypes",
 		serviceURL + "SaveOrder",
 		serviceURL + "GetExpenses",
+		serviceURL + "FindExpense",
 		serviceURL + "SaveExpense",
 	}
 
@@ -3362,6 +3741,52 @@ func (c *orderRepositoryJSONClient) callGetOrders(ctx context.Context, in *Order
 	return out, nil
 }
 
+func (c *orderRepositoryJSONClient) FindOrder(ctx context.Context, in *IdRequest) (*Order, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindOrder")
+	caller := c.callFindOrder
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Order, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindOrder(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Order)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Order) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *orderRepositoryJSONClient) callFindOrder(ctx context.Context, in *IdRequest) (*Order, error) {
+	out := new(Order)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *orderRepositoryJSONClient) GetOrderTypes(ctx context.Context, in *google_protobuf.Empty) (*OrderTypeCollection, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
 	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
@@ -3393,7 +3818,7 @@ func (c *orderRepositoryJSONClient) GetOrderTypes(ctx context.Context, in *googl
 
 func (c *orderRepositoryJSONClient) callGetOrderTypes(ctx context.Context, in *google_protobuf.Empty) (*OrderTypeCollection, error) {
 	out := new(OrderTypeCollection)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3439,7 +3864,7 @@ func (c *orderRepositoryJSONClient) SaveOrder(ctx context.Context, in *Order) (*
 
 func (c *orderRepositoryJSONClient) callSaveOrder(ctx context.Context, in *Order) (*Order, error) {
 	out := new(Order)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3485,7 +3910,53 @@ func (c *orderRepositoryJSONClient) GetExpenses(ctx context.Context, in *Expense
 
 func (c *orderRepositoryJSONClient) callGetExpenses(ctx context.Context, in *ExpenseFilter) (*ExpenseCollection, error) {
 	out := new(ExpenseCollection)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *orderRepositoryJSONClient) FindExpense(ctx context.Context, in *IdRequest) (*Expense, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "OrderRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "FindExpense")
+	caller := c.callFindExpense
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *IdRequest) (*Expense, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return c.callFindExpense(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Expense)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Expense) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *orderRepositoryJSONClient) callFindExpense(ctx context.Context, in *IdRequest) (*Expense, error) {
+	out := new(Expense)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3531,7 +4002,7 @@ func (c *orderRepositoryJSONClient) SaveExpense(ctx context.Context, in *Expense
 
 func (c *orderRepositoryJSONClient) callSaveExpense(ctx context.Context, in *Expense) (*Expense, error) {
 	out := new(Expense)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[6], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -3646,6 +4117,9 @@ func (s *orderRepositoryServer) ServeHTTP(resp http.ResponseWriter, req *http.Re
 	case "GetOrders":
 		s.serveGetOrders(ctx, resp, req)
 		return
+	case "FindOrder":
+		s.serveFindOrder(ctx, resp, req)
+		return
 	case "GetOrderTypes":
 		s.serveGetOrderTypes(ctx, resp, req)
 		return
@@ -3654,6 +4128,9 @@ func (s *orderRepositoryServer) ServeHTTP(resp http.ResponseWriter, req *http.Re
 		return
 	case "GetExpenses":
 		s.serveGetExpenses(ctx, resp, req)
+		return
+	case "FindExpense":
+		s.serveFindExpense(ctx, resp, req)
 		return
 	case "SaveExpense":
 		s.serveSaveExpense(ctx, resp, req)
@@ -3822,6 +4299,186 @@ func (s *orderRepositoryServer) serveGetOrdersProtobuf(ctx context.Context, resp
 	}
 	if respContent == nil {
 		s.writeError(ctx, resp, twirp.InternalError("received a nil *OrderCollection and nil error while calling GetOrders. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *orderRepositoryServer) serveFindOrder(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveFindOrderJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveFindOrderProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *orderRepositoryServer) serveFindOrderJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindOrder")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.OrderRepository.FindOrder
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Order, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.OrderRepository.FindOrder(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Order)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Order) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Order
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Order and nil error while calling FindOrder. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *orderRepositoryServer) serveFindOrderProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindOrder")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.OrderRepository.FindOrder
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Order, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.OrderRepository.FindOrder(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Order)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Order) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Order
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Order and nil error while calling FindOrder. nil responses are not supported"))
 		return
 	}
 
@@ -4362,6 +5019,186 @@ func (s *orderRepositoryServer) serveGetExpensesProtobuf(ctx context.Context, re
 	}
 	if respContent == nil {
 		s.writeError(ctx, resp, twirp.InternalError("received a nil *ExpenseCollection and nil error while calling GetExpenses. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *orderRepositoryServer) serveFindExpense(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveFindExpenseJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveFindExpenseProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *orderRepositoryServer) serveFindExpenseJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindExpense")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.OrderRepository.FindExpense
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Expense, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.OrderRepository.FindExpense(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Expense)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Expense) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Expense
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Expense and nil error while calling FindExpense. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *orderRepositoryServer) serveFindExpenseProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "FindExpense")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(IdRequest)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.OrderRepository.FindExpense
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *IdRequest) (*Expense, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*IdRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*IdRequest) when calling interceptor")
+					}
+					return s.OrderRepository.FindExpense(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Expense)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Expense) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Expense
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Expense and nil error while calling FindExpense. nil responses are not supported"))
 		return
 	}
 
@@ -5146,88 +5983,91 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 1321 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xcd, 0x92, 0xdb, 0x44,
-	0x10, 0x46, 0x96, 0x64, 0xcb, 0xed, 0xac, 0x57, 0x19, 0x7e, 0xca, 0xe5, 0x1c, 0x70, 0x54, 0x40,
-	0x4c, 0x12, 0x64, 0xca, 0x21, 0x84, 0x84, 0x14, 0x20, 0x1c, 0xc7, 0x49, 0x41, 0xd6, 0x1b, 0xd9,
-	0xa9, 0xfc, 0x90, 0xaa, 0x30, 0x2b, 0xcf, 0x1a, 0x51, 0xb2, 0xa5, 0x92, 0xc6, 0x5b, 0xf1, 0x95,
-	0x23, 0x07, 0x4e, 0x14, 0x5c, 0x39, 0xf0, 0x10, 0x3c, 0x03, 0x77, 0x5e, 0x80, 0x33, 0x8f, 0xc0,
-	0x81, 0x9a, 0xd1, 0xc8, 0x2b, 0x79, 0xb3, 0xb6, 0x44, 0x28, 0x6e, 0x33, 0xad, 0xee, 0xd6, 0x74,
-	0x7f, 0xdd, 0xfd, 0xcd, 0xc0, 0x99, 0x88, 0x84, 0x47, 0x24, 0x34, 0x83, 0xd0, 0xa7, 0x3e, 0x3a,
-	0xf7, 0x9c, 0x78, 0x07, 0x3e, 0x35, 0x1d, 0x7f, 0x66, 0xe2, 0x05, 0xf5, 0xe7, 0x3e, 0x25, 0x91,
-	0x19, 0xab, 0x34, 0xcf, 0x4d, 0x7d, 0x7f, 0xea, 0x91, 0x0e, 0x57, 0x3d, 0x58, 0x1c, 0x76, 0xc8,
-	0x2c, 0xa0, 0xcb, 0xd8, 0xb2, 0xf9, 0xe6, 0xfa, 0x47, 0xea, 0xce, 0x48, 0x44, 0xf1, 0x2c, 0x88,
-	0x15, 0x8c, 0x8f, 0x40, 0xe9, 0xf9, 0x11, 0x45, 0xaf, 0x81, 0x7a, 0x84, 0xbd, 0x05, 0x69, 0x48,
-	0x2d, 0xa9, 0xad, 0xda, 0xf1, 0x06, 0x35, 0x41, 0x73, 0x16, 0x61, 0x48, 0xe6, 0xce, 0xb2, 0x51,
-	0x6a, 0x49, 0xed, 0xaa, 0xbd, 0xda, 0x1b, 0xbf, 0x4a, 0x20, 0xf7, 0x70, 0x88, 0xea, 0x50, 0x72,
-	0x27, 0xc2, 0xac, 0xe4, 0x4e, 0x10, 0x02, 0x65, 0x8e, 0x67, 0x44, 0xe8, 0xf3, 0x35, 0xd2, 0x41,
-	0x3e, 0x72, 0xe7, 0x0d, 0x99, 0x8b, 0xd8, 0x92, 0x69, 0x2d, 0x09, 0x0e, 0x1b, 0x0a, 0xb7, 0xe3,
-	0x6b, 0xd4, 0x80, 0xca, 0x84, 0x1c, 0xe2, 0x85, 0x47, 0x1b, 0x6a, 0x4b, 0x6a, 0x6b, 0x76, 0xb2,
-	0x45, 0xd7, 0x01, 0x9c, 0x90, 0x60, 0x4a, 0x26, 0xcf, 0x30, 0x6d, 0x94, 0x5b, 0x52, 0xbb, 0xd6,
-	0x6d, 0x9a, 0x71, 0x6c, 0x66, 0x12, 0x9b, 0x39, 0x4e, 0x62, 0xb3, 0xab, 0x42, 0xdb, 0xa2, 0x46,
-	0x1f, 0x76, 0x7a, 0x38, 0xec, 0xf9, 0x9e, 0x47, 0x1c, 0xea, 0xfa, 0x73, 0xf4, 0x01, 0x28, 0x0e,
-	0x0e, 0xa3, 0x86, 0xd4, 0x92, 0xdb, 0xb5, 0x6e, 0xcb, 0xdc, 0x90, 0x5b, 0xb3, 0x87, 0x43, 0x9b,
-	0x6b, 0x1b, 0x3e, 0xd4, 0x6f, 0xbb, 0x9e, 0xe7, 0xce, 0xa7, 0x23, 0x8a, 0xb9, 0x9f, 0x3c, 0x71,
-	0x67, 0xcf, 0x2d, 0x17, 0x39, 0xb7, 0x03, 0x8d, 0xec, 0x0f, 0x53, 0x21, 0x0c, 0x40, 0x8b, 0x62,
-	0x61, 0x12, 0xc6, 0xa5, 0x8d, 0x61, 0x64, 0x1d, 0xd9, 0x2b, 0x63, 0xc3, 0x04, 0xed, 0xf6, 0x82,
-	0x78, 0xe3, 0x65, 0x40, 0xf2, 0xc4, 0x63, 0xdc, 0x07, 0x94, 0xe8, 0xa7, 0x8e, 0xf3, 0x31, 0xa8,
-	0x74, 0x19, 0x90, 0xe4, 0x2c, 0x6f, 0x6f, 0x3e, 0x8b, 0xb0, 0xb7, 0x63, 0x1b, 0xe3, 0x17, 0x19,
-	0x14, 0x26, 0x3b, 0xf1, 0xff, 0xab, 0xa0, 0x38, 0x7e, 0x44, 0xf9, 0xff, 0x6b, 0xdd, 0xf3, 0x9b,
-	0x71, 0xf2, 0x23, 0x6a, 0x73, 0xf5, 0xe3, 0x42, 0x96, 0xd3, 0x85, 0xdc, 0x87, 0x8a, 0x08, 0x9a,
-	0x57, 0x5c, 0xc1, 0x84, 0x25, 0xb6, 0xc8, 0x04, 0x65, 0x82, 0x29, 0xe1, 0xe5, 0xb9, 0x19, 0x49,
-	0xae, 0xc7, 0xfa, 0x67, 0xe2, 0x46, 0x14, 0xcf, 0x1d, 0xc2, 0xab, 0x56, 0xb5, 0x57, 0x7b, 0xd4,
-	0x05, 0xd9, 0xc1, 0x61, 0xa3, 0xc2, 0x5d, 0x6d, 0x2f, 0x43, 0xa6, 0xbc, 0x56, 0x4f, 0x5a, 0x81,
-	0x7a, 0x42, 0xd7, 0x41, 0x61, 0x09, 0x6f, 0x54, 0xb9, 0x51, 0x4e, 0x8c, 0xb8, 0x89, 0xf1, 0xbd,
-	0x04, 0x75, 0x26, 0x4a, 0x41, 0x7e, 0x0d, 0xd4, 0xc3, 0x05, 0xf1, 0x12, 0xc8, 0xcf, 0x6f, 0x75,
-	0x67, 0xc7, 0xfa, 0xe8, 0x53, 0x50, 0x66, 0x84, 0x62, 0x81, 0xea, 0x66, 0x14, 0xf6, 0xf1, 0xd4,
-	0x9d, 0xf3, 0xc4, 0xdf, 0x23, 0x14, 0xdb, 0xdc, 0xd0, 0xf8, 0x59, 0x02, 0xad, 0x27, 0x66, 0x50,
-	0xae, 0x1e, 0x44, 0xac, 0x8e, 0x26, 0x44, 0x0c, 0x1f, 0xbe, 0x4e, 0x4f, 0x1a, 0x65, 0xd3, 0xa4,
-	0x51, 0x8b, 0x74, 0xec, 0xb7, 0xb0, 0x7b, 0x2b, 0xf6, 0xb2, 0x3a, 0x9f, 0x95, 0x9a, 0x9f, 0x52,
-	0x8e, 0xc4, 0x27, 0x86, 0xc7, 0x63, 0x96, 0xd5, 0xf3, 0xa1, 0xbf, 0x98, 0x4f, 0x78, 0x4c, 0x9a,
-	0x1d, 0x6f, 0x8c, 0xaf, 0x00, 0x25, 0xba, 0x29, 0x54, 0xfa, 0x00, 0xc2, 0xce, 0xcd, 0xd9, 0x8d,
-	0xab, 0x1f, 0xa6, 0x0c, 0x8d, 0x4f, 0xa0, 0x9e, 0x4d, 0x3d, 0xcb, 0x57, 0xfc, 0x9d, 0x8a, 0x64,
-	0x27, 0x5b, 0x96, 0x5d, 0x0f, 0x8b, 0x2e, 0x55, 0x6d, 0xbe, 0x36, 0xfe, 0x2e, 0xc1, 0x99, 0x07,
-	0x11, 0x09, 0x47, 0x84, 0x52, 0x77, 0x3e, 0x8d, 0x4e, 0xc0, 0x64, 0x41, 0x4d, 0xe4, 0xfb, 0x19,
-	0x6b, 0x81, 0x52, 0xce, 0x16, 0x00, 0x61, 0xc4, 0x58, 0x67, 0x1f, 0xf4, 0x95, 0x8b, 0x24, 0xc3,
-	0x72, 0x91, 0x0c, 0xef, 0x4e, 0xd6, 0xb0, 0xca, 0x22, 0xaf, 0x14, 0xeb, 0x2d, 0x58, 0x04, 0x93,
-	0x02, 0x45, 0x23, 0xb4, 0x2d, 0x8a, 0xee, 0xc3, 0xd9, 0x24, 0x0e, 0xd6, 0x20, 0xcf, 0x78, 0x8f,
-	0x96, 0x8b, 0xf4, 0x68, 0x12, 0x48, 0x22, 0x30, 0x3e, 0x04, 0x60, 0xeb, 0xdb, 0xae, 0x47, 0x49,
-	0xc8, 0xea, 0xc7, 0x73, 0x67, 0x6e, 0x02, 0x5c, 0xbc, 0x61, 0xb0, 0x05, 0x78, 0x4a, 0x12, 0xd8,
-	0xd8, 0xda, 0xe8, 0x40, 0x75, 0x18, 0x4e, 0x48, 0x98, 0x9b, 0x0d, 0x46, 0xf0, 0xea, 0xca, 0x20,
-	0x55, 0x85, 0x37, 0xb3, 0x74, 0xf0, 0xce, 0xc6, 0x30, 0x56, 0x0e, 0x12, 0x3e, 0xf8, 0x4d, 0x06,
-	0x95, 0x0b, 0xff, 0x2b, 0x42, 0x68, 0xb1, 0x62, 0x8b, 0x9c, 0xd0, 0x0d, 0xf8, 0xf8, 0x8f, 0xc7,
-	0x40, 0x5a, 0xc4, 0x6f, 0x39, 0x38, 0xc0, 0x8e, 0x4b, 0x97, 0x1c, 0x77, 0x76, 0xcb, 0x11, 0xfb,
-	0xc2, 0x13, 0xff, 0x0a, 0x54, 0x16, 0x51, 0xde, 0x6b, 0x4a, 0x99, 0xa9, 0x5a, 0x34, 0x43, 0x13,
-	0x95, 0x17, 0xd3, 0x84, 0x56, 0x84, 0x26, 0x6e, 0x64, 0x66, 0x7d, 0x5e, 0x00, 0xb8, 0xcd, 0x5a,
-	0x1b, 0x40, 0x91, 0x01, 0xf8, 0x83, 0x04, 0xbb, 0xdc, 0x5d, 0xaa, 0x18, 0x6e, 0x40, 0xd9, 0x67,
-	0xa2, 0xa4, 0x1a, 0x8c, 0xed, 0x87, 0xb1, 0x85, 0xc5, 0xcb, 0x73, 0xc5, 0x8f, 0x25, 0xa8, 0xf4,
-	0x9f, 0x07, 0x64, 0x1e, 0x91, 0xff, 0xaf, 0x9a, 0x92, 0x8a, 0x51, 0x72, 0x56, 0x8c, 0x00, 0x58,
-	0x2d, 0x02, 0xf0, 0x4d, 0x01, 0x30, 0x2b, 0xb1, 0x7a, 0xb7, 0xbd, 0xd1, 0x48, 0x24, 0x20, 0xc5,
-	0xe7, 0x3f, 0x49, 0x70, 0x56, 0x48, 0x53, 0x48, 0x7d, 0x06, 0x1a, 0x89, 0x85, 0x09, 0x56, 0x6f,
-	0xe5, 0xf1, 0x6b, 0xaf, 0xac, 0x5e, 0x1e, 0xaf, 0x6b, 0x50, 0xe3, 0x15, 0x50, 0x78, 0x74, 0x5d,
-	0x87, 0x1d, 0x71, 0x9c, 0xa2, 0xa6, 0x17, 0x8f, 0xa0, 0x96, 0xca, 0x10, 0xaa, 0x82, 0xda, 0xbf,
-	0xb7, 0x3f, 0x7e, 0xac, 0xbf, 0x82, 0x00, 0xca, 0x03, 0xcb, 0xb6, 0x06, 0x7d, 0x5d, 0x62, 0xe2,
-	0xf1, 0x70, 0xf8, 0xe5, 0x48, 0x2f, 0xa1, 0x0a, 0xc8, 0x63, 0xeb, 0x91, 0x2e, 0xa3, 0x1d, 0xa8,
-	0xde, 0xdd, 0x1b, 0x3d, 0xb0, 0xad, 0xbd, 0x5e, 0x5f, 0x57, 0x90, 0x06, 0x8a, 0x3d, 0xb4, 0x6e,
-	0xe9, 0x2a, 0xaa, 0x41, 0xe5, 0xa1, 0x35, 0xba, 0x73, 0x77, 0x6f, 0xa0, 0x97, 0xd9, 0x66, 0xdf,
-	0xb2, 0xbf, 0x60, 0x9b, 0x0a, 0x73, 0x33, 0x1c, 0xdf, 0xe9, 0xdb, 0xba, 0xd3, 0xfd, 0x43, 0x86,
-	0x3a, 0x23, 0x49, 0x9b, 0x04, 0x7e, 0xe4, 0x52, 0x3f, 0x5c, 0xa2, 0x7b, 0x50, 0x19, 0x10, 0xc6,
-	0x6e, 0x11, 0x7a, 0xe3, 0x44, 0xd9, 0xf4, 0xd9, 0xab, 0xae, 0x79, 0x71, 0x5b, 0x7d, 0xa4, 0x00,
-	0x7d, 0x04, 0x3b, 0xcc, 0xdd, 0x8a, 0xd7, 0x4f, 0x75, 0xda, 0xc9, 0xc5, 0x98, 0x29, 0xcf, 0x4f,
-	0x00, 0x0d, 0x08, 0x5d, 0xbf, 0xec, 0x9c, 0xe6, 0xfe, 0xf2, 0x46, 0xf7, 0xeb, 0x5e, 0xc6, 0xb0,
-	0x3b, 0x20, 0x34, 0x73, 0x7d, 0x38, 0xcd, 0xf1, 0xbb, 0x1b, 0x1d, 0x67, 0x5c, 0x7c, 0x03, 0xfa,
-	0x08, 0x1f, 0x91, 0x8c, 0x2c, 0xbf, 0x79, 0x81, 0x3f, 0x75, 0xbf, 0x93, 0xe3, 0xcb, 0x72, 0x0a,
-	0xd7, 0xaf, 0x41, 0x1b, 0x10, 0xce, 0xcf, 0x11, 0xba, 0xb0, 0x95, 0xd4, 0xe3, 0x0a, 0x6e, 0x5e,
-	0xda, 0xaa, 0x98, 0x02, 0xc4, 0xe1, 0x80, 0x64, 0x5f, 0x2d, 0xa7, 0xe7, 0xed, 0x6a, 0x81, 0xb7,
-	0x4f, 0xea, 0x27, 0x0f, 0xe1, 0x8c, 0x08, 0x83, 0x75, 0xca, 0xbf, 0x2d, 0xa7, 0x17, 0xbc, 0x1f,
-	0xf7, 0x41, 0x63, 0xe0, 0xf0, 0x57, 0xe0, 0xf6, 0x97, 0x44, 0x73, 0xbb, 0x4a, 0xf7, 0x2f, 0x59,
-	0x30, 0x51, 0x0a, 0x05, 0x07, 0xaa, 0x03, 0x42, 0x87, 0x31, 0xb5, 0xb4, 0xb7, 0xd3, 0x90, 0xc0,
-	0xe1, 0xf2, 0x76, 0xcd, 0x54, 0x28, 0x8f, 0x79, 0xcf, 0xad, 0x38, 0xf5, 0xf4, 0x24, 0xbd, 0x9f,
-	0x8f, 0x94, 0x53, 0xae, 0x47, 0x50, 0x65, 0x59, 0x8a, 0xef, 0x46, 0x39, 0x68, 0xb4, 0x99, 0x43,
-	0x07, 0xb9, 0x50, 0x1b, 0x10, 0xda, 0x4f, 0x26, 0xf8, 0xc5, 0x3c, 0x13, 0x5f, 0x24, 0xc6, 0xcc,
-	0xa3, 0x9b, 0x49, 0x4d, 0x8d, 0x9d, 0x3f, 0xe1, 0xe3, 0x5c, 0xe4, 0xd2, 0xcc, 0xa5, 0xf5, 0xf9,
-	0xf8, 0xc9, 0x85, 0x63, 0xb5, 0x0e, 0x53, 0x7b, 0x8f, 0xeb, 0x75, 0x62, 0xbd, 0x4e, 0x18, 0x38,
-	0x62, 0xf9, 0x7b, 0x49, 0xb7, 0x16, 0xd4, 0xdf, 0x63, 0x5f, 0x9f, 0x8e, 0xb8, 0xe8, 0xcf, 0xd2,
-	0xeb, 0xeb, 0xa2, 0xa7, 0x8c, 0x93, 0x0e, 0xca, 0x1c, 0xb2, 0x2b, 0xff, 0x04, 0x00, 0x00, 0xff,
-	0xff, 0xe3, 0xb7, 0x19, 0x57, 0x8c, 0x13, 0x00, 0x00,
+	// 1372 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0x4f, 0x8f, 0xdb, 0x44,
+	0x14, 0xc7, 0xb1, 0x9d, 0x38, 0x2f, 0xdd, 0xdd, 0x74, 0xf8, 0xa3, 0x28, 0x3d, 0x90, 0x5a, 0x40,
+	0x43, 0x5b, 0x12, 0x94, 0x52, 0x4a, 0x4b, 0x05, 0x98, 0x34, 0x9b, 0x56, 0xd0, 0xdd, 0xad, 0x93,
+	0xaa, 0x7f, 0xa5, 0xe2, 0xda, 0xb3, 0xc1, 0xc8, 0x89, 0x83, 0x3d, 0x59, 0x35, 0x5f, 0x81, 0x03,
+	0x27, 0x04, 0x57, 0x84, 0xf8, 0x10, 0x7c, 0x06, 0xee, 0x1c, 0xb8, 0xf2, 0x39, 0x38, 0xa0, 0x19,
+	0xcf, 0xa4, 0x76, 0xb6, 0xeb, 0x8c, 0x29, 0xe2, 0x36, 0xf3, 0xfc, 0xde, 0x9b, 0x79, 0xef, 0xf7,
+	0x9b, 0xf9, 0x8d, 0xe1, 0x54, 0x8c, 0xa3, 0x23, 0x1c, 0x75, 0xe6, 0x51, 0x48, 0x42, 0x74, 0xe6,
+	0x19, 0x0e, 0x9e, 0x86, 0xa4, 0xe3, 0x86, 0xd3, 0x8e, 0xb3, 0x20, 0xe1, 0x2c, 0x24, 0x38, 0xee,
+	0x24, 0x2e, 0xcd, 0x33, 0x93, 0x30, 0x9c, 0x04, 0xb8, 0xcb, 0x5c, 0x9f, 0x2e, 0x0e, 0xbb, 0x78,
+	0x3a, 0x27, 0xcb, 0x24, 0xb2, 0xf9, 0xe6, 0xfa, 0x47, 0xe2, 0x4f, 0x71, 0x4c, 0x9c, 0xe9, 0x3c,
+	0x71, 0x30, 0x3f, 0x02, 0xad, 0x1f, 0xc6, 0x04, 0xbd, 0x06, 0xfa, 0x91, 0x13, 0x2c, 0x70, 0x43,
+	0x69, 0x29, 0x6d, 0xdd, 0x4e, 0x26, 0xa8, 0x09, 0x86, 0xbb, 0x88, 0x22, 0x3c, 0x73, 0x97, 0x8d,
+	0x52, 0x4b, 0x69, 0x57, 0xed, 0xd5, 0xdc, 0xfc, 0x55, 0x01, 0xb5, 0xef, 0x44, 0x68, 0x1b, 0x4a,
+	0xbe, 0xc7, 0xc3, 0x4a, 0xbe, 0x87, 0x10, 0x68, 0x33, 0x67, 0x8a, 0xb9, 0x3f, 0x1b, 0xa3, 0x3a,
+	0xa8, 0x47, 0xfe, 0xac, 0xa1, 0x32, 0x13, 0x1d, 0x52, 0xaf, 0x25, 0x76, 0xa2, 0x86, 0xc6, 0xe2,
+	0xd8, 0x18, 0x35, 0xa0, 0xe2, 0xe1, 0x43, 0x67, 0x11, 0x90, 0x86, 0xde, 0x52, 0xda, 0x86, 0x2d,
+	0xa6, 0xe8, 0x2a, 0x80, 0x1b, 0x61, 0x87, 0x60, 0xef, 0x89, 0x43, 0x1a, 0xe5, 0x96, 0xd2, 0xae,
+	0xf5, 0x9a, 0x9d, 0xa4, 0xb6, 0x8e, 0xa8, 0xad, 0x33, 0x16, 0xb5, 0xd9, 0x55, 0xee, 0x6d, 0x11,
+	0x73, 0x00, 0x5b, 0x7d, 0x27, 0xea, 0x87, 0x41, 0x80, 0x5d, 0xe2, 0x87, 0x33, 0xf4, 0x01, 0x68,
+	0xae, 0x13, 0xc5, 0x0d, 0xa5, 0xa5, 0xb6, 0x6b, 0xbd, 0x56, 0x27, 0xa7, 0xb7, 0x9d, 0xbe, 0x13,
+	0xd9, 0xcc, 0xdb, 0x0c, 0x61, 0x7b, 0xd7, 0x0f, 0x02, 0x7f, 0x36, 0x19, 0x11, 0x87, 0xe5, 0x91,
+	0xa9, 0x3b, 0xbb, 0x6f, 0xb5, 0xc8, 0xbe, 0x5d, 0x68, 0x64, 0x17, 0x4c, 0x95, 0x30, 0x04, 0x23,
+	0x4e, 0x8c, 0xa2, 0x8c, 0x0b, 0xb9, 0x65, 0x64, 0x13, 0xd9, 0xab, 0x60, 0xb3, 0x03, 0xc6, 0xee,
+	0x02, 0x07, 0xe3, 0xe5, 0x1c, 0xcb, 0xd4, 0x63, 0xde, 0x01, 0x24, 0xfc, 0x53, 0xdb, 0xf9, 0x18,
+	0x74, 0xb2, 0x9c, 0x63, 0xb1, 0x97, 0xb7, 0xf3, 0xf7, 0xc2, 0xe3, 0xed, 0x24, 0xc6, 0xfc, 0x59,
+	0x05, 0x8d, 0xda, 0x8e, 0xad, 0x7f, 0x19, 0x34, 0x37, 0x8c, 0x09, 0x5b, 0xbf, 0xd6, 0x3b, 0x9b,
+	0x8f, 0x53, 0x18, 0x13, 0x9b, 0xb9, 0x3f, 0x27, 0xb2, 0x9a, 0x26, 0xf2, 0x00, 0x2a, 0xbc, 0x68,
+	0xc6, 0xb8, 0x82, 0x0d, 0x13, 0xb1, 0xa8, 0x03, 0x9a, 0xe7, 0x10, 0xcc, 0xe8, 0x99, 0x8f, 0x24,
+	0xf3, 0xa3, 0xe7, 0xc7, 0xf3, 0x63, 0xe2, 0xcc, 0x5c, 0xcc, 0x58, 0xab, 0xdb, 0xab, 0x39, 0xea,
+	0x81, 0xea, 0x3a, 0x51, 0xa3, 0xc2, 0x52, 0x6d, 0xa6, 0x21, 0x75, 0x5e, 0xe3, 0x93, 0x51, 0x80,
+	0x4f, 0xe8, 0x2a, 0x68, 0xb4, 0xe1, 0x8d, 0x2a, 0x0b, 0x92, 0xc4, 0x88, 0x85, 0x98, 0xdf, 0x29,
+	0xb0, 0x4d, 0x4d, 0x29, 0xc8, 0xaf, 0x80, 0x7e, 0xb8, 0xc0, 0x81, 0x80, 0xfc, 0xec, 0xc6, 0x74,
+	0x76, 0xe2, 0x8f, 0x3e, 0x05, 0x6d, 0x8a, 0x89, 0xc3, 0x51, 0xcd, 0x47, 0xe1, 0xc0, 0x99, 0xf8,
+	0x33, 0xd6, 0xf8, 0xdb, 0x98, 0x38, 0x36, 0x0b, 0x34, 0x7f, 0x52, 0xc0, 0xe8, 0xf3, 0x3b, 0x48,
+	0xea, 0x0c, 0x22, 0xca, 0x23, 0x0f, 0xf3, 0xcb, 0x87, 0x8d, 0xd3, 0x37, 0x8d, 0x96, 0x77, 0xd3,
+	0xe8, 0x45, 0x4e, 0xec, 0x37, 0xb0, 0x73, 0x23, 0xc9, 0xb2, 0xda, 0x9f, 0x95, 0xba, 0x3f, 0x15,
+	0x89, 0xc6, 0x8b, 0xc0, 0xe7, 0xd7, 0x2c, 0xe5, 0xf3, 0x61, 0xb8, 0x98, 0x79, 0xac, 0x26, 0xc3,
+	0x4e, 0x26, 0xe6, 0x23, 0x40, 0xc2, 0x37, 0x85, 0xca, 0x00, 0x80, 0xc7, 0xf9, 0x92, 0xa7, 0x71,
+	0xb5, 0x60, 0x2a, 0xd0, 0xfc, 0x04, 0xb6, 0xb3, 0xad, 0xa7, 0xfd, 0x4a, 0xbe, 0x13, 0xde, 0x6c,
+	0x31, 0xa5, 0xdd, 0x0d, 0x1c, 0x7e, 0x4a, 0x75, 0x9b, 0x8d, 0xcd, 0xbf, 0x4b, 0x70, 0xea, 0x6e,
+	0x8c, 0xa3, 0x11, 0x26, 0xc4, 0x9f, 0x4d, 0xe2, 0x63, 0x30, 0x59, 0x50, 0xe3, 0xfd, 0x7e, 0x42,
+	0x8f, 0x40, 0x49, 0xf2, 0x08, 0x00, 0x0f, 0xa2, 0xaa, 0x73, 0x00, 0xf5, 0x55, 0x0a, 0xd1, 0x61,
+	0xb5, 0x48, 0x87, 0x77, 0xbc, 0x35, 0xac, 0xb2, 0xc8, 0x6b, 0xc5, 0xce, 0x16, 0x2c, 0xe6, 0x5e,
+	0x01, 0xd2, 0x70, 0x6f, 0x8b, 0xa0, 0x3b, 0x70, 0x5a, 0xd4, 0x41, 0x0f, 0xc8, 0x13, 0x76, 0x46,
+	0xcb, 0x45, 0xce, 0xa8, 0x28, 0x44, 0x18, 0xcc, 0x0f, 0x01, 0xe8, 0x78, 0xd7, 0x0f, 0x08, 0x8e,
+	0x28, 0x7f, 0x02, 0x7f, 0xea, 0x0b, 0xe0, 0x92, 0x09, 0x85, 0x6d, 0xee, 0x4c, 0xb0, 0x80, 0x8d,
+	0x8e, 0xcd, 0x33, 0x50, 0xbd, 0xe5, 0xd9, 0xf8, 0xdb, 0x05, 0x8e, 0xc9, 0x3a, 0x64, 0x66, 0x17,
+	0xaa, 0xfb, 0x91, 0x87, 0x23, 0x69, 0xa9, 0x18, 0xc1, 0xab, 0xab, 0x80, 0x14, 0x45, 0xaf, 0x67,
+	0xb5, 0xe2, 0x9d, 0xdc, 0x1a, 0x57, 0x09, 0x84, 0x58, 0xfc, 0xa6, 0x82, 0xce, 0x8c, 0xff, 0x95,
+	0x5a, 0xb4, 0x28, 0x13, 0x63, 0x37, 0xf2, 0xe7, 0x4c, 0x1b, 0x92, 0x3b, 0x22, 0x6d, 0x62, 0x4f,
+	0x20, 0x67, 0xee, 0xb8, 0x3e, 0x59, 0x32, 0x52, 0xd0, 0x27, 0x10, 0x9f, 0x17, 0x96, 0x83, 0x4b,
+	0x50, 0x59, 0xc4, 0xb2, 0x6f, 0x98, 0x32, 0x75, 0xb5, 0x48, 0x46, 0x43, 0x2a, 0x2f, 0xd6, 0x10,
+	0xa3, 0x88, 0x86, 0x5c, 0xcb, 0x08, 0x81, 0x2c, 0x00, 0x2c, 0x66, 0xed, 0x8c, 0x40, 0x91, 0xdb,
+	0xf1, 0x7b, 0x05, 0x76, 0x58, 0xba, 0x14, 0x19, 0xae, 0x41, 0x39, 0xa4, 0x26, 0xc1, 0x06, 0x73,
+	0xf3, 0x66, 0x6c, 0x1e, 0xf1, 0xf2, 0x42, 0xf2, 0x43, 0x09, 0x2a, 0x83, 0x67, 0x73, 0x3c, 0x8b,
+	0xf1, 0xff, 0xc7, 0x26, 0xc1, 0x18, 0x4d, 0x92, 0x31, 0x1c, 0x60, 0xbd, 0x08, 0xc0, 0xd7, 0x39,
+	0xc0, 0x94, 0x62, 0xdb, 0xbd, 0x76, 0x6e, 0x10, 0x6f, 0x40, 0x4a, 0xec, 0x7f, 0x54, 0xe0, 0x34,
+	0xb7, 0xa6, 0x90, 0xfa, 0x0c, 0x0c, 0x9c, 0x18, 0x05, 0x56, 0x6f, 0xc9, 0xe4, 0xb5, 0x57, 0x51,
+	0x2f, 0x8f, 0xd7, 0x15, 0xa8, 0x31, 0x06, 0x14, 0xbe, 0xd7, 0xae, 0xc2, 0x16, 0xdf, 0x4e, 0xd1,
+	0xd0, 0xf3, 0x47, 0x50, 0x4b, 0x75, 0x08, 0x55, 0x41, 0x1f, 0xdc, 0x3e, 0x18, 0x3f, 0xa8, 0xbf,
+	0x82, 0x00, 0xca, 0x43, 0xcb, 0xb6, 0x86, 0x83, 0xba, 0x42, 0xcd, 0xe3, 0xfd, 0xfd, 0x2f, 0x47,
+	0xf5, 0x12, 0xaa, 0x80, 0x3a, 0xb6, 0xee, 0xd7, 0x55, 0xb4, 0x05, 0xd5, 0x5b, 0x7b, 0xa3, 0xbb,
+	0xb6, 0xb5, 0xd7, 0x1f, 0xd4, 0x35, 0x64, 0x80, 0x66, 0xef, 0x5b, 0x37, 0xea, 0x3a, 0xaa, 0x41,
+	0xe5, 0x9e, 0x35, 0xba, 0x79, 0x6b, 0x6f, 0x58, 0x2f, 0xd3, 0xc9, 0x81, 0x65, 0x7f, 0x41, 0x27,
+	0x15, 0x9a, 0x66, 0x7f, 0x7c, 0x73, 0x60, 0xd7, 0xdd, 0xde, 0x1f, 0x2a, 0x6c, 0x53, 0x05, 0xb5,
+	0xf1, 0x3c, 0x8c, 0x7d, 0x12, 0x46, 0x4b, 0x74, 0x1b, 0x2a, 0x43, 0x4c, 0xa5, 0x2f, 0x46, 0x6f,
+	0x1c, 0xa3, 0xcd, 0x80, 0xfe, 0xf2, 0x35, 0xcf, 0x6f, 0xe2, 0x47, 0x0a, 0xd0, 0xfb, 0xb0, 0x45,
+	0xd3, 0xad, 0x44, 0xff, 0xc4, 0xa4, 0x5d, 0x29, 0x39, 0x4d, 0x65, 0x7e, 0x08, 0x68, 0x88, 0xc9,
+	0xfa, 0x4b, 0xe8, 0xa4, 0xf4, 0x17, 0x73, 0xd3, 0xaf, 0x67, 0x19, 0xc3, 0xce, 0x10, 0x93, 0xcc,
+	0xdb, 0xe2, 0xa4, 0xc4, 0xef, 0xe6, 0x26, 0xce, 0xa4, 0xf8, 0x1a, 0xea, 0x23, 0xe7, 0x08, 0x67,
+	0x6c, 0xf2, 0xe1, 0x05, 0x56, 0xea, 0xfd, 0xa9, 0x26, 0x2f, 0xe9, 0x14, 0xae, 0x5f, 0x81, 0x31,
+	0xc4, 0x4c, 0xbc, 0x63, 0x74, 0x6e, 0xa3, 0xe2, 0x27, 0x0c, 0x6e, 0x5e, 0xd8, 0xe8, 0x98, 0x02,
+	0xe4, 0x2e, 0x18, 0xbb, 0xfe, 0xcc, 0x63, 0x3f, 0x59, 0xf9, 0xd7, 0xfd, 0x4a, 0xfe, 0x9b, 0x9b,
+	0x1f, 0xf4, 0xc8, 0x65, 0x38, 0x67, 0xff, 0x94, 0x4e, 0x86, 0xe3, 0x72, 0x81, 0xff, 0xad, 0xd4,
+	0xde, 0xef, 0xc1, 0x29, 0xde, 0x1d, 0x7a, 0x00, 0xff, 0x2d, 0x4b, 0x5f, 0xf0, 0xcf, 0x7a, 0x00,
+	0x06, 0xc5, 0x9c, 0x55, 0xb2, 0xb9, 0x58, 0x89, 0x7e, 0xf4, 0x7e, 0xd1, 0xb9, 0xc0, 0xa5, 0xc0,
+	0x75, 0xa1, 0x3a, 0xc4, 0x64, 0x3f, 0x51, 0xac, 0xf6, 0x66, 0x75, 0xe3, 0xf0, 0x5e, 0xdc, 0xec,
+	0x99, 0xe9, 0x51, 0x95, 0xe2, 0x9b, 0xbc, 0x8b, 0x64, 0x01, 0x96, 0x90, 0x5a, 0xf4, 0x80, 0xdd,
+	0x11, 0xab, 0x37, 0xc0, 0xc9, 0xdd, 0x7f, 0x5f, 0xee, 0x11, 0x91, 0xda, 0xf3, 0x08, 0xaa, 0xb4,
+	0xfd, 0xc9, 0x3a, 0x12, 0x7b, 0x91, 0xda, 0xaf, 0x0f, 0xb5, 0x21, 0x26, 0x03, 0xa1, 0x38, 0xe7,
+	0x65, 0x14, 0x8a, 0x77, 0xbc, 0x23, 0xe3, 0x9b, 0xda, 0xff, 0x23, 0xa8, 0xd1, 0x9e, 0x8b, 0xf7,
+	0x83, 0x6c, 0xd7, 0xa5, 0x44, 0x13, 0x3d, 0x80, 0x1a, 0x6d, 0x8e, 0x98, 0x4a, 0x05, 0xc9, 0xa5,
+	0xfe, 0x7c, 0xfc, 0xf0, 0xdc, 0x73, 0xb7, 0x2e, 0x75, 0x7b, 0x8f, 0xf9, 0x75, 0x13, 0xbf, 0x6e,
+	0x34, 0x77, 0xf9, 0xf0, 0xf7, 0x52, 0xdd, 0x5a, 0x90, 0x70, 0x8f, 0x7e, 0x7d, 0x3c, 0x62, 0xa6,
+	0xbf, 0x4a, 0xaf, 0xaf, 0x9b, 0x1e, 0x53, 0x81, 0x7e, 0x5a, 0x66, 0x7c, 0xb8, 0xf4, 0x4f, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x0d, 0xa6, 0x5f, 0x6d, 0xb6, 0x14, 0x00, 0x00,
 }

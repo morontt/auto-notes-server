@@ -111,8 +111,13 @@ message FuelFilter {
   int32 page = 2;
 }
 
+message IdRequest {
+  int32 id = 1;
+}
+
 service FuelRepository {
   rpc GetFuels(FuelFilter) returns (FuelCollection);
+  rpc FindFuel(IdRequest) returns (Fuel);
   rpc GetFillingStations(google.protobuf.Empty) returns (FillingStationCollection);
   rpc GetFuelTypes(google.protobuf.Empty) returns (FuelTypeCollection);
   rpc SaveFuel(Fuel) returns (Fuel);
@@ -183,8 +188,10 @@ message ExpenseFilter {
 
 service OrderRepository {
   rpc GetOrders(OrderFilter) returns (OrderCollection);
+  rpc FindOrder(IdRequest) returns (Order);
   rpc GetOrderTypes(google.protobuf.Empty) returns (OrderTypeCollection);
   rpc SaveOrder(Order) returns (Order);
   rpc GetExpenses(ExpenseFilter) returns (ExpenseCollection);
+  rpc FindExpense(IdRequest) returns (Expense);
   rpc SaveExpense(Expense) returns (Expense);
 }

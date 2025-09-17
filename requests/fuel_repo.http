@@ -48,3 +48,13 @@ Content-Type: application/json
     "id": 2
   }
 }
+
+###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.FuelRepository/FindFuel
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "id": 17
+}

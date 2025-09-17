@@ -55,6 +55,10 @@ func (or *OrderRepositoryService) GetOrders(ctx context.Context, pbFilter *pb.Or
 	}, nil
 }
 
+func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdRequest) (*pb.Order, error) {
+	return nil, nil
+}
+
 func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.Empty) (*pb.OrderTypeCollection, error) {
 	return nil, nil
 }
@@ -64,6 +68,10 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 }
 
 func (or *OrderRepositoryService) GetExpenses(ctx context.Context, filter *pb.ExpenseFilter) (*pb.ExpenseCollection, error) {
+	return nil, nil
+}
+
+func (or *OrderRepositoryService) FindExpense(ctx context.Context, idReq *pb.IdRequest) (*pb.Expense, error) {
 	return nil, nil
 }
 
