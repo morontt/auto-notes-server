@@ -10,14 +10,14 @@ func NewFuelFilter(f *pb.FuelFilter) *FuelFilter {
 	return &FuelFilter{pbFilter: f}
 }
 
-func (f *FuelFilter) GetPage() int {
-	if f.pbFilter.GetPage() > 0 {
-		return int(f.pbFilter.GetPage())
+func (ff *FuelFilter) GetPage() int {
+	if ff.pbFilter.GetPage() > 0 {
+		return int(ff.pbFilter.GetPage())
 	}
 
 	return 1
 }
 
-func (f *FuelFilter) GetLimit() int {
-	return int(f.pbFilter.GetLimit())
+func (ff *FuelFilter) GetLimit() int {
+	return int(ff.pbFilter.GetLimit())
 }

@@ -3,8 +3,11 @@ package server
 import (
 	"context"
 
+	"github.com/twitchtv/twirp"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models/filters"
+	"xelbot.com/auto-notes/server/internal/models/repository"
 	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
@@ -16,8 +19,40 @@ func NewOrderRepositoryService(app application.Container) *OrderRepositoryServic
 	return &OrderRepositoryService{app: app}
 }
 
-func (or *OrderRepositoryService) GetOrders(ctx context.Context, filter *pb.OrderFilter) (*pb.OrderCollection, error) {
-	return nil, nil
+func (or *OrderRepositoryService) GetOrders(ctx context.Context, pbFilter *pb.OrderFilter) (*pb.OrderCollection, error) {
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	filter := filters.NewOrderFilter(pbFilter)
+
+	repo := repository.OrderRepository{DB: or.app.DB}
+	dbOrders, cntOrders, err := repo.GetOrdersByUser(user.ID, filter)
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	if pageOutOfRange(filter, cntOrders) {
+		return nil, twirp.NotFoundError("fuels not found")
+	}
+
+	orders := make([]*pb.Order, 0, len(dbOrders))
+	for _, dbOrder := range dbOrders {
+		orders = append(orders, dbOrder.ToRpcMessage())
+	}
+
+	or.app.Info("FuelRepositoryService: populate fuels", ctx, "cnt", len(dbOrders))
+
+	return &pb.OrderCollection{
+		Orders: orders,
+		Meta: &pb.PaginationMeta{
+			Current: int32(filter.GetPage()),
+			Last:    int32(filters.GetLastPage(filter, cntOrders)),
+		},
+	}, nil
 }
 
 func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.Empty) (*pb.OrderTypeCollection, error) {

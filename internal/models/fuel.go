@@ -32,7 +32,7 @@ type Fuel struct {
 }
 
 func (f *Fuel) ToRpcMessage() *pb.Fuel {
-	fuel := &pb.Fuel{
+	message := &pb.Fuel{
 		Id: int32(f.ID),
 		Cost: &pb.Cost{
 			Value:    f.Cost.Value,
@@ -53,15 +53,15 @@ func (f *Fuel) ToRpcMessage() *pb.Fuel {
 	}
 
 	if f.Car != nil {
-		fuel.Car = &pb.Car{
+		message.Car = &pb.Car{
 			Id:   int32(f.Car.ID),
 			Name: f.Car.Brand + " " + f.Car.Model,
 		}
 	}
 
 	if f.Distance.Valid {
-		fuel.Distance = f.Distance.Int32
+		message.Distance = f.Distance.Int32
 	}
 
-	return fuel
+	return message
 }

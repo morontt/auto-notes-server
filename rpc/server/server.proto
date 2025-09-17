@@ -137,6 +137,7 @@ message Order {
   int32 distance = 7;
   Car car = 8;
   OrderType type = 9;
+  google.protobuf.Timestamp created_at = 10;
 }
 
 message OrderCollection {
