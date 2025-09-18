@@ -169,6 +169,7 @@ message Expense {
   google.protobuf.Timestamp date = 4;
   Car car = 5;
   ExpenseType type = 6;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message ExpenseCollection {
