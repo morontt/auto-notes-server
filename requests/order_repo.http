@@ -6,3 +6,13 @@ Content-Type: application/json
 {
   "limit": 10
 }
+
+###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.OrderRepository/FindOrder
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "id": 17
+}

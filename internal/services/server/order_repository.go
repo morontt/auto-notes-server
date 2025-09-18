@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"errors"
 
 	"github.com/twitchtv/twirp"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/models/repository"
 	pb "xelbot.com/auto-notes/server/rpc/server"
@@ -56,7 +58,38 @@ func (or *OrderRepositoryService) GetOrders(ctx context.Context, pbFilter *pb.Or
 }
 
 func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdRequest) (*pb.Order, error) {
-	return nil, nil
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	repo := repository.OrderRepository{DB: or.app.DB}
+	if idReq.GetId() > 0 {
+		ownerId, err := repo.OrderOwner(uint(idReq.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.NotFound.Error("fuel not found")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+		if ownerId != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid fuel owner")
+		}
+	} else {
+		return nil, twirp.InvalidArgument.Error("invalid id")
+	}
+
+	dbOrder, err := repo.Find(uint(idReq.GetId()))
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return dbOrder.ToRpcMessage(), nil
 }
 
 func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.Empty) (*pb.OrderTypeCollection, error) {

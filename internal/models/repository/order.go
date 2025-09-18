@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/doug-martin/goqu/v9"
 	"xelbot.com/auto-notes/server/internal/models"
@@ -84,6 +85,75 @@ func (or *OrderRepository) GetOrdersByUser(userID uint, filter *filters.OrderFil
 	}
 
 	return items, count, nil
+}
+
+func (or *OrderRepository) Find(id uint) (*models.Order, error) {
+	ds := orderQueryExpression()
+
+	ds = ds.Where(goqu.Ex{"o.id": id})
+	query, params, _ := ds.Prepared(true).ToSQL()
+
+	obj := models.Order{}
+	carFields := struct {
+		ID    sql.NullInt32
+		Brand sql.NullString
+		Model sql.NullString
+	}{}
+
+	err := or.DB.QueryRow(query, params...).Scan(
+		&obj.ID,
+		&obj.Date,
+		&obj.Cost.Value,
+		&obj.Cost.CurrencyCode,
+		&obj.Description,
+		&obj.Capacity,
+		&obj.UsedAt,
+		&carFields.ID,
+		&carFields.Brand,
+		&carFields.Model,
+		&obj.Distance,
+		&obj.Type.ID,
+		&obj.Type.Name,
+		&obj.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	if carFields.ID.Valid {
+		car := models.Car{
+			ID:    uint(carFields.ID.Int32),
+			Brand: carFields.Brand.String,
+			Model: carFields.Model.String,
+		}
+		obj.Car = &car
+	}
+
+	return &obj, nil
+}
+
+func (or *OrderRepository) OrderOwner(orderId uint) (uint, error) {
+	query := `
+		SELECT
+			user_id
+		FROM orders
+		WHERE id = ?`
+
+	var userId uint
+	err := or.DB.QueryRow(query, orderId).Scan(&userId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, models.RecordNotFound
+		} else {
+			return 0, err
+		}
+	}
+
+	return userId, nil
 }
 
 func orderListQueryExpression(userID uint, _ *filters.OrderFilter) *goqu.SelectDataset {
