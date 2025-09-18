@@ -156,6 +156,39 @@ func (or *OrderRepository) OrderOwner(orderId uint) (uint, error) {
 	return userId, nil
 }
 
+func (or *OrderRepository) GetOrderTypes() ([]*models.OrderType, error) {
+	query := `
+		SELECT
+			ot.id,
+			ot.name
+		FROM order_types AS ot
+		ORDER BY ot.name`
+
+	rows, err := or.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	items := make([]*models.OrderType, 0)
+
+	for rows.Next() {
+		obj := models.OrderType{}
+		err = rows.Scan(
+			&obj.ID,
+			&obj.Name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, &obj)
+	}
+
+	return items, nil
+}
+
 func orderListQueryExpression(userID uint, _ *filters.OrderFilter) *goqu.SelectDataset {
 	ds := orderQueryExpression()
 

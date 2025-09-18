@@ -112,7 +112,7 @@ func (fr *FuelRepositoryService) GetFuelTypes(ctx context.Context, _ *emptypb.Em
 		types = append(types, item)
 	}
 
-	fr.app.Info("FuelRepositoryService: populate stations", ctx, "cnt", len(dbTypes))
+	fr.app.Info("FuelRepositoryService: populate fuel types", ctx, "cnt", len(dbTypes))
 
 	return &pb.FuelTypeCollection{Types: types}, nil
 }

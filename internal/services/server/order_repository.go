@@ -93,7 +93,32 @@ func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdReq
 }
 
 func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.Empty) (*pb.OrderTypeCollection, error) {
-	return nil, nil
+	_, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	repo := repository.OrderRepository{DB: or.app.DB}
+	dbTypes, err := repo.GetOrderTypes()
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	types := make([]*pb.OrderType, 0, len(dbTypes))
+	for _, dbItem := range dbTypes {
+		item := &pb.OrderType{
+			Id:   int32(dbItem.ID),
+			Name: dbItem.Name,
+		}
+
+		types = append(types, item)
+	}
+
+	or.app.Info("FuelRepositoryService: populate order types", ctx, "cnt", len(dbTypes))
+
+	return &pb.OrderTypeCollection{Types: types}, nil
 }
 
 func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order) (*pb.Order, error) {
