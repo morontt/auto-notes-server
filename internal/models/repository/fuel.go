@@ -186,28 +186,28 @@ func (fr *FuelRepository) FindType(id uint) (*models.FuelType, error) {
 	return &obj, nil
 }
 
-func (fr *FuelRepository) SaveFuel(fuel *models.Fuel, userId uint) (uint, error) {
+func (fr *FuelRepository) SaveFuel(obj *models.Fuel, userId uint) (uint, error) {
 	data := goqu.Record{}
 
-	data["date"] = fuel.Date.Format(time.DateOnly)
-	data["station_id"] = fuel.Station.ID
-	data["currency_id"] = fuel.Cost.CurrencyID
-	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Cost.Value))
-	data["value"] = fmt.Sprintf("%.2f", 0.01*float64(fuel.Value))
-	data["type_id"] = fuel.Type.ID
+	data["date"] = obj.Date.Format(time.DateOnly)
+	data["station_id"] = obj.Station.ID
+	data["currency_id"] = obj.Cost.CurrencyID
+	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Cost.Value))
+	data["value"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Value))
+	data["type_id"] = obj.Type.ID
 
-	if fuel.Car != nil {
-		data["car_id"] = fuel.Car.ID
+	if obj.Car != nil {
+		data["car_id"] = obj.Car.ID
 	} else {
 		data["car_id"] = nil
 	}
 
 	var ds exp.SQLExpression
-	if fuel.ID == 0 {
+	if obj.ID == 0 {
 		data["user_id"] = userId
 		ds = goqu.Dialect("mysql8").Insert("fuels").Rows(data)
 	} else {
-		ds = goqu.Dialect("mysql8").Update("fuels").Set(data).Where(goqu.Ex{"id": fuel.ID})
+		ds = goqu.Dialect("mysql8").Update("fuels").Set(data).Where(goqu.Ex{"id": obj.ID})
 	}
 
 	query, _, err := ds.ToSQL()
@@ -220,7 +220,7 @@ func (fr *FuelRepository) SaveFuel(fuel *models.Fuel, userId uint) (uint, error)
 		return 0, err
 	}
 
-	if fuel.ID == 0 {
+	if obj.ID == 0 {
 		lastID, err := res.LastInsertId()
 		if err != nil {
 			return 0, err
@@ -229,7 +229,7 @@ func (fr *FuelRepository) SaveFuel(fuel *models.Fuel, userId uint) (uint, error)
 		return uint(lastID), nil
 	}
 
-	return fuel.ID, nil
+	return obj.ID, nil
 }
 
 func (fr *FuelRepository) GetFillingStations() ([]*models.FillingStation, error) {

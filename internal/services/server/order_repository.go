@@ -197,5 +197,97 @@ func (or *OrderRepositoryService) FindExpense(ctx context.Context, idReq *pb.IdR
 }
 
 func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.Expense) (*pb.Expense, error) {
-	return nil, nil
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	currencyCode := expense.Cost.GetCurrency()
+	if currencyCode == "" {
+		return nil, twirp.InvalidArgument.Error("empty currency code")
+	}
+
+	if expense.GetType() == pb.ExpenseType_EMPTY {
+		return nil, twirp.InvalidArgument.Error("expense type is required")
+	}
+
+	if expense.GetDate() == nil {
+		return nil, twirp.InvalidArgument.Error("date is required")
+	}
+
+	expenseRepo := repository.ExpenseRepository{DB: or.app.DB}
+	if expense.GetId() > 0 {
+		ownerId, err := expenseRepo.ExpenseOwner(uint(expense.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.NotFound.Error("fuel not found")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+		if ownerId != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid expense owner")
+		}
+	}
+
+	currencyRepo := repository.CurrencyRepository{DB: or.app.DB}
+	currency, err := currencyRepo.GetCurrencyByCode(currencyCode)
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+			return nil, twirp.InvalidArgument.Error("invalid currency")
+		} else {
+			or.app.ServerError(ctx, err)
+
+			return nil, twirp.InternalError("internal error")
+		}
+	}
+
+	var car *models.Car
+	if expense.Car.GetId() > 0 {
+		carRepo := repository.CarRepository{DB: or.app.DB}
+		car, err = carRepo.Find(uint(expense.Car.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid car")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+
+		if car.UserID != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid car owner")
+		}
+	}
+
+	expenseModel := models.Expense{
+		ID:  uint(expense.GetId()),
+		Car: car,
+		Cost: models.Cost{
+			Value:      expense.GetCost().GetValue(),
+			CurrencyID: currency.ID,
+		},
+		Description: expense.GetDescription(),
+		Date:        expense.GetDate().AsTime(),
+		Type:        expense.GetType(),
+	}
+
+	expenseID, err := expenseRepo.SaveExpense(&expenseModel, user.ID)
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	dbExpense, err := expenseRepo.Find(expenseID)
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return dbExpense.ToRpcMessage(), nil
 }

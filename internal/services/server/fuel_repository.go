@@ -136,6 +136,10 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		return nil, twirp.InvalidArgument.Error("empty fuel type")
 	}
 
+	if fuel.GetDate() == nil {
+		return nil, twirp.InvalidArgument.Error("date is required")
+	}
+
 	fuelRepo := repository.FuelRepository{DB: fr.app.DB}
 	if fuel.GetId() > 0 {
 		ownerId, err := fuelRepo.FuelOwner(uint(fuel.GetId()))

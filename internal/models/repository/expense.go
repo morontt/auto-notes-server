@@ -3,8 +3,11 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/utils/database"
@@ -146,6 +149,51 @@ func (er *ExpenseRepository) ExpenseOwner(orderId uint) (uint, error) {
 	}
 
 	return userId, nil
+}
+
+func (er *ExpenseRepository) SaveExpense(obj *models.Expense, userId uint) (uint, error) {
+	data := goqu.Record{}
+
+	data["date"] = obj.Date.Format(time.DateOnly)
+	data["description"] = obj.Description
+	data["currency_id"] = obj.Cost.CurrencyID
+	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Cost.Value))
+	data["type"] = int(obj.Type)
+
+	if obj.Car != nil {
+		data["car_id"] = obj.Car.ID
+	} else {
+		data["car_id"] = nil
+	}
+
+	var ds exp.SQLExpression
+	if obj.ID == 0 {
+		data["user_id"] = userId
+		ds = goqu.Dialect("mysql8").Insert("expenses").Rows(data)
+	} else {
+		ds = goqu.Dialect("mysql8").Update("expenses").Set(data).Where(goqu.Ex{"id": obj.ID})
+	}
+
+	query, _, err := ds.ToSQL()
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := er.DB.Exec(query)
+	if err != nil {
+		return 0, err
+	}
+
+	if obj.ID == 0 {
+		lastID, err := res.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+
+		return uint(lastID), nil
+	}
+
+	return obj.ID, nil
 }
 
 func expenseListQueryExpression(userID uint, _ *filters.ExpenseFilter) *goqu.SelectDataset {
