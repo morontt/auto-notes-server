@@ -26,6 +26,28 @@ Content-Type: application/json
 {}
 
 ###
+POST http://localhost:8080/twirp/xelbot.com.autonotes.server.OrderRepository/SaveOrder
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "id": 0,
+  "cost": {
+    "value": 10100,
+    "currency": "RUB"
+  },
+  "description": "Motor Oil",
+  "type": {
+    "id": 11
+  },
+  "date": "2025-09-20T09:00:00Z",
+  "car": {
+    "id": 2
+  }
+}
+
+###
 POST http://localhost:8080/twirp/xelbot.com.autonotes.server.OrderRepository/GetExpenses
 Accept: application/json
 Authorization: Bearer {{auth_token}}

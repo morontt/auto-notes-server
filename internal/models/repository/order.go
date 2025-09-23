@@ -3,8 +3,11 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/doug-martin/goqu/v9/exp"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/utils/database"
@@ -52,6 +55,10 @@ func (or *OrderRepository) GetOrdersByUser(userID uint, filter *filters.OrderFil
 			Brand sql.NullString
 			Model sql.NullString
 		}{}
+		typeFields := struct {
+			ID   sql.NullInt32
+			Name sql.NullString
+		}{}
 		err = rows.Scan(
 			&obj.ID,
 			&obj.Date,
@@ -64,8 +71,8 @@ func (or *OrderRepository) GetOrdersByUser(userID uint, filter *filters.OrderFil
 			&carFields.Brand,
 			&carFields.Model,
 			&obj.Distance,
-			&obj.Type.ID,
-			&obj.Type.Name,
+			&typeFields.ID,
+			&typeFields.Name,
 			&obj.CreatedAt)
 
 		if err != nil {
@@ -79,6 +86,13 @@ func (or *OrderRepository) GetOrdersByUser(userID uint, filter *filters.OrderFil
 				Model: carFields.Model.String,
 			}
 			obj.Car = &car
+		}
+		if typeFields.ID.Valid {
+			orderType := models.OrderType{
+				ID:   uint(typeFields.ID.Int32),
+				Name: typeFields.Name.String,
+			}
+			obj.Type = &orderType
 		}
 
 		items = append(items, &obj)
@@ -99,6 +113,10 @@ func (or *OrderRepository) Find(id uint) (*models.Order, error) {
 		Brand sql.NullString
 		Model sql.NullString
 	}{}
+	typeFields := struct {
+		ID   sql.NullInt32
+		Name sql.NullString
+	}{}
 
 	err := or.DB.QueryRow(query, params...).Scan(
 		&obj.ID,
@@ -112,8 +130,8 @@ func (or *OrderRepository) Find(id uint) (*models.Order, error) {
 		&carFields.Brand,
 		&carFields.Model,
 		&obj.Distance,
-		&obj.Type.ID,
-		&obj.Type.Name,
+		&typeFields.ID,
+		&typeFields.Name,
 		&obj.CreatedAt)
 
 	if err != nil {
@@ -131,6 +149,13 @@ func (or *OrderRepository) Find(id uint) (*models.Order, error) {
 			Model: carFields.Model.String,
 		}
 		obj.Car = &car
+	}
+	if typeFields.ID.Valid {
+		orderType := models.OrderType{
+			ID:   uint(typeFields.ID.Int32),
+			Name: typeFields.Name.String,
+		}
+		obj.Type = &orderType
 	}
 
 	return &obj, nil
@@ -189,6 +214,93 @@ func (or *OrderRepository) GetOrderTypes() ([]*models.OrderType, error) {
 	return items, nil
 }
 
+func (or *OrderRepository) FindType(id uint) (*models.OrderType, error) {
+	query := `
+		SELECT
+			ot.id,
+			ot.name
+		FROM order_types AS ot
+		WHERE ot.id = ?`
+
+	obj := models.OrderType{}
+
+	err := or.DB.QueryRow(query, id).Scan(
+		&obj.ID,
+		&obj.Name)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.RecordNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &obj, nil
+}
+
+func (or *OrderRepository) SaveOrder(obj *models.Order, userId uint) (uint, error) {
+	data := goqu.Record{}
+
+	data["date"] = obj.Date.Format(time.DateOnly)
+	data["currency_id"] = obj.Cost.CurrencyID
+	data["description"] = obj.Description
+	data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Cost.Value))
+
+	if obj.Type != nil {
+		data["type_id"] = obj.Type.ID
+	} else {
+		data["type_id"] = nil
+	}
+
+	if obj.Car != nil {
+		data["car_id"] = obj.Car.ID
+	} else {
+		data["car_id"] = nil
+	}
+
+	if obj.Capacity.Valid {
+		data["capacity"] = obj.Capacity.String
+	} else {
+		data["capacity"] = nil
+	}
+
+	if obj.UsedAt.Valid {
+		data["used_at"] = obj.UsedAt.Time.Format(time.DateOnly)
+	} else {
+		data["used_at"] = nil
+	}
+
+	var ds exp.SQLExpression
+	if obj.ID == 0 {
+		data["user_id"] = userId
+		ds = goqu.Dialect("mysql8").Insert("orders").Rows(data)
+	} else {
+		ds = goqu.Dialect("mysql8").Update("orders").Set(data).Where(goqu.Ex{"id": obj.ID})
+	}
+
+	query, _, err := ds.ToSQL()
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := or.DB.Exec(query)
+	if err != nil {
+		return 0, err
+	}
+
+	if obj.ID == 0 {
+		lastID, err := res.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+
+		return uint(lastID), nil
+	}
+
+	return obj.ID, nil
+}
+
 func orderListQueryExpression(userID uint, _ *filters.OrderFilter) *goqu.SelectDataset {
 	ds := orderQueryExpression()
 
@@ -225,7 +337,7 @@ func orderQueryExpression() *goqu.SelectDataset {
 		goqu.On(goqu.Ex{
 			"cur.id": goqu.I("o.currency_id"),
 		}),
-	).InnerJoin(
+	).LeftJoin(
 		goqu.T("order_types").As("ot"),
 		goqu.On(goqu.Ex{
 			"ot.id": goqu.I("o.type_id"),

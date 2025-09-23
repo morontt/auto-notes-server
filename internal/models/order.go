@@ -22,7 +22,7 @@ type Order struct {
 	UsedAt      sql.NullTime
 	Distance    sql.NullInt32
 	Car         *Car
-	Type        OrderType
+	Type        *OrderType
 	CreatedAt   time.Time
 }
 
@@ -34,12 +34,15 @@ func (o *Order) ToRpcMessage() *pb.Order {
 			Currency: o.Cost.CurrencyCode,
 		},
 		Description: o.Description,
-		Type: &pb.OrderType{
+		Date:        timestamppb.New(o.Date),
+		CreatedAt:   timestamppb.New(o.CreatedAt),
+	}
+
+	if o.Type != nil {
+		message.Type = &pb.OrderType{
 			Id:   int32(o.Type.ID),
 			Name: o.Type.Name,
-		},
-		Date:      timestamppb.New(o.Date),
-		CreatedAt: timestamppb.New(o.CreatedAt),
+		}
 	}
 
 	if o.Car != nil {

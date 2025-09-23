@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/twitchtv/twirp"
@@ -46,7 +47,7 @@ func (or *OrderRepositoryService) GetOrders(ctx context.Context, pbFilter *pb.Or
 		orders = append(orders, dbOrder.ToRpcMessage())
 	}
 
-	or.app.Info("FuelRepositoryService: populate orders", ctx, "cnt", len(dbOrders))
+	or.app.Info("OrderRepositoryService: populate orders", ctx, "cnt", len(dbOrders))
 
 	return &pb.OrderCollection{
 		Orders: orders,
@@ -122,7 +123,135 @@ func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.
 }
 
 func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order) (*pb.Order, error) {
-	return nil, nil
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	currencyCode := order.Cost.GetCurrency()
+	if currencyCode == "" {
+		return nil, twirp.InvalidArgument.Error("empty currency code")
+	}
+
+	if order.GetDate() == nil {
+		return nil, twirp.InvalidArgument.Error("date is required")
+	}
+
+	orderRepo := repository.OrderRepository{DB: or.app.DB}
+	if order.GetId() > 0 {
+		ownerId, err := orderRepo.OrderOwner(uint(order.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.NotFound.Error("order not found")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+		if ownerId != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid order owner")
+		}
+	}
+
+	var orderType *models.OrderType
+	if order.Type.GetId() > 0 {
+		orderType, err = orderRepo.FindType(uint(order.Type.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid order type")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+	}
+
+	currencyRepo := repository.CurrencyRepository{DB: or.app.DB}
+	currency, err := currencyRepo.GetCurrencyByCode(currencyCode)
+	if err != nil {
+		if errors.Is(err, models.RecordNotFound) {
+			return nil, twirp.InvalidArgument.Error("invalid currency")
+		} else {
+			or.app.ServerError(ctx, err)
+
+			return nil, twirp.InternalError("internal error")
+		}
+	}
+
+	var car *models.Car
+	if order.Car.GetId() > 0 {
+		carRepo := repository.CarRepository{DB: or.app.DB}
+		car, err = carRepo.Find(uint(order.Car.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid car")
+			} else {
+				or.app.ServerError(ctx, err)
+
+				return nil, twirp.InternalError("internal error")
+			}
+		}
+
+		if car.UserID != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid car owner")
+		}
+	}
+
+	/*
+		Distance    sql.NullInt32
+	*/
+
+	var capacity sql.NullString
+	if order.GetCapacity() == "" {
+		capacity = sql.NullString{Valid: false}
+	} else {
+		capacity = sql.NullString{
+			String: order.GetCapacity(),
+			Valid:  true,
+		}
+	}
+
+	var usedAt sql.NullTime
+	if order.GetUsedAt() != nil {
+		usedAt = sql.NullTime{
+			Valid: true,
+			Time:  order.GetUsedAt().AsTime(),
+		}
+	} else {
+		usedAt = sql.NullTime{Valid: false}
+	}
+
+	orderModel := models.Order{
+		ID:  uint(order.GetId()),
+		Car: car,
+		Cost: models.Cost{
+			Value:      order.Cost.GetValue(),
+			CurrencyID: currency.ID,
+		},
+		Description: order.GetDescription(),
+		Capacity:    capacity,
+		Date:        order.Date.AsTime(),
+		Type:        orderType,
+		UsedAt:      usedAt,
+	}
+
+	orderID, err := orderRepo.SaveOrder(&orderModel, user.ID)
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	dbOrder, err := orderRepo.Find(orderID)
+	if err != nil {
+		or.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
+	return dbOrder.ToRpcMessage(), nil
 }
 
 func (or *OrderRepositoryService) GetExpenses(ctx context.Context, pbFilter *pb.ExpenseFilter) (*pb.ExpenseCollection, error) {
@@ -220,7 +349,7 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 		ownerId, err := expenseRepo.ExpenseOwner(uint(expense.GetId()))
 		if err != nil {
 			if errors.Is(err, models.RecordNotFound) {
-				return nil, twirp.NotFound.Error("fuel not found")
+				return nil, twirp.NotFound.Error("order not found")
 			} else {
 				or.app.ServerError(ctx, err)
 
