@@ -5417,6 +5417,1337 @@ func (s *orderRepositoryServer) PathPrefix() string {
 	return baseServicePath(s.pathPrefix, "xelbot.com.autonotes.server", "OrderRepository")
 }
 
+// =======================
+// CarRepository Interface
+// =======================
+
+type CarRepository interface {
+	GetServices(context.Context, *ServiceFilter) (*ServiceCollection, error)
+
+	SaveService(context.Context, *Service) (*Service, error)
+
+	GetMileages(context.Context, *MileageFilter) (*MileageCollection, error)
+
+	SaveMileage(context.Context, *Mileage) (*Mileage, error)
+}
+
+// =============================
+// CarRepository Protobuf Client
+// =============================
+
+type carRepositoryProtobufClient struct {
+	client      HTTPClient
+	urls        [4]string
+	interceptor twirp.Interceptor
+	opts        twirp.ClientOptions
+}
+
+// NewCarRepositoryProtobufClient creates a Protobuf client that implements the CarRepository interface.
+// It communicates using Protobuf and can be configured with a custom HTTPClient.
+func NewCarRepositoryProtobufClient(baseURL string, client HTTPClient, opts ...twirp.ClientOption) CarRepository {
+	if c, ok := client.(*http.Client); ok {
+		client = withoutRedirects(c)
+	}
+
+	clientOpts := twirp.ClientOptions{}
+	for _, o := range opts {
+		o(&clientOpts)
+	}
+
+	// Using ReadOpt allows backwards and forwards compatibility with new options in the future
+	literalURLs := false
+	_ = clientOpts.ReadOpt("literalURLs", &literalURLs)
+	var pathPrefix string
+	if ok := clientOpts.ReadOpt("pathPrefix", &pathPrefix); !ok {
+		pathPrefix = "/twirp" // default prefix
+	}
+
+	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
+	serviceURL := sanitizeBaseURL(baseURL)
+	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "CarRepository")
+	urls := [4]string{
+		serviceURL + "GetServices",
+		serviceURL + "SaveService",
+		serviceURL + "GetMileages",
+		serviceURL + "SaveMileage",
+	}
+
+	return &carRepositoryProtobufClient{
+		client:      client,
+		urls:        urls,
+		interceptor: twirp.ChainInterceptors(clientOpts.Interceptors...),
+		opts:        clientOpts,
+	}
+}
+
+func (c *carRepositoryProtobufClient) GetServices(ctx context.Context, in *ServiceFilter) (*ServiceCollection, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "GetServices")
+	caller := c.callGetServices
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *ServiceFilter) (*ServiceCollection, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*ServiceFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*ServiceFilter) when calling interceptor")
+					}
+					return c.callGetServices(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*ServiceCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*ServiceCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryProtobufClient) callGetServices(ctx context.Context, in *ServiceFilter) (*ServiceCollection, error) {
+	out := new(ServiceCollection)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryProtobufClient) SaveService(ctx context.Context, in *Service) (*Service, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "SaveService")
+	caller := c.callSaveService
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *Service) (*Service, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Service)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Service) when calling interceptor")
+					}
+					return c.callSaveService(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Service)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Service) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryProtobufClient) callSaveService(ctx context.Context, in *Service) (*Service, error) {
+	out := new(Service)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryProtobufClient) GetMileages(ctx context.Context, in *MileageFilter) (*MileageCollection, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "GetMileages")
+	caller := c.callGetMileages
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *MileageFilter) (*MileageCollection, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*MileageFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*MileageFilter) when calling interceptor")
+					}
+					return c.callGetMileages(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*MileageCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*MileageCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryProtobufClient) callGetMileages(ctx context.Context, in *MileageFilter) (*MileageCollection, error) {
+	out := new(MileageCollection)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryProtobufClient) SaveMileage(ctx context.Context, in *Mileage) (*Mileage, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "SaveMileage")
+	caller := c.callSaveMileage
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *Mileage) (*Mileage, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Mileage)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Mileage) when calling interceptor")
+					}
+					return c.callSaveMileage(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Mileage)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Mileage) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryProtobufClient) callSaveMileage(ctx context.Context, in *Mileage) (*Mileage, error) {
+	out := new(Mileage)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+// =========================
+// CarRepository JSON Client
+// =========================
+
+type carRepositoryJSONClient struct {
+	client      HTTPClient
+	urls        [4]string
+	interceptor twirp.Interceptor
+	opts        twirp.ClientOptions
+}
+
+// NewCarRepositoryJSONClient creates a JSON client that implements the CarRepository interface.
+// It communicates using JSON and can be configured with a custom HTTPClient.
+func NewCarRepositoryJSONClient(baseURL string, client HTTPClient, opts ...twirp.ClientOption) CarRepository {
+	if c, ok := client.(*http.Client); ok {
+		client = withoutRedirects(c)
+	}
+
+	clientOpts := twirp.ClientOptions{}
+	for _, o := range opts {
+		o(&clientOpts)
+	}
+
+	// Using ReadOpt allows backwards and forwards compatibility with new options in the future
+	literalURLs := false
+	_ = clientOpts.ReadOpt("literalURLs", &literalURLs)
+	var pathPrefix string
+	if ok := clientOpts.ReadOpt("pathPrefix", &pathPrefix); !ok {
+		pathPrefix = "/twirp" // default prefix
+	}
+
+	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
+	serviceURL := sanitizeBaseURL(baseURL)
+	serviceURL += baseServicePath(pathPrefix, "xelbot.com.autonotes.server", "CarRepository")
+	urls := [4]string{
+		serviceURL + "GetServices",
+		serviceURL + "SaveService",
+		serviceURL + "GetMileages",
+		serviceURL + "SaveMileage",
+	}
+
+	return &carRepositoryJSONClient{
+		client:      client,
+		urls:        urls,
+		interceptor: twirp.ChainInterceptors(clientOpts.Interceptors...),
+		opts:        clientOpts,
+	}
+}
+
+func (c *carRepositoryJSONClient) GetServices(ctx context.Context, in *ServiceFilter) (*ServiceCollection, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "GetServices")
+	caller := c.callGetServices
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *ServiceFilter) (*ServiceCollection, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*ServiceFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*ServiceFilter) when calling interceptor")
+					}
+					return c.callGetServices(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*ServiceCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*ServiceCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryJSONClient) callGetServices(ctx context.Context, in *ServiceFilter) (*ServiceCollection, error) {
+	out := new(ServiceCollection)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryJSONClient) SaveService(ctx context.Context, in *Service) (*Service, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "SaveService")
+	caller := c.callSaveService
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *Service) (*Service, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Service)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Service) when calling interceptor")
+					}
+					return c.callSaveService(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Service)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Service) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryJSONClient) callSaveService(ctx context.Context, in *Service) (*Service, error) {
+	out := new(Service)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryJSONClient) GetMileages(ctx context.Context, in *MileageFilter) (*MileageCollection, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "GetMileages")
+	caller := c.callGetMileages
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *MileageFilter) (*MileageCollection, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*MileageFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*MileageFilter) when calling interceptor")
+					}
+					return c.callGetMileages(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*MileageCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*MileageCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryJSONClient) callGetMileages(ctx context.Context, in *MileageFilter) (*MileageCollection, error) {
+	out := new(MileageCollection)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *carRepositoryJSONClient) SaveMileage(ctx context.Context, in *Mileage) (*Mileage, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithMethodName(ctx, "SaveMileage")
+	caller := c.callSaveMileage
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *Mileage) (*Mileage, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Mileage)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Mileage) when calling interceptor")
+					}
+					return c.callSaveMileage(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Mileage)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Mileage) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *carRepositoryJSONClient) callSaveMileage(ctx context.Context, in *Mileage) (*Mileage, error) {
+	out := new(Mileage)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+// ============================
+// CarRepository Server Handler
+// ============================
+
+type carRepositoryServer struct {
+	CarRepository
+	interceptor      twirp.Interceptor
+	hooks            *twirp.ServerHooks
+	pathPrefix       string // prefix for routing
+	jsonSkipDefaults bool   // do not include unpopulated fields (default values) in the response
+	jsonCamelCase    bool   // JSON fields are serialized as lowerCamelCase rather than keeping the original proto names
+}
+
+// NewCarRepositoryServer builds a TwirpServer that can be used as an http.Handler to handle
+// HTTP requests that are routed to the right method in the provided svc implementation.
+// The opts are twirp.ServerOption modifiers, for example twirp.WithServerHooks(hooks).
+func NewCarRepositoryServer(svc CarRepository, opts ...interface{}) TwirpServer {
+	serverOpts := newServerOpts(opts)
+
+	// Using ReadOpt allows backwards and forwards compatibility with new options in the future
+	jsonSkipDefaults := false
+	_ = serverOpts.ReadOpt("jsonSkipDefaults", &jsonSkipDefaults)
+	jsonCamelCase := false
+	_ = serverOpts.ReadOpt("jsonCamelCase", &jsonCamelCase)
+	var pathPrefix string
+	if ok := serverOpts.ReadOpt("pathPrefix", &pathPrefix); !ok {
+		pathPrefix = "/twirp" // default prefix
+	}
+
+	return &carRepositoryServer{
+		CarRepository:    svc,
+		hooks:            serverOpts.Hooks,
+		interceptor:      twirp.ChainInterceptors(serverOpts.Interceptors...),
+		pathPrefix:       pathPrefix,
+		jsonSkipDefaults: jsonSkipDefaults,
+		jsonCamelCase:    jsonCamelCase,
+	}
+}
+
+// writeError writes an HTTP response with a valid Twirp error format, and triggers hooks.
+// If err is not a twirp.Error, it will get wrapped with twirp.InternalErrorWith(err)
+func (s *carRepositoryServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
+	writeError(ctx, resp, err, s.hooks)
+}
+
+// handleRequestBodyError is used to handle error when the twirp server cannot read request
+func (s *carRepositoryServer) handleRequestBodyError(ctx context.Context, resp http.ResponseWriter, msg string, err error) {
+	if context.Canceled == ctx.Err() {
+		s.writeError(ctx, resp, twirp.NewError(twirp.Canceled, "failed to read request: context canceled"))
+		return
+	}
+	if context.DeadlineExceeded == ctx.Err() {
+		s.writeError(ctx, resp, twirp.NewError(twirp.DeadlineExceeded, "failed to read request: deadline exceeded"))
+		return
+	}
+	s.writeError(ctx, resp, twirp.WrapError(malformedRequestError(msg), err))
+}
+
+// CarRepositoryPathPrefix is a convenience constant that may identify URL paths.
+// Should be used with caution, it only matches routes generated by Twirp Go clients,
+// with the default "/twirp" prefix and default CamelCase service and method names.
+// More info: https://twitchtv.github.io/twirp/docs/routing.html
+const CarRepositoryPathPrefix = "/twirp/xelbot.com.autonotes.server.CarRepository/"
+
+func (s *carRepositoryServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	ctx = ctxsetters.WithPackageName(ctx, "xelbot.com.autonotes.server")
+	ctx = ctxsetters.WithServiceName(ctx, "CarRepository")
+	ctx = ctxsetters.WithResponseWriter(ctx, resp)
+
+	var err error
+	ctx, err = callRequestReceived(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	if req.Method != "POST" {
+		msg := fmt.Sprintf("unsupported method %q (only POST is allowed)", req.Method)
+		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
+		return
+	}
+
+	// Verify path format: [<prefix>]/<package>.<Service>/<Method>
+	prefix, pkgService, method := parseTwirpPath(req.URL.Path)
+	if pkgService != "xelbot.com.autonotes.server.CarRepository" {
+		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
+		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
+		return
+	}
+	if prefix != s.pathPrefix {
+		msg := fmt.Sprintf("invalid path prefix %q, expected %q, on path %q", prefix, s.pathPrefix, req.URL.Path)
+		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
+		return
+	}
+
+	switch method {
+	case "GetServices":
+		s.serveGetServices(ctx, resp, req)
+		return
+	case "SaveService":
+		s.serveSaveService(ctx, resp, req)
+		return
+	case "GetMileages":
+		s.serveGetMileages(ctx, resp, req)
+		return
+	case "SaveMileage":
+		s.serveSaveMileage(ctx, resp, req)
+		return
+	default:
+		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
+		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
+		return
+	}
+}
+
+func (s *carRepositoryServer) serveGetServices(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveGetServicesJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveGetServicesProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *carRepositoryServer) serveGetServicesJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "GetServices")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(ServiceFilter)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.CarRepository.GetServices
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *ServiceFilter) (*ServiceCollection, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*ServiceFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*ServiceFilter) when calling interceptor")
+					}
+					return s.CarRepository.GetServices(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*ServiceCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*ServiceCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *ServiceCollection
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *ServiceCollection and nil error while calling GetServices. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveGetServicesProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "GetServices")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(ServiceFilter)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.CarRepository.GetServices
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *ServiceFilter) (*ServiceCollection, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*ServiceFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*ServiceFilter) when calling interceptor")
+					}
+					return s.CarRepository.GetServices(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*ServiceCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*ServiceCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *ServiceCollection
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *ServiceCollection and nil error while calling GetServices. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveSaveService(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveSaveServiceJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveSaveServiceProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *carRepositoryServer) serveSaveServiceJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "SaveService")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(Service)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.CarRepository.SaveService
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *Service) (*Service, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Service)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Service) when calling interceptor")
+					}
+					return s.CarRepository.SaveService(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Service)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Service) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Service
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Service and nil error while calling SaveService. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveSaveServiceProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "SaveService")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(Service)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.CarRepository.SaveService
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *Service) (*Service, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Service)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Service) when calling interceptor")
+					}
+					return s.CarRepository.SaveService(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Service)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Service) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Service
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Service and nil error while calling SaveService. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveGetMileages(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveGetMileagesJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveGetMileagesProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *carRepositoryServer) serveGetMileagesJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "GetMileages")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(MileageFilter)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.CarRepository.GetMileages
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *MileageFilter) (*MileageCollection, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*MileageFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*MileageFilter) when calling interceptor")
+					}
+					return s.CarRepository.GetMileages(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*MileageCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*MileageCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *MileageCollection
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *MileageCollection and nil error while calling GetMileages. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveGetMileagesProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "GetMileages")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(MileageFilter)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.CarRepository.GetMileages
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *MileageFilter) (*MileageCollection, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*MileageFilter)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*MileageFilter) when calling interceptor")
+					}
+					return s.CarRepository.GetMileages(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*MileageCollection)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*MileageCollection) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *MileageCollection
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *MileageCollection and nil error while calling GetMileages. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveSaveMileage(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveSaveMileageJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveSaveMileageProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *carRepositoryServer) serveSaveMileageJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "SaveMileage")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(Mileage)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.CarRepository.SaveMileage
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *Mileage) (*Mileage, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Mileage)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Mileage) when calling interceptor")
+					}
+					return s.CarRepository.SaveMileage(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Mileage)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Mileage) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Mileage
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Mileage and nil error while calling SaveMileage. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) serveSaveMileageProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "SaveMileage")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(Mileage)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.CarRepository.SaveMileage
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *Mileage) (*Mileage, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*Mileage)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*Mileage) when calling interceptor")
+					}
+					return s.CarRepository.SaveMileage(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*Mileage)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*Mileage) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *Mileage
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Mileage and nil error while calling SaveMileage. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *carRepositoryServer) ServiceDescriptor() ([]byte, int) {
+	return twirpFileDescriptor0, 3
+}
+
+func (s *carRepositoryServer) ProtocGenTwirpVersion() string {
+	return "v8.1.3"
+}
+
+// PathPrefix returns the base service path, in the form: "/<prefix>/<package>.<Service>/"
+// that is everything in a Twirp route except for the <Method>. This can be used for routing,
+// for example to identify the requests that are targeted to this service in a mux.
+func (s *carRepositoryServer) PathPrefix() string {
+	return baseServicePath(s.pathPrefix, "xelbot.com.autonotes.server", "CarRepository")
+}
+
 // =====
 // Utils
 // =====
@@ -5983,91 +7314,101 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 1376 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xcd, 0x92, 0xdb, 0x44,
-	0x10, 0x46, 0x96, 0x64, 0xcb, 0xed, 0xec, 0xae, 0x33, 0xfc, 0x94, 0xcb, 0x39, 0xe0, 0xa8, 0x80,
-	0x98, 0x24, 0xd8, 0x94, 0x43, 0x08, 0x09, 0x29, 0x40, 0x38, 0x5e, 0x27, 0x05, 0xd9, 0xdd, 0xc8,
-	0x4e, 0xe5, 0xb7, 0x2a, 0x28, 0xd2, 0xec, 0x22, 0x4a, 0xb6, 0x8c, 0x34, 0xde, 0x8a, 0x5f, 0x81,
-	0x03, 0x47, 0xb8, 0x52, 0x14, 0x0f, 0xc1, 0x33, 0x70, 0xe1, 0xc4, 0x81, 0x2b, 0xcf, 0xc1, 0x81,
-	0x9a, 0xd1, 0x8c, 0x23, 0x79, 0x63, 0x79, 0x44, 0x28, 0x6e, 0x33, 0xa3, 0xee, 0x56, 0x77, 0x7f,
-	0x5f, 0x4f, 0xf7, 0xc0, 0xa9, 0x18, 0x47, 0xc7, 0x38, 0xea, 0xcc, 0xa2, 0x90, 0x84, 0xe8, 0xcc,
-	0x33, 0x1c, 0x3c, 0x0d, 0x49, 0xc7, 0x0d, 0x27, 0x1d, 0x67, 0x4e, 0xc2, 0x69, 0x48, 0x70, 0xdc,
-	0x49, 0x44, 0x9a, 0x67, 0x8e, 0xc2, 0xf0, 0x28, 0xc0, 0x5d, 0x26, 0xfa, 0x74, 0x7e, 0xd8, 0xc5,
-	0x93, 0x19, 0x59, 0x24, 0x9a, 0xcd, 0x37, 0x57, 0x3f, 0x12, 0x7f, 0x82, 0x63, 0xe2, 0x4c, 0x66,
-	0x89, 0x80, 0xf9, 0x11, 0x68, 0xfd, 0x30, 0x26, 0xe8, 0x35, 0xd0, 0x8f, 0x9d, 0x60, 0x8e, 0x1b,
-	0x4a, 0x4b, 0x69, 0xeb, 0x76, 0xb2, 0x41, 0x4d, 0x30, 0xdc, 0x79, 0x14, 0xe1, 0xa9, 0xbb, 0x68,
-	0x94, 0x5a, 0x4a, 0xbb, 0x6a, 0x2f, 0xf7, 0xe6, 0x2f, 0x0a, 0xa8, 0x7d, 0x27, 0x42, 0xdb, 0x50,
-	0xf2, 0x3d, 0xae, 0x56, 0xf2, 0x3d, 0x84, 0x40, 0x9b, 0x3a, 0x13, 0xcc, 0xe5, 0xd9, 0x1a, 0xd5,
-	0x41, 0x3d, 0xf6, 0xa7, 0x0d, 0x95, 0x1d, 0xd1, 0x25, 0x95, 0x5a, 0x60, 0x27, 0x6a, 0x68, 0x4c,
-	0x8f, 0xad, 0x51, 0x03, 0x2a, 0x1e, 0x3e, 0x74, 0xe6, 0x01, 0x69, 0xe8, 0x2d, 0xa5, 0x6d, 0xd8,
-	0x62, 0x8b, 0xae, 0x02, 0xb8, 0x11, 0x76, 0x08, 0xf6, 0x9e, 0x38, 0xa4, 0x51, 0x6e, 0x29, 0xed,
-	0x5a, 0xaf, 0xd9, 0x49, 0x62, 0xeb, 0x88, 0xd8, 0x3a, 0x63, 0x11, 0x9b, 0x5d, 0xe5, 0xd2, 0x16,
-	0x31, 0x07, 0xb0, 0xd5, 0x77, 0xa2, 0x7e, 0x18, 0x04, 0xd8, 0x25, 0x7e, 0x38, 0x45, 0x1f, 0x80,
-	0xe6, 0x3a, 0x51, 0xdc, 0x50, 0x5a, 0x6a, 0xbb, 0xd6, 0x6b, 0x75, 0x72, 0x72, 0xdb, 0xe9, 0x3b,
-	0x91, 0xcd, 0xa4, 0xcd, 0x10, 0xb6, 0x77, 0xfd, 0x20, 0xf0, 0xa7, 0x47, 0x23, 0xe2, 0x30, 0x3b,
-	0x32, 0x71, 0x67, 0xfd, 0x56, 0x8b, 0xf8, 0xed, 0x42, 0x23, 0xfb, 0xc3, 0x54, 0x08, 0x43, 0x30,
-	0xe2, 0xe4, 0x50, 0x84, 0x71, 0x21, 0x37, 0x8c, 0xac, 0x21, 0x7b, 0xa9, 0x6c, 0x76, 0xc0, 0xd8,
-	0x9d, 0xe3, 0x60, 0xbc, 0x98, 0x61, 0x99, 0x78, 0xcc, 0x3b, 0x80, 0x84, 0x7c, 0xca, 0x9d, 0x8f,
-	0x41, 0x27, 0x8b, 0x19, 0x16, 0xbe, 0xbc, 0x9d, 0xef, 0x0b, 0xd7, 0xb7, 0x13, 0x1d, 0xf3, 0x27,
-	0x15, 0x34, 0x7a, 0x76, 0xe2, 0xff, 0x97, 0x41, 0x73, 0xc3, 0x98, 0xb0, 0xff, 0xd7, 0x7a, 0x67,
-	0xf3, 0x71, 0x0a, 0x63, 0x62, 0x33, 0xf1, 0xe7, 0x44, 0x56, 0xd3, 0x44, 0x1e, 0x40, 0x85, 0x07,
-	0xcd, 0x18, 0x57, 0x30, 0x61, 0x42, 0x17, 0x75, 0x40, 0xf3, 0x1c, 0x82, 0x19, 0x3d, 0xf3, 0x91,
-	0x64, 0x72, 0xb4, 0x7e, 0x3c, 0x3f, 0x26, 0xce, 0xd4, 0xc5, 0x8c, 0xb5, 0xba, 0xbd, 0xdc, 0xa3,
-	0x1e, 0xa8, 0xae, 0x13, 0x35, 0x2a, 0xcc, 0xd4, 0x66, 0x1a, 0x52, 0xe1, 0x15, 0x3e, 0x19, 0x05,
-	0xf8, 0x84, 0xae, 0x82, 0x46, 0x13, 0xde, 0xa8, 0x32, 0x25, 0x49, 0x8c, 0x98, 0x8a, 0xf9, 0x9d,
-	0x02, 0xdb, 0xf4, 0x28, 0x05, 0xf9, 0x15, 0xd0, 0x0f, 0xe7, 0x38, 0x10, 0x90, 0x9f, 0xdd, 0x68,
-	0xce, 0x4e, 0xe4, 0xd1, 0xa7, 0xa0, 0x4d, 0x30, 0x71, 0x38, 0xaa, 0xf9, 0x28, 0x1c, 0x38, 0x47,
-	0xfe, 0x94, 0x25, 0xfe, 0x36, 0x26, 0x8e, 0xcd, 0x14, 0xcd, 0x1f, 0x15, 0x30, 0xfa, 0xfc, 0x0e,
-	0x92, 0xaa, 0x41, 0x44, 0x79, 0xe4, 0x61, 0x7e, 0xf9, 0xb0, 0x75, 0xfa, 0xa6, 0xd1, 0xf2, 0x6e,
-	0x1a, 0xbd, 0x48, 0xc5, 0x7e, 0x03, 0x3b, 0x37, 0x12, 0x2b, 0x4b, 0xff, 0xac, 0xd4, 0xfd, 0xa9,
-	0x48, 0x24, 0x5e, 0x28, 0x3e, 0xbf, 0x66, 0x29, 0x9f, 0x0f, 0xc3, 0xf9, 0xd4, 0x63, 0x31, 0x19,
-	0x76, 0xb2, 0x31, 0x1f, 0x01, 0x12, 0xb2, 0x29, 0x54, 0x06, 0x00, 0x5c, 0xcf, 0x97, 0xac, 0xc6,
-	0xe5, 0x0f, 0x53, 0x8a, 0xe6, 0x27, 0xb0, 0x9d, 0x4d, 0x3d, 0xcd, 0x57, 0xf2, 0x9d, 0xf0, 0x64,
-	0x8b, 0x2d, 0xcd, 0x6e, 0xe0, 0xf0, 0x2a, 0xd5, 0x6d, 0xb6, 0x36, 0xff, 0x2e, 0xc1, 0xa9, 0xbb,
-	0x31, 0x8e, 0x46, 0x98, 0x10, 0x7f, 0x7a, 0x14, 0x9f, 0x80, 0xc9, 0x82, 0x1a, 0xcf, 0xf7, 0x13,
-	0x5a, 0x02, 0x25, 0xc9, 0x12, 0x00, 0xae, 0x44, 0xbb, 0xce, 0x01, 0xd4, 0x97, 0x26, 0x44, 0x86,
-	0xd5, 0x22, 0x19, 0xde, 0xf1, 0x56, 0xb0, 0xca, 0x22, 0xaf, 0x15, 0xab, 0x2d, 0x98, 0xcf, 0xbc,
-	0x02, 0xa4, 0xe1, 0xd2, 0x16, 0x41, 0x77, 0xe0, 0xb4, 0x88, 0x83, 0x16, 0xc8, 0x13, 0x56, 0xa3,
-	0xe5, 0x22, 0x35, 0x2a, 0x02, 0x11, 0x07, 0xe6, 0x87, 0x00, 0x74, 0xbd, 0xeb, 0x07, 0x04, 0x47,
-	0x94, 0x3f, 0x81, 0x3f, 0xf1, 0x05, 0x70, 0xc9, 0x86, 0xc2, 0x36, 0x73, 0x8e, 0xb0, 0x80, 0x8d,
-	0xae, 0xcd, 0x33, 0x50, 0xbd, 0xe5, 0xd9, 0xf8, 0xdb, 0x39, 0x8e, 0xc9, 0x2a, 0x64, 0x66, 0x17,
-	0xaa, 0xfb, 0x91, 0x87, 0x23, 0xe9, 0x56, 0x31, 0x82, 0x57, 0x97, 0x0a, 0x29, 0x8a, 0x5e, 0xcf,
-	0xf6, 0x8a, 0x77, 0x72, 0x63, 0x5c, 0x1a, 0x10, 0xcd, 0xe2, 0x57, 0x15, 0x74, 0x76, 0xf8, 0x5f,
-	0x75, 0x8b, 0x16, 0x65, 0x62, 0xec, 0x46, 0xfe, 0x8c, 0xf5, 0x86, 0xe4, 0x8e, 0x48, 0x1f, 0xb1,
-	0x11, 0xc8, 0x99, 0x39, 0xae, 0x4f, 0x16, 0x8c, 0x14, 0x74, 0x04, 0xe2, 0xfb, 0xc2, 0xed, 0xe0,
-	0x12, 0x54, 0xe6, 0xb1, 0xec, 0x0c, 0x53, 0xa6, 0xa2, 0x16, 0xc9, 0xf4, 0x90, 0xca, 0x8b, 0x7b,
-	0x88, 0x51, 0xa4, 0x87, 0x5c, 0xcb, 0x34, 0x02, 0x59, 0x00, 0x98, 0xce, 0x4a, 0x8d, 0x40, 0x91,
-	0xdb, 0xf1, 0x7b, 0x05, 0x76, 0x98, 0xb9, 0x14, 0x19, 0xae, 0x41, 0x39, 0xa4, 0x47, 0x82, 0x0d,
-	0xe6, 0x66, 0x67, 0x6c, 0xae, 0xf1, 0xf2, 0x8d, 0xe4, 0xf7, 0x12, 0x54, 0x06, 0xcf, 0x66, 0x78,
-	0x1a, 0xe3, 0xff, 0x8f, 0x4d, 0x82, 0x31, 0x9a, 0x24, 0x63, 0x38, 0xc0, 0x7a, 0x11, 0x80, 0xaf,
-	0x73, 0x80, 0x29, 0xc5, 0xb6, 0x7b, 0xed, 0x5c, 0x25, 0x9e, 0x80, 0xb5, 0x10, 0x57, 0x8a, 0x40,
-	0xfc, 0x83, 0x02, 0xa7, 0xb9, 0xc1, 0x14, 0xc8, 0x9f, 0x81, 0x81, 0x93, 0x43, 0x01, 0xf3, 0x5b,
-	0x32, 0x2e, 0xd9, 0x4b, 0xad, 0x97, 0x87, 0xfa, 0x0a, 0xd4, 0x18, 0x79, 0x0a, 0x5f, 0x89, 0x57,
-	0x61, 0x8b, 0xbb, 0x53, 0x54, 0xf5, 0xfc, 0x31, 0xd4, 0x52, 0xc9, 0x45, 0x55, 0xd0, 0x07, 0xb7,
-	0x0f, 0xc6, 0x0f, 0xea, 0xaf, 0x20, 0x80, 0xf2, 0xd0, 0xb2, 0xad, 0xe1, 0xa0, 0xae, 0xd0, 0xe3,
-	0xf1, 0xfe, 0xfe, 0x97, 0xa3, 0x7a, 0x09, 0x55, 0x40, 0x1d, 0x5b, 0xf7, 0xeb, 0x2a, 0xda, 0x82,
-	0xea, 0xad, 0xbd, 0xd1, 0x5d, 0xdb, 0xda, 0xeb, 0x0f, 0xea, 0x1a, 0x32, 0x40, 0xb3, 0xf7, 0xad,
-	0x1b, 0x75, 0x1d, 0xd5, 0xa0, 0x72, 0xcf, 0x1a, 0xdd, 0xbc, 0xb5, 0x37, 0xac, 0x97, 0xe9, 0xe6,
-	0xc0, 0xb2, 0xbf, 0xa0, 0x9b, 0x0a, 0x35, 0xb3, 0x3f, 0xbe, 0x39, 0xb0, 0xeb, 0x6e, 0xef, 0x0f,
-	0x15, 0xb6, 0x69, 0xf3, 0xb5, 0xf1, 0x2c, 0x8c, 0x7d, 0x12, 0x46, 0x0b, 0x74, 0x1b, 0x2a, 0x43,
-	0x4c, 0xbb, 0x66, 0x8c, 0xde, 0x38, 0x81, 0xe4, 0x80, 0xbe, 0x16, 0x9b, 0xe7, 0x37, 0x51, 0x2b,
-	0x05, 0xe8, 0x7d, 0xd8, 0xa2, 0xe6, 0x96, 0xf3, 0xc2, 0x5a, 0xa3, 0x5d, 0xa9, 0x4e, 0x9c, 0xb2,
-	0xfc, 0x10, 0xd0, 0x10, 0x93, 0xd5, 0x21, 0x6a, 0x9d, 0xf9, 0x8b, 0xb9, 0xe6, 0x57, 0xad, 0x8c,
-	0x61, 0x67, 0x88, 0x49, 0x66, 0x2c, 0x59, 0x67, 0xf8, 0xdd, 0x5c, 0xc3, 0x19, 0x13, 0x5f, 0x43,
-	0x7d, 0xe4, 0x1c, 0xe3, 0xcc, 0x99, 0xbc, 0x7a, 0x81, 0x3f, 0xf5, 0xfe, 0x54, 0x93, 0x21, 0x3c,
-	0x85, 0xeb, 0x57, 0x60, 0x0c, 0x31, 0xeb, 0xfb, 0x31, 0x3a, 0xb7, 0x71, 0x58, 0x48, 0x18, 0xdc,
-	0xbc, 0xb0, 0x51, 0x30, 0x05, 0xc8, 0x5d, 0x30, 0x76, 0xfd, 0xa9, 0xc7, 0xde, 0x67, 0xf9, 0x9d,
-	0x62, 0x39, 0x39, 0x34, 0x37, 0xbf, 0x05, 0x90, 0xcb, 0x70, 0xce, 0x3e, 0xb2, 0xd6, 0xc3, 0x71,
-	0xb9, 0xc0, 0x53, 0x2d, 0xe5, 0xfb, 0x3d, 0x38, 0xc5, 0xb3, 0x43, 0x0b, 0xf0, 0xdf, 0xb2, 0xf4,
-	0x05, 0xcf, 0xdd, 0x03, 0x30, 0x28, 0xe6, 0x2c, 0x92, 0xcd, 0xc1, 0x4a, 0xe4, 0xa3, 0xf7, 0xb3,
-	0xce, 0x7b, 0x63, 0x0a, 0x5c, 0x17, 0xaa, 0x43, 0x4c, 0xf6, 0x93, 0x66, 0xd7, 0xde, 0xdc, 0x18,
-	0x39, 0xbc, 0x17, 0x37, 0x4b, 0x66, 0x72, 0x54, 0xa5, 0xf8, 0x26, 0x23, 0x95, 0x2c, 0xc0, 0x12,
-	0x5d, 0x1a, 0x3d, 0x60, 0x77, 0xc4, 0x72, 0x7c, 0x58, 0x9f, 0xfd, 0xf7, 0xe5, 0xe6, 0x8f, 0x94,
-	0xcf, 0x23, 0xa8, 0xd2, 0xf4, 0x27, 0xff, 0x91, 0xf0, 0x45, 0xca, 0x5f, 0x1f, 0x6a, 0x43, 0x4c,
-	0x06, 0xa2, 0xe3, 0x9c, 0x97, 0xe9, 0x50, 0x3c, 0xe3, 0x1d, 0x19, 0xd9, 0x94, 0xff, 0x8f, 0xa0,
-	0x46, 0x73, 0x2e, 0x46, 0x0f, 0xd9, 0xac, 0x4b, 0x35, 0x4d, 0xf4, 0x00, 0x6a, 0x34, 0x39, 0x62,
-	0x2b, 0xa5, 0x24, 0x67, 0xfa, 0xf3, 0xf1, 0xc3, 0x73, 0xcf, 0xc5, 0xba, 0x54, 0xec, 0x3d, 0x26,
-	0xd7, 0x4d, 0xe4, 0xba, 0xd1, 0xcc, 0xe5, 0xcb, 0xdf, 0x4a, 0x75, 0x6b, 0x4e, 0xc2, 0x3d, 0xfa,
-	0xf5, 0xf1, 0x88, 0x1d, 0xfd, 0x55, 0x7a, 0x7d, 0xf5, 0xe8, 0x31, 0x6d, 0xd0, 0x4f, 0xcb, 0x8c,
-	0x0f, 0x97, 0xfe, 0x09, 0x00, 0x00, 0xff, 0xff, 0x4e, 0x47, 0x28, 0x3a, 0xf1, 0x14, 0x00, 0x00,
+	// 1534 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x58, 0xcf, 0x92, 0xdb, 0xc4,
+	0x13, 0xfe, 0xc9, 0x92, 0xd6, 0x76, 0x3b, 0xbb, 0xeb, 0xcc, 0x0f, 0x28, 0x97, 0x73, 0xc0, 0x51,
+	0x01, 0x31, 0x9b, 0x60, 0x53, 0x0e, 0x21, 0x6c, 0x48, 0x01, 0xc6, 0xf1, 0x3a, 0x29, 0xd8, 0x3f,
+	0x91, 0x9d, 0xca, 0xdf, 0xaa, 0xa0, 0x48, 0xb3, 0x46, 0x94, 0x6c, 0x09, 0x69, 0xbc, 0x15, 0xbf,
+	0x02, 0x07, 0xaa, 0xb8, 0xc0, 0x81, 0x0b, 0x45, 0xf1, 0x10, 0x3c, 0x03, 0x17, 0x2e, 0x70, 0xe0,
+	0xca, 0x73, 0x70, 0xa0, 0x66, 0x34, 0xa3, 0x48, 0xde, 0xac, 0x3d, 0xca, 0x52, 0x1c, 0xb8, 0xcd,
+	0x8c, 0xbb, 0x5b, 0xd3, 0xfd, 0x7d, 0x3d, 0xf3, 0x8d, 0xe1, 0x4c, 0x84, 0xc3, 0x23, 0x1c, 0xb6,
+	0x82, 0xd0, 0x27, 0x3e, 0x3a, 0xf7, 0x14, 0x7b, 0x4f, 0x7c, 0xd2, 0xb2, 0xfd, 0x49, 0xcb, 0x9a,
+	0x11, 0x7f, 0xea, 0x13, 0x1c, 0xb5, 0x62, 0x93, 0xfa, 0xb9, 0xb1, 0xef, 0x8f, 0x3d, 0xdc, 0x66,
+	0xa6, 0x4f, 0x66, 0x87, 0x6d, 0x3c, 0x09, 0xc8, 0x3c, 0xf6, 0xac, 0xbf, 0xba, 0xf8, 0x23, 0x71,
+	0x27, 0x38, 0x22, 0xd6, 0x24, 0x88, 0x0d, 0x8c, 0xf7, 0x40, 0xeb, 0xf9, 0x11, 0x41, 0x2f, 0x81,
+	0x7e, 0x64, 0x79, 0x33, 0x5c, 0x53, 0x1a, 0x4a, 0x53, 0x37, 0xe3, 0x09, 0xaa, 0x43, 0xc9, 0x9e,
+	0x85, 0x21, 0x9e, 0xda, 0xf3, 0x5a, 0xa1, 0xa1, 0x34, 0xcb, 0x66, 0x32, 0x37, 0x7e, 0x52, 0x40,
+	0xed, 0x59, 0x21, 0xda, 0x80, 0x82, 0xeb, 0x70, 0xb7, 0x82, 0xeb, 0x20, 0x04, 0xda, 0xd4, 0x9a,
+	0x60, 0x6e, 0xcf, 0xc6, 0xa8, 0x0a, 0xea, 0x91, 0x3b, 0xad, 0xa9, 0x6c, 0x89, 0x0e, 0xa9, 0xd5,
+	0x1c, 0x5b, 0x61, 0x4d, 0x63, 0x7e, 0x6c, 0x8c, 0x6a, 0x50, 0x74, 0xf0, 0xa1, 0x35, 0xf3, 0x48,
+	0x4d, 0x6f, 0x28, 0xcd, 0x92, 0x29, 0xa6, 0x68, 0x1b, 0xc0, 0x0e, 0xb1, 0x45, 0xb0, 0xf3, 0xd8,
+	0x22, 0xb5, 0xb5, 0x86, 0xd2, 0xac, 0x74, 0xea, 0xad, 0x38, 0xb7, 0x96, 0xc8, 0xad, 0x35, 0x12,
+	0xb9, 0x99, 0x65, 0x6e, 0xdd, 0x25, 0x46, 0x1f, 0xd6, 0x7b, 0x56, 0xd8, 0xf3, 0x3d, 0x0f, 0xdb,
+	0xc4, 0xf5, 0xa7, 0xe8, 0x1d, 0xd0, 0x6c, 0x2b, 0x8c, 0x6a, 0x4a, 0x43, 0x6d, 0x56, 0x3a, 0x8d,
+	0xd6, 0x92, 0xda, 0xb6, 0x7a, 0x56, 0x68, 0x32, 0x6b, 0xc3, 0x87, 0x8d, 0x1d, 0xd7, 0xf3, 0xdc,
+	0xe9, 0x78, 0x48, 0x2c, 0x16, 0x47, 0x26, 0xef, 0xec, 0xbe, 0xd5, 0x3c, 0xfb, 0xb6, 0xa1, 0x96,
+	0xfd, 0x60, 0x2a, 0x85, 0x01, 0x94, 0xa2, 0x78, 0x51, 0xa4, 0x71, 0x71, 0x69, 0x1a, 0xd9, 0x40,
+	0x66, 0xe2, 0x6c, 0xb4, 0xa0, 0xb4, 0x33, 0xc3, 0xde, 0x68, 0x1e, 0x60, 0x99, 0x7c, 0x8c, 0xdb,
+	0x80, 0x84, 0x7d, 0x6a, 0x3b, 0xef, 0x83, 0x4e, 0xe6, 0x01, 0x16, 0x7b, 0x79, 0x7d, 0xf9, 0x5e,
+	0xb8, 0xbf, 0x19, 0xfb, 0x18, 0x3f, 0xa8, 0xa0, 0xd1, 0xb5, 0x63, 0xdf, 0xbf, 0x02, 0x9a, 0xed,
+	0x47, 0x84, 0x7d, 0xbf, 0xd2, 0x39, 0xbf, 0x1c, 0x27, 0x3f, 0x22, 0x26, 0x33, 0x7f, 0x46, 0x64,
+	0x35, 0x4d, 0xe4, 0x3e, 0x14, 0x79, 0xd2, 0x8c, 0x71, 0x39, 0x0b, 0x26, 0x7c, 0x51, 0x0b, 0x34,
+	0xc7, 0x22, 0x98, 0xd1, 0x73, 0x39, 0x92, 0xcc, 0x8e, 0xf6, 0x8f, 0xe3, 0x46, 0xc4, 0x9a, 0xda,
+	0x98, 0xb1, 0x56, 0x37, 0x93, 0x39, 0xea, 0x80, 0x6a, 0x5b, 0x61, 0xad, 0xc8, 0x42, 0xad, 0xa6,
+	0x21, 0x35, 0x5e, 0xe0, 0x53, 0x29, 0x07, 0x9f, 0xd0, 0x36, 0x68, 0xb4, 0xe0, 0xb5, 0x32, 0x73,
+	0x92, 0xc4, 0x88, 0xb9, 0x18, 0x5f, 0x29, 0xb0, 0x41, 0x97, 0x52, 0x90, 0x5f, 0x05, 0xfd, 0x70,
+	0x86, 0x3d, 0x01, 0xf9, 0xf9, 0x95, 0xe1, 0xcc, 0xd8, 0x1e, 0x7d, 0x08, 0xda, 0x04, 0x13, 0x8b,
+	0xa3, 0xba, 0x1c, 0x85, 0x03, 0x6b, 0xec, 0x4e, 0x59, 0xe1, 0x77, 0x31, 0xb1, 0x4c, 0xe6, 0x68,
+	0x7c, 0xa7, 0x40, 0xa9, 0xc7, 0xcf, 0x20, 0xa9, 0x1e, 0x44, 0x94, 0x47, 0x0e, 0xe6, 0x87, 0x0f,
+	0x1b, 0xa7, 0x4f, 0x1a, 0x6d, 0xd9, 0x49, 0xa3, 0xe7, 0xe9, 0xd8, 0x2f, 0x60, 0xf3, 0x46, 0x1c,
+	0x25, 0xd9, 0x5f, 0x37, 0x75, 0x7e, 0x2a, 0x12, 0x85, 0x17, 0x8e, 0xcf, 0x8e, 0x59, 0xca, 0xe7,
+	0x43, 0x7f, 0x36, 0x75, 0x58, 0x4e, 0x25, 0x33, 0x9e, 0x18, 0x0f, 0x01, 0x09, 0xdb, 0x14, 0x2a,
+	0x7d, 0x00, 0xee, 0xe7, 0x4a, 0x76, 0x63, 0xf2, 0xc1, 0x94, 0xa3, 0xf1, 0x01, 0x6c, 0x64, 0x4b,
+	0x4f, 0xeb, 0x15, 0xff, 0x4e, 0x78, 0xb1, 0xc5, 0x94, 0x56, 0xd7, 0xb3, 0x78, 0x97, 0xea, 0x26,
+	0x1b, 0x1b, 0x7f, 0x15, 0xe0, 0xcc, 0x9d, 0x08, 0x87, 0x43, 0x4c, 0x88, 0x3b, 0x1d, 0x47, 0xc7,
+	0x60, 0xea, 0x42, 0x85, 0xd7, 0xfb, 0x31, 0x6d, 0x81, 0x82, 0x64, 0x0b, 0x00, 0x77, 0xa2, 0xb7,
+	0xce, 0x01, 0x54, 0x93, 0x10, 0xa2, 0xc2, 0x6a, 0x9e, 0x0a, 0x6f, 0x3a, 0x0b, 0x58, 0x65, 0x91,
+	0xd7, 0xf2, 0xf5, 0x16, 0xcc, 0x02, 0x27, 0x07, 0x69, 0xb8, 0x75, 0x97, 0xa0, 0xdb, 0x70, 0x56,
+	0xe4, 0x41, 0x1b, 0xe4, 0x31, 0xeb, 0xd1, 0xb5, 0x3c, 0x3d, 0x2a, 0x12, 0x11, 0x0b, 0xc6, 0xbb,
+	0x00, 0x74, 0xbc, 0xe3, 0x7a, 0x04, 0x87, 0x94, 0x3f, 0x9e, 0x3b, 0x71, 0x05, 0x70, 0xf1, 0x84,
+	0xc2, 0x16, 0x58, 0x63, 0x2c, 0x60, 0xa3, 0x63, 0xe3, 0x1c, 0x94, 0x6f, 0x39, 0x26, 0xfe, 0x72,
+	0x86, 0x23, 0xb2, 0x08, 0x99, 0xd1, 0x86, 0xf2, 0x7e, 0xe8, 0xe0, 0x50, 0xfa, 0xaa, 0x18, 0xc2,
+	0xff, 0x13, 0x87, 0x14, 0x45, 0xaf, 0x67, 0xef, 0x8a, 0x37, 0x96, 0xe6, 0x98, 0x04, 0x10, 0x97,
+	0xc5, 0xcf, 0x2a, 0xe8, 0x6c, 0xf1, 0x9f, 0xba, 0x2d, 0x1a, 0x94, 0x89, 0x91, 0x1d, 0xba, 0x01,
+	0xbb, 0x1b, 0xe2, 0x33, 0x22, 0xbd, 0xc4, 0x24, 0x90, 0x15, 0x58, 0xb6, 0x4b, 0xe6, 0x8c, 0x14,
+	0x54, 0x02, 0xf1, 0x79, 0xee, 0xeb, 0xe0, 0x32, 0x14, 0x67, 0x91, 0xac, 0x86, 0x59, 0xa3, 0xa6,
+	0x5d, 0x92, 0xb9, 0x43, 0x8a, 0xcf, 0xbf, 0x43, 0x4a, 0x79, 0xee, 0x90, 0x6b, 0x99, 0x8b, 0x40,
+	0x16, 0x00, 0xe6, 0xb3, 0xd0, 0x23, 0x90, 0xe7, 0x74, 0xfc, 0x5a, 0x81, 0x4d, 0x16, 0x2e, 0x45,
+	0x86, 0x6b, 0xb0, 0xe6, 0xd3, 0x25, 0xc1, 0x06, 0x63, 0xf5, 0x66, 0x4c, 0xee, 0x71, 0xfa, 0x8b,
+	0xe4, 0xd7, 0x02, 0x14, 0xfb, 0x4f, 0x03, 0x3c, 0x8d, 0xf0, 0xbf, 0xc7, 0x26, 0xc1, 0x18, 0x4d,
+	0x92, 0x31, 0x1c, 0x60, 0x3d, 0x0f, 0xc0, 0xd7, 0x39, 0xc0, 0x94, 0x62, 0x1b, 0x9d, 0xe6, 0x52,
+	0x27, 0x5e, 0x80, 0x13, 0x21, 0x2e, 0xe6, 0x81, 0xf8, 0x5b, 0x05, 0xce, 0xf2, 0x80, 0x29, 0x90,
+	0x3f, 0x82, 0x12, 0x8e, 0x17, 0x05, 0xcc, 0xaf, 0xc9, 0x6c, 0xc9, 0x4c, 0xbc, 0x4e, 0x0f, 0xf5,
+	0x55, 0xa8, 0x30, 0xf2, 0xe4, 0x3e, 0x12, 0xb7, 0x61, 0x9d, 0x6f, 0xe7, 0x45, 0x5c, 0x77, 0x5d,
+	0x0f, 0x5b, 0xe3, 0xfc, 0xae, 0xbf, 0x29, 0x50, 0xe4, 0xbe, 0xc7, 0x98, 0x99, 0x3e, 0x0d, 0x0a,
+	0x0b, 0xa7, 0x81, 0x20, 0x97, 0x9a, 0x8f, 0x5c, 0xda, 0x8b, 0x2b, 0x50, 0x3d, 0x2f, 0x3d, 0x78,
+	0x5a, 0x59, 0x7a, 0x4c, 0xe2, 0x45, 0x39, 0x7a, 0xf0, 0x08, 0x66, 0xe2, 0x75, 0x7a, 0x7a, 0x7c,
+	0x53, 0x80, 0xe2, 0x10, 0x87, 0x47, 0xae, 0xfd, 0x1f, 0x3b, 0x09, 0x4e, 0xf1, 0x6c, 0xa6, 0x60,
+	0xf1, 0x9a, 0x64, 0xc1, 0x8a, 0xe2, 0x45, 0x39, 0xb0, 0x78, 0x04, 0x33, 0xf1, 0x3a, 0x3d, 0x58,
+	0xdb, 0xb0, 0xce, 0xa3, 0xe6, 0xed, 0xab, 0xad, 0x23, 0xa8, 0xa4, 0xce, 0x3b, 0x54, 0x06, 0xbd,
+	0xbf, 0x7b, 0x30, 0xba, 0x5f, 0xfd, 0x1f, 0x02, 0x58, 0x1b, 0x74, 0xcd, 0xee, 0xa0, 0x5f, 0x55,
+	0xe8, 0xf2, 0x68, 0x7f, 0xff, 0xd3, 0x61, 0xb5, 0x80, 0x8a, 0xa0, 0x8e, 0xba, 0xf7, 0xaa, 0x2a,
+	0x5a, 0x87, 0xf2, 0xad, 0xbd, 0xe1, 0x1d, 0xb3, 0xbb, 0xd7, 0xeb, 0x57, 0x35, 0x54, 0x02, 0xcd,
+	0xdc, 0xef, 0xde, 0xa8, 0xea, 0xa8, 0x02, 0xc5, 0xbb, 0xdd, 0xe1, 0xcd, 0x5b, 0x7b, 0x83, 0xea,
+	0x1a, 0x9d, 0x1c, 0x74, 0xcd, 0x4f, 0xe8, 0xa4, 0x48, 0xc3, 0xec, 0x8f, 0x6e, 0xf6, 0xcd, 0xaa,
+	0xdd, 0xf9, 0x5d, 0x85, 0x0d, 0xaa, 0x87, 0x4d, 0x1c, 0xf8, 0x91, 0x4b, 0xfc, 0x70, 0x8e, 0x76,
+	0xa1, 0x38, 0xc0, 0x54, 0xc8, 0x46, 0xe8, 0x95, 0x63, 0x80, 0xf4, 0x27, 0x01, 0x99, 0xd7, 0xb7,
+	0x56, 0x61, 0x9c, 0xc2, 0xe5, 0x1e, 0xac, 0xd3, 0x70, 0x89, 0x84, 0x3f, 0x31, 0x68, 0x5b, 0x4a,
+	0x1c, 0xa7, 0x22, 0x3f, 0x00, 0x34, 0xc0, 0x64, 0xf1, 0x5d, 0x73, 0x52, 0xf8, 0x4b, 0x4b, 0xc3,
+	0x2f, 0x46, 0x19, 0xc1, 0xe6, 0x00, 0x93, 0xcc, 0x4b, 0xe1, 0xa4, 0xc0, 0x6f, 0x2e, 0x0d, 0x9c,
+	0x09, 0xf1, 0x39, 0x54, 0x87, 0xd6, 0x11, 0xce, 0xac, 0xc9, 0xbb, 0xe7, 0xf8, 0x52, 0xe7, 0x0f,
+	0x35, 0x7e, 0x17, 0xa7, 0x70, 0xfd, 0x0c, 0x4a, 0x03, 0xcc, 0xa4, 0x78, 0x84, 0x2e, 0xac, 0xd4,
+	0xef, 0x31, 0x83, 0xeb, 0x17, 0x57, 0x1a, 0xa6, 0x00, 0xb9, 0x03, 0xa5, 0x1d, 0x77, 0xea, 0xb0,
+	0xbf, 0x4c, 0x96, 0x8b, 0xb7, 0x44, 0xcc, 0xd7, 0x57, 0x3f, 0xcf, 0x91, 0xcd, 0x70, 0xce, 0xfe,
+	0xef, 0x71, 0x32, 0x1c, 0x57, 0x72, 0xfc, 0x7b, 0x92, 0xda, 0xfb, 0x5d, 0x38, 0xc3, 0xab, 0x43,
+	0x1b, 0xf0, 0x45, 0x59, 0xfa, 0x9c, 0x7f, 0xa0, 0x0e, 0xa0, 0x44, 0x31, 0x67, 0x99, 0xac, 0x4e,
+	0x56, 0xa2, 0x1e, 0x9d, 0x1f, 0x75, 0x2e, 0x57, 0x53, 0xe0, 0xda, 0x50, 0x1e, 0x60, 0xb2, 0x1f,
+	0xeb, 0xcf, 0xe6, 0x6a, 0xad, 0xca, 0xe1, 0xbd, 0xb4, 0xda, 0x32, 0x53, 0xa3, 0x32, 0xc5, 0x37,
+	0x7e, 0xe5, 0xc8, 0x02, 0x2c, 0x21, 0x9c, 0xd1, 0x7d, 0x76, 0x46, 0x24, 0x8a, 0xfe, 0xe4, 0xea,
+	0xbf, 0x2d, 0xf7, 0x24, 0x48, 0xed, 0x79, 0x08, 0x65, 0x5a, 0xfe, 0xf8, 0x3b, 0x12, 0x7b, 0x91,
+	0xda, 0xaf, 0x0b, 0x95, 0x01, 0x26, 0x7d, 0x21, 0x02, 0xb7, 0x64, 0x44, 0x23, 0xaf, 0x78, 0x4b,
+	0xc6, 0x36, 0xb5, 0xff, 0x87, 0x50, 0xa1, 0x35, 0x17, 0xaf, 0x01, 0xd9, 0xaa, 0x4b, 0xe9, 0x58,
+	0x74, 0x1f, 0x2a, 0xb4, 0x38, 0x62, 0x2a, 0xe5, 0x24, 0x17, 0xba, 0xf3, 0xbd, 0xca, 0xfe, 0xdc,
+	0x4e, 0x51, 0x34, 0x2e, 0xda, 0x50, 0xdc, 0xb6, 0x5b, 0x32, 0xb7, 0xb3, 0x54, 0xd1, 0x8e, 0x6b,
+	0x01, 0x9e, 0x97, 0x10, 0x4e, 0x52, 0x42, 0xa0, 0x2e, 0x65, 0xc5, 0xb3, 0xd8, 0x15, 0x02, 0x6f,
+	0x4b, 0x46, 0x10, 0x4a, 0x65, 0x71, 0x5c, 0x7e, 0xf2, 0x2c, 0x84, 0xdc, 0x96, 0xd2, 0x9e, 0x75,
+	0x29, 0xab, 0x8f, 0x47, 0x0f, 0x2e, 0x3c, 0x33, 0x6b, 0x53, 0xb3, 0xb7, 0x98, 0x5d, 0x3b, 0xb6,
+	0x6b, 0x87, 0x81, 0xcd, 0x87, 0xbf, 0x14, 0xaa, 0xdd, 0x19, 0xf1, 0xf7, 0xe8, 0xaf, 0x8f, 0x86,
+	0x6c, 0xe9, 0xcf, 0xc2, 0xcb, 0x8b, 0x4b, 0x8f, 0xa8, 0x0a, 0x7a, 0xb2, 0xc6, 0xba, 0xf5, 0xf2,
+	0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x75, 0x62, 0xa5, 0x7a, 0x22, 0x1a, 0x00, 0x00,
 }
