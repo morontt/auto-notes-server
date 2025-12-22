@@ -13,3 +13,28 @@ func GetLastPage(f PaginationPart, cntItems int) int {
 
 	return lastPage
 }
+
+type pagerFilter interface {
+	GetPage() int32
+	GetLimit() int32
+}
+
+type pager struct {
+	filter any
+}
+
+func (p *pager) GetPage() int {
+	if pf, ok := p.filter.(pagerFilter); ok {
+		return int(pf.GetPage())
+	}
+
+	return 1
+}
+
+func (p *pager) GetLimit() int {
+	if pf, ok := p.filter.(pagerFilter); ok {
+		return int(pf.GetLimit())
+	}
+
+	return 100
+}
