@@ -155,6 +155,7 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 
 		return nil, twirp.InvalidArgument.Error("invalid settings owner")
 	}
+	* Or modify UPDATE query whith setting.UserId AND settings.ID
 	*/
 
 	if settingsReq.DefaultCar.GetId() > 0 {
