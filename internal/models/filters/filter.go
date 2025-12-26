@@ -25,7 +25,9 @@ type pager struct {
 
 func (p *pager) GetPage() int {
 	if pf, ok := p.filter.(pagerFilter); ok {
-		return int(pf.GetPage())
+		if pf.GetPage() > 0 {
+			return int(pf.GetPage())
+		}
 	}
 
 	return 1
