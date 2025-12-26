@@ -9,7 +9,7 @@ import (
 
 type Mileage struct {
 	ID        uint
-	Distance  int
+	Distance  uint
 	Date      time.Time
 	Car       *Car
 	CreatedAt time.Time
