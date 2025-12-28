@@ -117,6 +117,17 @@ func (cr *CarRepositoryService) SaveMileage(ctx context.Context, mileage *pb.Mil
 		Date:     mileage.GetDate().AsTime(),
 	}
 
+	err = mileageRepo.Validate(&mileageModel)
+	if err != nil {
+		if errors.Is(err, models.InvalidMileage) {
+			return nil, twirp.InvalidArgument.Error("invalid distance")
+		}
+
+		cr.app.ServerError(ctx, err)
+
+		return nil, twirp.InternalError("internal error")
+	}
+
 	mileageID, err := mileageRepo.SaveMileage(&mileageModel)
 	if err != nil {
 		cr.app.ServerError(ctx, err)

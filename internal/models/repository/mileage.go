@@ -141,6 +141,37 @@ func (mr *MileageRepository) findMileageRow(ds *goqu.SelectDataset) (*models.Mil
 	return &obj, nil
 }
 
+func (mr *MileageRepository) Validate(obj *models.Mileage) error {
+	var dist sql.NullInt32
+	err := mr.DB.QueryRow(
+		"SELECT MIN(`distance`) FROM mileages WHERE `car_id` = ? AND `date` > ?",
+		obj.Car.ID,
+		obj.Date.Format(time.DateOnly),
+	).Scan(&dist)
+	if err != nil {
+		return err
+	}
+
+	if dist.Valid && uint(dist.Int32) < obj.Distance {
+		return models.InvalidMileage
+	}
+
+	err = mr.DB.QueryRow(
+		"SELECT MAX(`distance`) FROM mileages WHERE `car_id` = ? AND `date` < ?",
+		obj.Car.ID,
+		obj.Date.Format(time.DateOnly),
+	).Scan(&dist)
+	if err != nil {
+		return err
+	}
+
+	if dist.Valid && uint(dist.Int32) > obj.Distance {
+		return models.InvalidMileage
+	}
+
+	return nil
+}
+
 func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
 	data := goqu.Record{}
 
@@ -149,8 +180,6 @@ func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
 
 	if obj.Car != nil {
 		data["car_id"] = obj.Car.ID
-	} else {
-		data["car_id"] = nil
 	}
 
 	var ds exp.SQLExpression
