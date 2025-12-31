@@ -33,9 +33,7 @@ func (or *OrderRepositoryService) GetOrders(ctx context.Context, pbFilter *pb.Or
 	repo := repository.OrderRepository{DB: or.app.DB}
 	dbOrders, cntOrders, err := repo.GetOrdersByUser(user.ID, filter)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	if pageOutOfRange(filter, cntOrders) {
@@ -68,13 +66,7 @@ func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdReq
 	if idReq.GetId() > 0 {
 		ownerId, err := repo.OrderOwner(uint(idReq.GetId()))
 		if err != nil {
-			if errors.Is(err, models.RecordNotFound) {
-				return nil, twirp.NotFound.Error("order not found")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
-			}
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 		if ownerId != user.ID {
 			return nil, twirp.InvalidArgument.Error("invalid order owner")
@@ -85,9 +77,7 @@ func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdReq
 
 	dbOrder, err := repo.Find(uint(idReq.GetId()))
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	return dbOrder.ToRpcMessage(), nil
@@ -102,9 +92,7 @@ func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.
 	repo := repository.OrderRepository{DB: or.app.DB}
 	dbTypes, err := repo.GetOrderTypes()
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	types := make([]*pb.OrderType, 0, len(dbTypes))
@@ -141,13 +129,7 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 	if order.GetId() > 0 {
 		ownerId, err := orderRepo.OrderOwner(uint(order.GetId()))
 		if err != nil {
-			if errors.Is(err, models.RecordNotFound) {
-				return nil, twirp.NotFound.Error("order not found")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
-			}
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 		if ownerId != user.ID {
 			return nil, twirp.InvalidArgument.Error("invalid order owner")
@@ -160,11 +142,9 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 		if err != nil {
 			if errors.Is(err, models.RecordNotFound) {
 				return nil, twirp.InvalidArgument.Error("invalid order type")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
 			}
+
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 	}
 
@@ -173,11 +153,9 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
 			return nil, twirp.InvalidArgument.Error("invalid currency")
-		} else {
-			or.app.ServerError(ctx, err)
-
-			return nil, twirp.InternalError("internal error")
 		}
+
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	var car *models.Car
@@ -187,11 +165,9 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 		if err != nil {
 			if errors.Is(err, models.RecordNotFound) {
 				return nil, twirp.InvalidArgument.Error("invalid car")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
 			}
+
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 
 		if car.UserID != user.ID {
@@ -239,16 +215,12 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 
 	orderID, err := orderRepo.SaveOrder(&orderModel, user.ID)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	dbOrder, err := orderRepo.Find(orderID)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	return dbOrder.ToRpcMessage(), nil
@@ -265,9 +237,7 @@ func (or *OrderRepositoryService) GetExpenses(ctx context.Context, pbFilter *pb.
 	repo := repository.ExpenseRepository{DB: or.app.DB}
 	dbExpenses, cntExpenses, err := repo.GetExpensesByUser(user.ID, filter)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	if pageOutOfRange(filter, cntExpenses) {
@@ -300,13 +270,7 @@ func (or *OrderRepositoryService) FindExpense(ctx context.Context, idReq *pb.IdR
 	if idReq.GetId() > 0 {
 		ownerId, err := repo.ExpenseOwner(uint(idReq.GetId()))
 		if err != nil {
-			if errors.Is(err, models.RecordNotFound) {
-				return nil, twirp.NotFound.Error("expense not found")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
-			}
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 		if ownerId != user.ID {
 			return nil, twirp.InvalidArgument.Error("invalid expense owner")
@@ -317,9 +281,7 @@ func (or *OrderRepositoryService) FindExpense(ctx context.Context, idReq *pb.IdR
 
 	dbExpense, err := repo.Find(uint(idReq.GetId()))
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	return dbExpense.ToRpcMessage(), nil
@@ -348,13 +310,7 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 	if expense.GetId() > 0 {
 		ownerId, err := expenseRepo.ExpenseOwner(uint(expense.GetId()))
 		if err != nil {
-			if errors.Is(err, models.RecordNotFound) {
-				return nil, twirp.NotFound.Error("order not found")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
-			}
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 		if ownerId != user.ID {
 			return nil, twirp.InvalidArgument.Error("invalid expense owner")
@@ -366,11 +322,9 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
 			return nil, twirp.InvalidArgument.Error("invalid currency")
-		} else {
-			or.app.ServerError(ctx, err)
-
-			return nil, twirp.InternalError("internal error")
 		}
+
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	var car *models.Car
@@ -380,11 +334,9 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 		if err != nil {
 			if errors.Is(err, models.RecordNotFound) {
 				return nil, twirp.InvalidArgument.Error("invalid car")
-			} else {
-				or.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
 			}
+
+			return nil, toTwirpError(or.app, err, ctx)
 		}
 
 		if car.UserID != user.ID {
@@ -406,16 +358,12 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 
 	expenseID, err := expenseRepo.SaveExpense(&expenseModel, user.ID)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	dbExpense, err := expenseRepo.Find(expenseID)
 	if err != nil {
-		or.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(or.app, err, ctx)
 	}
 
 	return dbExpense.ToRpcMessage(), nil

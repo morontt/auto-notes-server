@@ -240,3 +240,8 @@ service CarRepository {
   rpc GetMileages(MileageFilter) returns (MileageCollection);
   rpc SaveMileage(Mileage) returns (Mileage);
 }
+
+enum ErrorCode {
+  E001 = 0; // record not found
+  E002 = 1; // invalid mileage
+}

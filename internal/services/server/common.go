@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 
+	"github.com/twitchtv/twirp"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/security"
+	pb "xelbot.com/auto-notes/server/rpc/server"
 )
 
 var UnAuthenticated = errors.New("services: unauthenticated")
@@ -34,4 +37,16 @@ func pageOutOfRange(filter filters.PaginationPart, cntItems int) bool {
 	}
 
 	return false
+}
+
+func toTwirpError(app application.Container, err error, ctx context.Context) error {
+	if errors.Is(err, models.RecordNotFound) {
+		return twirp.NotFound.Error(pb.ErrorCode_E001.String() + ": record not found")
+	} else if errors.Is(err, models.InvalidMileage) {
+		return twirp.InvalidArgument.Error(pb.ErrorCode_E002.String() + ": invalid distance")
+	}
+
+	app.ServerError(ctx, err)
+
+	return twirp.InternalError("internal error")
 }

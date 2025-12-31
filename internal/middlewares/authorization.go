@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kataras/jwt"
+	"github.com/twitchtv/twirp"
 	"xelbot.com/auto-notes/server/internal/application"
 	"xelbot.com/auto-notes/server/internal/security"
 )
@@ -54,8 +55,5 @@ func WithAuthorization(app application.Container, next http.Handler) http.Handle
 }
 
 func forbidden(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusForbidden)
-
-	_, _ = w.Write([]byte("Who are you?"))
+	twirp.WriteError(w, twirp.PermissionDenied.Error("Who are you?"))
 }

@@ -39,9 +39,7 @@ func (cr *CarRepositoryService) GetMileages(ctx context.Context, pbFilter *pb.Mi
 	repo := repository.MileageRepository{DB: cr.app.DB}
 	dbTypes, cntItems, err := repo.GetMileagesByUser(user.ID, filter)
 	if err != nil {
-		cr.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(cr.app, err, ctx)
 	}
 
 	if pageOutOfRange(filter, cntItems) {
@@ -77,11 +75,9 @@ func (cr *CarRepositoryService) SaveMileage(ctx context.Context, mileage *pb.Mil
 		if err != nil {
 			if errors.Is(err, models.RecordNotFound) {
 				return nil, twirp.InvalidArgument.Error("invalid car")
-			} else {
-				cr.app.ServerError(ctx, err)
-
-				return nil, twirp.InternalError("internal error")
 			}
+
+			return nil, toTwirpError(cr.app, err, ctx)
 		}
 
 		if car.UserID != user.ID {
@@ -101,9 +97,7 @@ func (cr *CarRepositoryService) SaveMileage(ctx context.Context, mileage *pb.Mil
 			mileage.GetDate().AsTime(),
 		)
 		if err != nil && !errors.Is(err, models.RecordNotFound) {
-			cr.app.ServerError(ctx, err)
-
-			return nil, twirp.InternalError("internal error")
+			return nil, toTwirpError(cr.app, err, ctx)
 		}
 		if dbItem != nil {
 			return dbItem.ToRpcMessage(), nil
@@ -119,27 +113,17 @@ func (cr *CarRepositoryService) SaveMileage(ctx context.Context, mileage *pb.Mil
 
 	err = mileageRepo.Validate(&mileageModel)
 	if err != nil {
-		if errors.Is(err, models.InvalidMileage) {
-			return nil, twirp.InvalidArgument.Error("invalid distance")
-		}
-
-		cr.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(cr.app, err, ctx)
 	}
 
 	mileageID, err := mileageRepo.SaveMileage(&mileageModel)
 	if err != nil {
-		cr.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(cr.app, err, ctx)
 	}
 
 	dbItem, err = mileageRepo.Find(mileageID)
 	if err != nil {
-		cr.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(cr.app, err, ctx)
 	}
 
 	return dbItem.ToRpcMessage(), nil

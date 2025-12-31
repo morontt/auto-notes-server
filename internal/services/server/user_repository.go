@@ -30,9 +30,7 @@ func (ur *UserRepositoryService) GetCars(ctx context.Context, _ *emptypb.Empty) 
 	repo := repository.CarRepository{DB: ur.app.DB}
 	dbCars, err := repo.GetCarsByUser(user.ID)
 	if err != nil {
-		ur.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(ur.app, err, ctx)
 	}
 
 	cars := make([]*pb.Car, 0, len(dbCars))
@@ -68,9 +66,7 @@ func (ur *UserRepositoryService) GetCurrencies(ctx context.Context, _ *emptypb.E
 	repo := repository.CurrencyRepository{DB: ur.app.DB}
 	dbCurrencies, err := repo.GetCurrencies(user.ID)
 	if err != nil {
-		ur.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(ur.app, err, ctx)
 	}
 
 	currencies := make([]*pb.Currency, 0, len(dbCurrencies))
@@ -100,9 +96,7 @@ func (ur *UserRepositoryService) GetDefaultCurrency(ctx context.Context, _ *empt
 	repo := repository.CurrencyRepository{DB: ur.app.DB}
 	dbCurrencies, err := repo.GetCurrencies(user.ID)
 	if err != nil {
-		ur.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(ur.app, err, ctx)
 	}
 
 	result := &pb.DefaultCurrency{}
@@ -173,9 +167,7 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 
 	err = repo.SaveUserSettings(&settings, user.ID)
 	if err != nil {
-		ur.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(ur.app, err, ctx)
 	}
 
 	return ur.userSettingsFromDB(ctx, user.ID)
@@ -191,9 +183,7 @@ func (ur *UserRepositoryService) userSettingsFromDB(ctx context.Context, userID 
 			return &pb.UserSettings{}, nil
 		}
 
-		ur.app.ServerError(ctx, err)
-
-		return nil, twirp.InternalError("internal error")
+		return nil, toTwirpError(ur.app, err, ctx)
 	}
 
 	settings := pb.UserSettings{
