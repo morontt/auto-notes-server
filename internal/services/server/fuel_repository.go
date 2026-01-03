@@ -181,6 +181,15 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		}
 	}
 
+	var mileage *models.Mileage
+	if fuel.Distance > 0 && car != nil {
+		mileageRepo := repository.MileageRepository{DB: fr.app.DB}
+		mileage, err = mileageRepo.FindOrCreate(uint(fuel.Distance), car.ID, fuel.Date.AsTime())
+		if err != nil {
+			return nil, toTwirpError(fr.app, err, ctx)
+		}
+	}
+
 	fuelModel := models.Fuel{
 		ID:  uint(fuel.GetId()),
 		Car: car,
@@ -196,6 +205,7 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		Type: models.FuelType{
 			ID: fuelType.ID,
 		},
+		Mileage: mileage,
 	}
 
 	fuelID, err := fuelRepo.SaveFuel(&fuelModel, user.ID)

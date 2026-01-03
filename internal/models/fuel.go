@@ -26,6 +26,7 @@ type Fuel struct {
 	Station   FillingStation
 	Date      time.Time
 	Distance  sql.NullInt32
+	Mileage   *Mileage
 	Car       *Car
 	Type      FuelType
 	CreatedAt time.Time

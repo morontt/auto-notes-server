@@ -28,7 +28,7 @@ func (mr *MileageRepository) GetMileagesByUser(userID uint, filter *filters.Mile
 	}
 
 	ds := milageListQueryExpression(userID, filter)
-	ds = ds.Order(goqu.I("m.date").Desc(), goqu.I("m.id").Desc())
+	ds = ds.Order(goqu.I("m.date").Desc(), goqu.I("m.distance").Desc())
 
 	if filter.GetLimit() > 0 {
 		ds = ds.Limit(uint(filter.GetLimit()))
@@ -209,6 +209,41 @@ func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
 	}
 
 	return obj.ID, nil
+}
+
+func (mr *MileageRepository) FindOrCreate(distance, carId uint, dt time.Time) (*models.Mileage, error) {
+	var mileageModel *models.Mileage
+	mileageModel, err := mr.FindUniq(
+		distance,
+		carId,
+		dt,
+	)
+	if err != nil && !errors.Is(err, models.RecordNotFound) {
+		return nil, err
+	}
+	if mileageModel != nil {
+		return mileageModel, nil
+	}
+
+	mileageModel = &models.Mileage{
+		Car: &models.Car{
+			ID: carId,
+		},
+		Distance: distance,
+		Date:     dt,
+	}
+
+	err = mr.Validate(mileageModel)
+	if err != nil {
+		return nil, err
+	}
+
+	mileageModel.ID, err = mr.SaveMileage(mileageModel)
+	if err != nil {
+		return nil, err
+	}
+
+	return mileageModel, nil
 }
 
 func milageListQueryExpression(userID uint, _ *filters.MileageFilter) *goqu.SelectDataset {

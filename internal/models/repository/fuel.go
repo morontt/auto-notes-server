@@ -202,6 +202,12 @@ func (fr *FuelRepository) SaveFuel(obj *models.Fuel, userId uint) (uint, error) 
 		data["car_id"] = nil
 	}
 
+	if obj.Mileage != nil {
+		data["mileage_id"] = obj.Mileage.ID
+	} else {
+		data["mileage_id"] = nil
+	}
+
 	var ds exp.SQLExpression
 	if obj.ID == 0 {
 		data["user_id"] = userId
