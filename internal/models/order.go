@@ -21,6 +21,7 @@ type Order struct {
 	Date        time.Time
 	UsedAt      sql.NullTime
 	Distance    sql.NullInt32
+	Mileage     *Mileage
 	Car         *Car
 	Type        *OrderType
 	CreatedAt   time.Time

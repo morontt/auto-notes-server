@@ -271,6 +271,12 @@ func (or *OrderRepository) SaveOrder(obj *models.Order, userId uint) (uint, erro
 		data["used_at"] = nil
 	}
 
+	if obj.Mileage != nil {
+		data["mileage_id"] = obj.Mileage.ID
+	} else {
+		data["mileage_id"] = nil
+	}
+
 	var ds exp.SQLExpression
 	if obj.ID == 0 {
 		data["user_id"] = userId

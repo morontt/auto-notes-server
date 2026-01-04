@@ -175,9 +175,14 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 		}
 	}
 
-	/*
-		Distance    sql.NullInt32
-	*/
+	var mileage *models.Mileage
+	if order.Distance > 0 && car != nil && order.GetUsedAt() != nil {
+		mileageRepo := repository.MileageRepository{DB: or.app.DB}
+		mileage, err = mileageRepo.FindOrCreate(uint(order.Distance), car.ID, order.GetUsedAt().AsTime())
+		if err != nil {
+			return nil, toTwirpError(or.app, err, ctx)
+		}
+	}
 
 	var capacity sql.NullString
 	if order.GetCapacity() == "" {
@@ -211,6 +216,7 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 		Date:        order.Date.AsTime(),
 		Type:        orderType,
 		UsedAt:      usedAt,
+		Mileage:     mileage,
 	}
 
 	orderID, err := orderRepo.SaveOrder(&orderModel, user.ID)
