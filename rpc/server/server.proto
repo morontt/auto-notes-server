@@ -222,6 +222,7 @@ message Service {
   google.protobuf.Timestamp date = 4;
   Car car = 5;
   google.protobuf.Timestamp created_at = 6;
+  int32 distance = 7;
 }
 
 message ServiceCollection {
@@ -236,6 +237,7 @@ message ServiceFilter {
 
 service CarRepository {
   rpc GetServices(ServiceFilter) returns (ServiceCollection);
+  rpc FindService(IdRequest) returns (Service);
   rpc SaveService(Service) returns (Service);
   rpc GetMileages(MileageFilter) returns (MileageCollection);
   rpc SaveMileage(Mileage) returns (Mileage);

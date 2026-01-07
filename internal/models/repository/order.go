@@ -80,19 +80,17 @@ func (or *OrderRepository) GetOrdersByUser(userID uint, filter *filters.OrderFil
 		}
 
 		if carFields.ID.Valid {
-			car := models.Car{
+			obj.Car = &models.Car{
 				ID:    uint(carFields.ID.Int32),
 				Brand: carFields.Brand.String,
 				Model: carFields.Model.String,
 			}
-			obj.Car = &car
 		}
 		if typeFields.ID.Valid {
-			orderType := models.OrderType{
+			obj.Type = &models.OrderType{
 				ID:   uint(typeFields.ID.Int32),
 				Name: typeFields.Name.String,
 			}
-			obj.Type = &orderType
 		}
 
 		items = append(items, &obj)
@@ -143,19 +141,17 @@ func (or *OrderRepository) Find(id uint) (*models.Order, error) {
 	}
 
 	if carFields.ID.Valid {
-		car := models.Car{
+		obj.Car = &models.Car{
 			ID:    uint(carFields.ID.Int32),
 			Brand: carFields.Brand.String,
 			Model: carFields.Model.String,
 		}
-		obj.Car = &car
 	}
 	if typeFields.ID.Valid {
-		orderType := models.OrderType{
+		obj.Type = &models.OrderType{
 			ID:   uint(typeFields.ID.Int32),
 			Name: typeFields.Name.String,
 		}
-		obj.Type = &orderType
 	}
 
 	return &obj, nil

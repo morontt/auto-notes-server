@@ -20,7 +20,41 @@ func NewCarRepositoryService(app application.Container) *CarRepositoryService {
 	return &CarRepositoryService{app: app}
 }
 
-func (cr *CarRepositoryService) GetServices(context.Context, *pb.ServiceFilter) (*pb.ServiceCollection, error) {
+func (cr *CarRepositoryService) GetServices(ctx context.Context, pbFilter *pb.ServiceFilter) (*pb.ServiceCollection, error) {
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	filter := filters.NewServiceFilter(pbFilter)
+
+	repo := repository.ServiceRepository{DB: cr.app.DB}
+	dbItems, cntItems, err := repo.GetServicesByUser(user.ID, filter)
+	if err != nil {
+		return nil, toTwirpError(cr.app, err, ctx)
+	}
+
+	if pageOutOfRange(filter, cntItems) {
+		return nil, twirp.NotFoundError("services not found")
+	}
+
+	items := make([]*pb.Service, 0, len(dbItems))
+	for _, dbItem := range dbItems {
+		items = append(items, dbItem.ToRpcMessage())
+	}
+
+	cr.app.Info("CarRepositoryService: populate services", ctx, "cnt", len(dbItems))
+
+	return &pb.ServiceCollection{
+		Services: items,
+		Meta: &pb.PaginationMeta{
+			Current: int32(filter.GetPage()),
+			Last:    int32(filters.GetLastPage(filter, cntItems)),
+		},
+	}, nil
+}
+
+func (cr *CarRepositoryService) FindService(context.Context, *pb.IdRequest) (*pb.Service, error) {
 	return nil, twirp.InternalError("not implemented")
 }
 
