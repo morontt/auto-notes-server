@@ -75,12 +75,12 @@ func (or *OrderRepositoryService) FindOrder(ctx context.Context, idReq *pb.IdReq
 		return nil, twirp.InvalidArgument.Error("invalid id")
 	}
 
-	dbOrder, err := repo.Find(uint(idReq.GetId()))
+	dbItem, err := repo.Find(uint(idReq.GetId()))
 	if err != nil {
 		return nil, toTwirpError(or.app, err, ctx)
 	}
 
-	return dbOrder.ToRpcMessage(), nil
+	return dbItem.ToRpcMessage(), nil
 }
 
 func (or *OrderRepositoryService) GetOrderTypes(ctx context.Context, _ *emptypb.Empty) (*pb.OrderTypeCollection, error) {
@@ -285,12 +285,12 @@ func (or *OrderRepositoryService) FindExpense(ctx context.Context, idReq *pb.IdR
 		return nil, twirp.InvalidArgument.Error("invalid id")
 	}
 
-	dbExpense, err := repo.Find(uint(idReq.GetId()))
+	dbItem, err := repo.Find(uint(idReq.GetId()))
 	if err != nil {
 		return nil, toTwirpError(or.app, err, ctx)
 	}
 
-	return dbExpense.ToRpcMessage(), nil
+	return dbItem.ToRpcMessage(), nil
 }
 
 func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.Expense) (*pb.Expense, error) {

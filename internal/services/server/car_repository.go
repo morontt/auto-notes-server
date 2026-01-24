@@ -54,12 +54,115 @@ func (cr *CarRepositoryService) GetServices(ctx context.Context, pbFilter *pb.Se
 	}, nil
 }
 
-func (cr *CarRepositoryService) FindService(context.Context, *pb.IdRequest) (*pb.Service, error) {
-	return nil, twirp.InternalError("not implemented")
+func (cr *CarRepositoryService) FindService(ctx context.Context, idReq *pb.IdRequest) (*pb.Service, error) {
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	repo := repository.ServiceRepository{DB: cr.app.DB}
+	if idReq.GetId() > 0 {
+		ownerId, err := repo.ServiceOwner(uint(idReq.GetId()))
+		if err != nil {
+			return nil, toTwirpError(cr.app, err, ctx)
+		}
+		if ownerId != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid service owner")
+		}
+	} else {
+		return nil, twirp.InvalidArgument.Error("invalid id")
+	}
+
+	dbItem, err := repo.Find(uint(idReq.GetId()))
+	if err != nil {
+		return nil, toTwirpError(cr.app, err, ctx)
+	}
+
+	return dbItem.ToRpcMessage(), nil
 }
 
-func (cr *CarRepositoryService) SaveService(context.Context, *pb.Service) (*pb.Service, error) {
-	return nil, twirp.InternalError("not implemented")
+func (cr *CarRepositoryService) SaveService(ctx context.Context, service *pb.Service) (*pb.Service, error) {
+	user, err := userClaimsFromContext(ctx)
+	if err != nil {
+		return nil, twirp.Unauthenticated.Error(err.Error())
+	}
+
+	if service.GetDate() == nil {
+		return nil, twirp.InvalidArgument.Error("date is required")
+	}
+
+	var cost *models.Cost
+	if service.Cost.GetValue() > 0 {
+		currencyCode := service.Cost.GetCurrency()
+		if currencyCode == "" {
+			return nil, twirp.InvalidArgument.Error("empty currency code")
+		}
+
+		currencyRepo := repository.CurrencyRepository{DB: cr.app.DB}
+		currency, err := currencyRepo.GetCurrencyByCode(currencyCode)
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid currency")
+			}
+
+			return nil, toTwirpError(cr.app, err, ctx)
+		}
+
+		cost = &models.Cost{
+			Value:      service.Cost.GetValue(),
+			CurrencyID: currency.ID,
+		}
+	}
+
+	var car *models.Car
+	if service.Car.GetId() > 0 {
+		carRepo := repository.CarRepository{DB: cr.app.DB}
+		car, err = carRepo.Find(uint(service.Car.GetId()))
+		if err != nil {
+			if errors.Is(err, models.RecordNotFound) {
+				return nil, twirp.InvalidArgument.Error("invalid car")
+			}
+
+			return nil, toTwirpError(cr.app, err, ctx)
+		}
+
+		if car.UserID != user.ID {
+			return nil, twirp.InvalidArgument.Error("invalid car owner")
+		}
+	} else {
+		return nil, twirp.InvalidArgument.Error("car is required")
+	}
+
+	var mileage *models.Mileage
+	if service.Distance > 0 && car != nil && service.GetDate() != nil {
+		mileageRepo := repository.MileageRepository{DB: cr.app.DB}
+		mileage, err = mileageRepo.FindOrCreate(uint(service.Distance), car.ID, service.GetDate().AsTime())
+		if err != nil {
+			return nil, toTwirpError(cr.app, err, ctx)
+		}
+	}
+
+	serviceModel := models.Service{
+		ID:          uint(service.GetId()),
+		Car:         car,
+		Cost:        cost,
+		Description: service.GetDescription(),
+		Date:        service.Date.AsTime(),
+		Mileage:     mileage,
+	}
+
+	repo := repository.ServiceRepository{DB: cr.app.DB}
+	serviceID, err := repo.SaveService(&serviceModel, user.ID)
+	if err != nil {
+		return nil, toTwirpError(cr.app, err, ctx)
+	}
+
+	dbItem, err := repo.Find(serviceID)
+	if err != nil {
+		return nil, toTwirpError(cr.app, err, ctx)
+	}
+
+	return dbItem.ToRpcMessage(), nil
 }
 
 func (cr *CarRepositoryService) GetMileages(ctx context.Context, pbFilter *pb.MileageFilter) (*pb.MileageCollection, error) {

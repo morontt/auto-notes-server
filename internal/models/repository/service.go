@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
@@ -95,7 +96,7 @@ func (sr *ServiceRepository) GetServicesByUser(userID uint, filter *filters.Serv
 }
 
 func (sr *ServiceRepository) Find(id uint) (*models.Service, error) {
-	ds := orderQueryExpression()
+	ds := serviceQueryExpression()
 
 	ds = ds.Where(goqu.Ex{"s.id": id})
 	query, params, _ := ds.Prepared(true).ToSQL()
@@ -175,8 +176,13 @@ func (sr *ServiceRepository) SaveService(obj *models.Service, userId uint) (uint
 	data["date"] = obj.Date.Format(time.DateOnly)
 	data["description"] = obj.Description
 
-	//data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Cost.Value))
-	//data["currency_id"] = obj.Cost.CurrencyID
+	if obj.Cost != nil {
+		data["cost"] = fmt.Sprintf("%.2f", 0.01*float64(obj.Cost.Value))
+		data["currency_id"] = obj.Cost.CurrencyID
+	} else {
+		data["cost"] = nil
+		data["currency_id"] = nil
+	}
 
 	if obj.Car != nil {
 		data["car_id"] = obj.Car.ID
