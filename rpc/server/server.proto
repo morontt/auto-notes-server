@@ -109,6 +109,7 @@ service UserRepository {
 message FuelFilter {
   int32 limit = 1;
   int32 page = 2;
+  int32 car_id = 3;
 }
 
 message IdRequest {
@@ -180,11 +181,13 @@ message ExpenseCollection {
 message OrderFilter {
   int32 limit = 1;
   int32 page = 2;
+  int32 car_id = 3;
 }
 
 message ExpenseFilter {
   int32 limit = 1;
   int32 page = 2;
+  int32 car_id = 3;
 }
 
 service OrderRepository {
@@ -200,6 +203,7 @@ service OrderRepository {
 message MileageFilter {
   int32 limit = 1;
   int32 page = 2;
+  int32 car_id = 3;
 }
 
 message Mileage {
@@ -233,6 +237,7 @@ message ServiceCollection {
 message ServiceFilter {
   int32 limit = 1;
   int32 page = 2;
+  int32 car_id = 3;
 }
 
 service CarRepository {

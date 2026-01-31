@@ -303,12 +303,18 @@ func (or *OrderRepository) SaveOrder(obj *models.Order, userId uint) (uint, erro
 	return obj.ID, nil
 }
 
-func orderListQueryExpression(userID uint, _ *filters.OrderFilter) *goqu.SelectDataset {
+func orderListQueryExpression(userID uint, filter *filters.OrderFilter) *goqu.SelectDataset {
 	ds := orderQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"o.user_id": userID,
 	})
+
+	if filter.HasCarId() {
+		ds = ds.Where(goqu.Ex{
+			"o.car_id": filter.GetCarId(),
+		})
+	}
 
 	return ds
 }

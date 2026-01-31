@@ -225,12 +225,18 @@ func (sr *ServiceRepository) SaveService(obj *models.Service, userId uint) (uint
 	return obj.ID, nil
 }
 
-func serviceListQueryExpression(userID uint, _ *filters.ServiceFilter) *goqu.SelectDataset {
+func serviceListQueryExpression(userID uint, filter *filters.ServiceFilter) *goqu.SelectDataset {
 	ds := serviceQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"c.user_id": userID,
 	})
+
+	if filter.HasCarId() {
+		ds = ds.Where(goqu.Ex{
+			"s.car_id": filter.GetCarId(),
+		})
+	}
 
 	return ds
 }

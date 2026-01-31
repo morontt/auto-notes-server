@@ -246,12 +246,18 @@ func (mr *MileageRepository) FindOrCreate(distance, carId uint, dt time.Time) (*
 	return mileageModel, nil
 }
 
-func milageListQueryExpression(userID uint, _ *filters.MileageFilter) *goqu.SelectDataset {
+func milageListQueryExpression(userID uint, filter *filters.MileageFilter) *goqu.SelectDataset {
 	ds := mileageQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"c.user_id": userID,
 	})
+
+	if filter.HasCarId() {
+		ds = ds.Where(goqu.Ex{
+			"m.car_id": filter.GetCarId(),
+		})
+	}
 
 	return ds
 }

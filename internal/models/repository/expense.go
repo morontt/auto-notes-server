@@ -196,12 +196,18 @@ func (er *ExpenseRepository) SaveExpense(obj *models.Expense, userId uint) (uint
 	return obj.ID, nil
 }
 
-func expenseListQueryExpression(userID uint, _ *filters.ExpenseFilter) *goqu.SelectDataset {
+func expenseListQueryExpression(userID uint, filter *filters.ExpenseFilter) *goqu.SelectDataset {
 	ds := expenseQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"e.user_id": userID,
 	})
+
+	if filter.HasCarId() {
+		ds = ds.Where(goqu.Ex{
+			"e.car_id": filter.GetCarId(),
+		})
+	}
 
 	return ds
 }

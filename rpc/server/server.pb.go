@@ -992,6 +992,7 @@ type FuelFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1036,6 +1037,13 @@ func (x *FuelFilter) GetLimit() int32 {
 func (x *FuelFilter) GetPage() int32 {
 	if x != nil {
 		return x.Page
+	}
+	return 0
+}
+
+func (x *FuelFilter) GetCarId() int32 {
+	if x != nil {
+		return x.CarId
 	}
 	return 0
 }
@@ -1496,6 +1504,7 @@ type OrderFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1544,10 +1553,18 @@ func (x *OrderFilter) GetPage() int32 {
 	return 0
 }
 
+func (x *OrderFilter) GetCarId() int32 {
+	if x != nil {
+		return x.CarId
+	}
+	return 0
+}
+
 type ExpenseFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1596,10 +1613,18 @@ func (x *ExpenseFilter) GetPage() int32 {
 	return 0
 }
 
+func (x *ExpenseFilter) GetCarId() int32 {
+	if x != nil {
+		return x.CarId
+	}
+	return 0
+}
+
 type MileageFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1644,6 +1669,13 @@ func (x *MileageFilter) GetLimit() int32 {
 func (x *MileageFilter) GetPage() int32 {
 	if x != nil {
 		return x.Page
+	}
+	return 0
+}
+
+func (x *MileageFilter) GetCarId() int32 {
+	if x != nil {
+		return x.CarId
 	}
 	return 0
 }
@@ -1924,6 +1956,7 @@ type ServiceFilter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1968,6 +2001,13 @@ func (x *ServiceFilter) GetLimit() int32 {
 func (x *ServiceFilter) GetPage() int32 {
 	if x != nil {
 		return x.Page
+	}
+	return 0
+}
+
+func (x *ServiceFilter) GetCarId() int32 {
+	if x != nil {
+		return x.CarId
 	}
 	return 0
 }
@@ -2042,11 +2082,12 @@ const file_server_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12Q\n" +
-	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\"6\n" +
+	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\"M\n" +
 	"\n" +
 	"FuelFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\"\x1b\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"\x1b\n" +
 	"\tIdRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"/\n" +
 	"\tOrderType\x12\x0e\n" +
@@ -2081,16 +2122,19 @@ const file_server_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x96\x01\n" +
 	"\x11ExpenseCollection\x12@\n" +
 	"\bexpenses\x18\x01 \x03(\v2$.xelbot.com.autonotes.server.ExpenseR\bexpenses\x12?\n" +
-	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"7\n" +
+	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"N\n" +
 	"\vOrderFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\"9\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"P\n" +
 	"\rExpenseFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\"9\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"P\n" +
 	"\rMileageFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\"\xd4\x01\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"\xd4\x01\n" +
 	"\aMileage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1a\n" +
 	"\bdistance\x18\x02 \x01(\x05R\bdistance\x12.\n" +
@@ -2112,10 +2156,11 @@ const file_server_proto_rawDesc = "" +
 	"\bdistance\x18\a \x01(\x05R\bdistance\"\x96\x01\n" +
 	"\x11ServiceCollection\x12@\n" +
 	"\bservices\x18\x01 \x03(\v2$.xelbot.com.autonotes.server.ServiceR\bservices\x12?\n" +
-	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"9\n" +
+	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"P\n" +
 	"\rServiceFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page*v\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId*v\n" +
 	"\vExpenseType\x12\t\n" +
 	"\x05EMPTY\x10\x00\x12\n" +
 	"\n" +

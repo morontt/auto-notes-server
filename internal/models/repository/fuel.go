@@ -306,12 +306,18 @@ func (fr *FuelRepository) GetFuelTypes() ([]*models.FuelType, error) {
 	return items, nil
 }
 
-func fuelListQueryExpression(userID uint, _ *filters.FuelFilter) *goqu.SelectDataset {
+func fuelListQueryExpression(userID uint, filter *filters.FuelFilter) *goqu.SelectDataset {
 	ds := fuelQueryExpression()
 
 	ds = ds.Where(goqu.Ex{
 		"f.user_id": userID,
 	})
+
+	if filter.HasCarId() {
+		ds = ds.Where(goqu.Ex{
+			"f.car_id": filter.GetCarId(),
+		})
+	}
 
 	return ds
 }

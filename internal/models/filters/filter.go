@@ -19,11 +19,15 @@ type pagerFilter interface {
 	GetLimit() int32
 }
 
-type pager struct {
+type carPart interface {
+	GetCarId() int32
+}
+
+type commonPart struct {
 	filter any
 }
 
-func (p *pager) GetPage() int {
+func (p *commonPart) GetPage() int {
 	if pf, ok := p.filter.(pagerFilter); ok {
 		if pf.GetPage() > 0 {
 			return int(pf.GetPage())
@@ -33,10 +37,26 @@ func (p *pager) GetPage() int {
 	return 1
 }
 
-func (p *pager) GetLimit() int {
+func (p *commonPart) GetLimit() int {
 	if pf, ok := p.filter.(pagerFilter); ok {
 		return int(pf.GetLimit())
 	}
 
 	return 100
+}
+
+func (p *commonPart) HasCarId() bool {
+	if pf, ok := p.filter.(carPart); ok {
+		return pf.GetCarId() > 0
+	}
+
+	return false
+}
+
+func (p *commonPart) GetCarId() uint {
+	if pf, ok := p.filter.(carPart); ok {
+		return uint(pf.GetCarId())
+	}
+
+	return 0
 }

@@ -4,12 +4,12 @@ import pb "xelbot.com/auto-notes/server/rpc/server"
 
 type FuelFilter struct {
 	pbFilter *pb.FuelFilter
-	pager
+	commonPart
 }
 
 func NewFuelFilter(f *pb.FuelFilter) *FuelFilter {
 	return &FuelFilter{
-		pbFilter: f,
-		pager:    pager{filter: f},
+		pbFilter:   f,
+		commonPart: commonPart{filter: f},
 	}
 }
