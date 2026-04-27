@@ -136,7 +136,7 @@ func (cr *CarRepositoryService) SaveService(ctx context.Context, service *pb.Ser
 	var mileage *models.Mileage
 	if service.Distance > 0 && car != nil && service.GetDate() != nil {
 		mileageRepo := repository.MileageRepository{DB: cr.app.DB}
-		mileage, err = mileageRepo.FindOrCreate(uint(service.Distance), car.ID, service.GetDate().AsTime())
+		mileage, err = mileageRepo.FindOrCreate(ctx, uint(service.Distance), car.ID, service.GetDate().AsTime())
 		if err != nil {
 			return nil, toTwirpError(cr.app, err, ctx)
 		}
@@ -152,7 +152,7 @@ func (cr *CarRepositoryService) SaveService(ctx context.Context, service *pb.Ser
 	}
 
 	repo := repository.ServiceRepository{DB: cr.app.DB}
-	serviceID, err := repo.SaveService(&serviceModel, user.ID)
+	serviceID, err := repo.SaveService(ctx, &serviceModel, user.ID)
 	if err != nil {
 		return nil, toTwirpError(cr.app, err, ctx)
 	}
@@ -253,7 +253,7 @@ func (cr *CarRepositoryService) SaveMileage(ctx context.Context, mileage *pb.Mil
 		return nil, toTwirpError(cr.app, err, ctx)
 	}
 
-	mileageID, err := mileageRepo.SaveMileage(&mileageModel)
+	mileageID, err := mileageRepo.SaveMileage(ctx, &mileageModel)
 	if err != nil {
 		return nil, toTwirpError(cr.app, err, ctx)
 	}

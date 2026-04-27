@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -172,7 +173,7 @@ func (mr *MileageRepository) Validate(obj *models.Mileage) error {
 	return nil
 }
 
-func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
+func (mr *MileageRepository) SaveMileage(ctx context.Context, obj *models.Mileage) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = obj.Date.Format(time.DateOnly)
@@ -194,7 +195,7 @@ func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
 		return 0, err
 	}
 
-	res, err := mr.DB.Exec(query)
+	res, err := mr.DB.ExecContext(ctx, query)
 	if err != nil {
 		return 0, err
 	}
@@ -211,7 +212,7 @@ func (mr *MileageRepository) SaveMileage(obj *models.Mileage) (uint, error) {
 	return obj.ID, nil
 }
 
-func (mr *MileageRepository) FindOrCreate(distance, carId uint, dt time.Time) (*models.Mileage, error) {
+func (mr *MileageRepository) FindOrCreate(ctx context.Context, distance, carId uint, dt time.Time) (*models.Mileage, error) {
 	var mileageModel *models.Mileage
 	mileageModel, err := mr.FindUniq(
 		distance,
@@ -238,7 +239,7 @@ func (mr *MileageRepository) FindOrCreate(distance, carId uint, dt time.Time) (*
 		return nil, err
 	}
 
-	mileageModel.ID, err = mr.SaveMileage(mileageModel)
+	mileageModel.ID, err = mr.SaveMileage(ctx, mileageModel)
 	if err != nil {
 		return nil, err
 	}

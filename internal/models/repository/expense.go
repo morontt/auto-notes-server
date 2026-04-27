@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -151,7 +152,7 @@ func (er *ExpenseRepository) ExpenseOwner(orderId uint) (uint, error) {
 	return userId, nil
 }
 
-func (er *ExpenseRepository) SaveExpense(obj *models.Expense, userId uint) (uint, error) {
+func (er *ExpenseRepository) SaveExpense(ctx context.Context, obj *models.Expense, userId uint) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = obj.Date.Format(time.DateOnly)
@@ -179,7 +180,7 @@ func (er *ExpenseRepository) SaveExpense(obj *models.Expense, userId uint) (uint
 		return 0, err
 	}
 
-	res, err := er.DB.Exec(query)
+	res, err := er.DB.ExecContext(ctx, query)
 	if err != nil {
 		return 0, err
 	}

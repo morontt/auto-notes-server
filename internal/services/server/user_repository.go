@@ -165,7 +165,7 @@ func (ur *UserRepositoryService) SaveUserSettings(ctx context.Context, settingsR
 		settings.FuelTypeID.Int32 = settingsReq.DefaultFuelType.GetId()
 	}
 
-	err = repo.SaveUserSettings(&settings, user.ID)
+	err = repo.SaveUserSettings(ctx, &settings, user.ID)
 	if err != nil {
 		return nil, toTwirpError(ur.app, err, ctx)
 	}

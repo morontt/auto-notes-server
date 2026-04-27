@@ -37,7 +37,7 @@ func (auth *AuthService) GetToken(ctx context.Context, req *pb.LoginRequest) (*p
 	}
 
 	repo := repository.UserRepository{DB: auth.app.DB}
-	user, err := repo.GetUserByUsername(req.Username)
+	user, err := repo.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
 			auth.app.Info("Auth.GetToken: User not found", ctx, "username", req.Username)
@@ -86,7 +86,7 @@ func (auth *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenR
 	auth.app.Debug("Auth.RefreshToken: parsed claims", ctx, "claims", claims)
 
 	repo := repository.UserRepository{DB: auth.app.DB}
-	user, err := repo.GetUserByUsername(claims.Username)
+	user, err := repo.GetUserByUsername(ctx, claims.Username)
 	if err != nil {
 		if errors.Is(err, models.RecordNotFound) {
 			auth.app.Info("Auth.RefreshToken: User not found", ctx, "username", claims.Username)

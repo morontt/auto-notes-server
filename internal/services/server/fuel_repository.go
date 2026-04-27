@@ -184,7 +184,7 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 	var mileage *models.Mileage
 	if fuel.Distance > 0 && car != nil {
 		mileageRepo := repository.MileageRepository{DB: fr.app.DB}
-		mileage, err = mileageRepo.FindOrCreate(uint(fuel.Distance), car.ID, fuel.Date.AsTime())
+		mileage, err = mileageRepo.FindOrCreate(ctx, uint(fuel.Distance), car.ID, fuel.Date.AsTime())
 		if err != nil {
 			return nil, toTwirpError(fr.app, err, ctx)
 		}
@@ -208,7 +208,7 @@ func (fr *FuelRepositoryService) SaveFuel(ctx context.Context, fuel *pb.Fuel) (*
 		Mileage: mileage,
 	}
 
-	fuelID, err := fuelRepo.SaveFuel(&fuelModel, user.ID)
+	fuelID, err := fuelRepo.SaveFuel(ctx, &fuelModel, user.ID)
 	if err != nil {
 		return nil, toTwirpError(fr.app, err, ctx)
 	}

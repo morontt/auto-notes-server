@@ -187,7 +187,7 @@ func (fr *FuelRepository) FindType(id uint) (*models.FuelType, error) {
 	return &obj, nil
 }
 
-func (fr *FuelRepository) SaveFuel(obj *models.Fuel, userId uint) (uint, error) {
+func (fr *FuelRepository) SaveFuel(ctx context.Context, obj *models.Fuel, userId uint) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = obj.Date.Format(time.DateOnly)
@@ -222,7 +222,7 @@ func (fr *FuelRepository) SaveFuel(obj *models.Fuel, userId uint) (uint, error) 
 		return 0, err
 	}
 
-	res, err := fr.DB.Exec(query)
+	res, err := fr.DB.ExecContext(ctx, query)
 	if err != nil {
 		return 0, err
 	}
