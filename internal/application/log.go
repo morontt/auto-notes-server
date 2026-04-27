@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime/debug"
+
+	"xelbot.com/auto-notes/server/internal/constants"
 )
 
 func (c *Container) SetLogger(logger *slog.Logger) {
@@ -35,7 +37,7 @@ func (c *Container) ServerError(ctx context.Context, err error) {
 
 func logContext(ctx context.Context, args ...any) []any {
 	var additional []any
-	if reqID, ok := ctx.Value(CtxKeyRequestID).(string); ok {
+	if reqID, ok := ctx.Value(constants.CtxKeyRequestID).(string); ok {
 		additional = append(additional, "request_id", reqID)
 	}
 

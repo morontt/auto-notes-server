@@ -6,11 +6,6 @@ import (
 	"xelbot.com/auto-notes/server/internal/utils/database"
 )
 
-const (
-	CtxKeyUser      = "user_ctx_key"
-	CtxKeyRequestID = "req_id_ctx_key"
-)
-
 type Container struct {
 	DB     *database.DB
 	logger *slog.Logger

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -17,13 +18,13 @@ type FuelRepository struct {
 	DB *database.DB
 }
 
-func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *filters.FuelFilter) ([]*models.Fuel, int, error) {
+func (fr *FuelRepository) GetFuelsByUser(ctx context.Context, userID uint, filter *filters.FuelFilter) ([]*models.Fuel, int, error) {
 	cntDs := fuelListQueryExpression(userID, filter)
 	cntDs = cntDs.ClearSelect().Select(goqu.COUNT("f.id"))
 
 	var count int
 	cntQuery, cntParams, _ := cntDs.Prepared(true).ToSQL()
-	err := fr.DB.QueryRow(cntQuery, cntParams...).Scan(&count)
+	err := fr.DB.QueryRowContext(ctx, cntQuery, cntParams...).Scan(&count)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -39,7 +40,7 @@ func (fr *FuelRepository) GetFuelsByUser(userID uint, filter *filters.FuelFilter
 	}
 
 	query, params, _ := ds.Prepared(true).ToSQL()
-	rows, err := fr.DB.Query(query, params...)
+	rows, err := fr.DB.QueryContext(ctx, query, params...)
 	if err != nil {
 		return nil, 0, err
 	}

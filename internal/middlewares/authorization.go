@@ -8,6 +8,7 @@ import (
 	"github.com/kataras/jwt"
 	"github.com/twitchtv/twirp"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/constants"
 	"xelbot.com/auto-notes/server/internal/security"
 )
 
@@ -48,7 +49,7 @@ func WithAuthorization(app application.Container, next http.Handler) http.Handle
 		}
 
 		app.Info("Authorization: parsed claims", ctx, "claims", claims)
-		ctx = context.WithValue(ctx, application.CtxKeyUser, claims)
+		ctx = context.WithValue(ctx, constants.CtxKeyUser, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

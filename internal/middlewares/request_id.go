@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/constants"
 )
 
 func RequestID(next http.Handler) http.Handler {
@@ -15,7 +15,7 @@ func RequestID(next http.Handler) http.Handler {
 		reqID := generateRequestId()
 		w.Header().Add("X-Request-Id", reqID)
 
-		ctx := context.WithValue(r.Context(), application.CtxKeyRequestID, reqID)
+		ctx := context.WithValue(r.Context(), constants.CtxKeyRequestID, reqID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
