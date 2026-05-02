@@ -1565,6 +1565,7 @@ type ExpenseFilter struct {
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
+	Type          ExpenseType            `protobuf:"varint,4,opt,name=type,proto3,enum=xelbot.com.autonotes.server.ExpenseType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1618,6 +1619,13 @@ func (x *ExpenseFilter) GetCarId() int32 {
 		return x.CarId
 	}
 	return 0
+}
+
+func (x *ExpenseFilter) GetType() ExpenseType {
+	if x != nil {
+		return x.Type
+	}
+	return ExpenseType_EMPTY
 }
 
 type MileageFilter struct {
@@ -2126,11 +2134,12 @@ const file_server_proto_rawDesc = "" +
 	"\vOrderFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
-	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"P\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"\x8e\x01\n" +
 	"\rExpenseFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
-	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"P\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\x12<\n" +
+	"\x04type\x18\x04 \x01(\x0e2(.xelbot.com.autonotes.server.ExpenseTypeR\x04type\"P\n" +
 	"\rMileageFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
@@ -2290,66 +2299,67 @@ var file_server_proto_depIdxs = []int32{
 	32, // 34: xelbot.com.autonotes.server.Expense.created_at:type_name -> google.protobuf.Timestamp
 	22, // 35: xelbot.com.autonotes.server.ExpenseCollection.expenses:type_name -> xelbot.com.autonotes.server.Expense
 	14, // 36: xelbot.com.autonotes.server.ExpenseCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
-	32, // 37: xelbot.com.autonotes.server.Mileage.date:type_name -> google.protobuf.Timestamp
-	3,  // 38: xelbot.com.autonotes.server.Mileage.car:type_name -> xelbot.com.autonotes.server.Car
-	32, // 39: xelbot.com.autonotes.server.Mileage.created_at:type_name -> google.protobuf.Timestamp
-	27, // 40: xelbot.com.autonotes.server.MileageCollection.mileages:type_name -> xelbot.com.autonotes.server.Mileage
-	14, // 41: xelbot.com.autonotes.server.MileageCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
-	2,  // 42: xelbot.com.autonotes.server.Service.cost:type_name -> xelbot.com.autonotes.server.Cost
-	32, // 43: xelbot.com.autonotes.server.Service.date:type_name -> google.protobuf.Timestamp
-	3,  // 44: xelbot.com.autonotes.server.Service.car:type_name -> xelbot.com.autonotes.server.Car
-	32, // 45: xelbot.com.autonotes.server.Service.created_at:type_name -> google.protobuf.Timestamp
-	29, // 46: xelbot.com.autonotes.server.ServiceCollection.services:type_name -> xelbot.com.autonotes.server.Service
-	14, // 47: xelbot.com.autonotes.server.ServiceCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
-	33, // 48: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
-	33, // 49: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
-	33, // 50: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
-	33, // 51: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
-	15, // 52: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
-	16, // 53: xelbot.com.autonotes.server.FuelRepository.GetFuels:input_type -> xelbot.com.autonotes.server.FuelFilter
-	17, // 54: xelbot.com.autonotes.server.FuelRepository.FindFuel:input_type -> xelbot.com.autonotes.server.IdRequest
-	33, // 55: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
-	33, // 56: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:input_type -> google.protobuf.Empty
-	9,  // 57: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
-	24, // 58: xelbot.com.autonotes.server.OrderRepository.GetOrders:input_type -> xelbot.com.autonotes.server.OrderFilter
-	17, // 59: xelbot.com.autonotes.server.OrderRepository.FindOrder:input_type -> xelbot.com.autonotes.server.IdRequest
-	33, // 60: xelbot.com.autonotes.server.OrderRepository.GetOrderTypes:input_type -> google.protobuf.Empty
-	20, // 61: xelbot.com.autonotes.server.OrderRepository.SaveOrder:input_type -> xelbot.com.autonotes.server.Order
-	25, // 62: xelbot.com.autonotes.server.OrderRepository.GetExpenses:input_type -> xelbot.com.autonotes.server.ExpenseFilter
-	17, // 63: xelbot.com.autonotes.server.OrderRepository.FindExpense:input_type -> xelbot.com.autonotes.server.IdRequest
-	22, // 64: xelbot.com.autonotes.server.OrderRepository.SaveExpense:input_type -> xelbot.com.autonotes.server.Expense
-	31, // 65: xelbot.com.autonotes.server.CarRepository.GetServices:input_type -> xelbot.com.autonotes.server.ServiceFilter
-	17, // 66: xelbot.com.autonotes.server.CarRepository.FindService:input_type -> xelbot.com.autonotes.server.IdRequest
-	29, // 67: xelbot.com.autonotes.server.CarRepository.SaveService:input_type -> xelbot.com.autonotes.server.Service
-	26, // 68: xelbot.com.autonotes.server.CarRepository.GetMileages:input_type -> xelbot.com.autonotes.server.MileageFilter
-	27, // 69: xelbot.com.autonotes.server.CarRepository.SaveMileage:input_type -> xelbot.com.autonotes.server.Mileage
-	4,  // 70: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
-	13, // 71: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
-	12, // 72: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
-	15, // 73: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	15, // 74: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
-	10, // 75: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
-	9,  // 76: xelbot.com.autonotes.server.FuelRepository.FindFuel:output_type -> xelbot.com.autonotes.server.Fuel
-	6,  // 77: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
-	8,  // 78: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:output_type -> xelbot.com.autonotes.server.FuelTypeCollection
-	9,  // 79: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
-	21, // 80: xelbot.com.autonotes.server.OrderRepository.GetOrders:output_type -> xelbot.com.autonotes.server.OrderCollection
-	20, // 81: xelbot.com.autonotes.server.OrderRepository.FindOrder:output_type -> xelbot.com.autonotes.server.Order
-	19, // 82: xelbot.com.autonotes.server.OrderRepository.GetOrderTypes:output_type -> xelbot.com.autonotes.server.OrderTypeCollection
-	20, // 83: xelbot.com.autonotes.server.OrderRepository.SaveOrder:output_type -> xelbot.com.autonotes.server.Order
-	23, // 84: xelbot.com.autonotes.server.OrderRepository.GetExpenses:output_type -> xelbot.com.autonotes.server.ExpenseCollection
-	22, // 85: xelbot.com.autonotes.server.OrderRepository.FindExpense:output_type -> xelbot.com.autonotes.server.Expense
-	22, // 86: xelbot.com.autonotes.server.OrderRepository.SaveExpense:output_type -> xelbot.com.autonotes.server.Expense
-	30, // 87: xelbot.com.autonotes.server.CarRepository.GetServices:output_type -> xelbot.com.autonotes.server.ServiceCollection
-	29, // 88: xelbot.com.autonotes.server.CarRepository.FindService:output_type -> xelbot.com.autonotes.server.Service
-	29, // 89: xelbot.com.autonotes.server.CarRepository.SaveService:output_type -> xelbot.com.autonotes.server.Service
-	28, // 90: xelbot.com.autonotes.server.CarRepository.GetMileages:output_type -> xelbot.com.autonotes.server.MileageCollection
-	27, // 91: xelbot.com.autonotes.server.CarRepository.SaveMileage:output_type -> xelbot.com.autonotes.server.Mileage
-	70, // [70:92] is the sub-list for method output_type
-	48, // [48:70] is the sub-list for method input_type
-	48, // [48:48] is the sub-list for extension type_name
-	48, // [48:48] is the sub-list for extension extendee
-	0,  // [0:48] is the sub-list for field type_name
+	0,  // 37: xelbot.com.autonotes.server.ExpenseFilter.type:type_name -> xelbot.com.autonotes.server.ExpenseType
+	32, // 38: xelbot.com.autonotes.server.Mileage.date:type_name -> google.protobuf.Timestamp
+	3,  // 39: xelbot.com.autonotes.server.Mileage.car:type_name -> xelbot.com.autonotes.server.Car
+	32, // 40: xelbot.com.autonotes.server.Mileage.created_at:type_name -> google.protobuf.Timestamp
+	27, // 41: xelbot.com.autonotes.server.MileageCollection.mileages:type_name -> xelbot.com.autonotes.server.Mileage
+	14, // 42: xelbot.com.autonotes.server.MileageCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
+	2,  // 43: xelbot.com.autonotes.server.Service.cost:type_name -> xelbot.com.autonotes.server.Cost
+	32, // 44: xelbot.com.autonotes.server.Service.date:type_name -> google.protobuf.Timestamp
+	3,  // 45: xelbot.com.autonotes.server.Service.car:type_name -> xelbot.com.autonotes.server.Car
+	32, // 46: xelbot.com.autonotes.server.Service.created_at:type_name -> google.protobuf.Timestamp
+	29, // 47: xelbot.com.autonotes.server.ServiceCollection.services:type_name -> xelbot.com.autonotes.server.Service
+	14, // 48: xelbot.com.autonotes.server.ServiceCollection.meta:type_name -> xelbot.com.autonotes.server.PaginationMeta
+	33, // 49: xelbot.com.autonotes.server.UserRepository.GetCars:input_type -> google.protobuf.Empty
+	33, // 50: xelbot.com.autonotes.server.UserRepository.GetCurrencies:input_type -> google.protobuf.Empty
+	33, // 51: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:input_type -> google.protobuf.Empty
+	33, // 52: xelbot.com.autonotes.server.UserRepository.GetUserSettings:input_type -> google.protobuf.Empty
+	15, // 53: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:input_type -> xelbot.com.autonotes.server.UserSettings
+	16, // 54: xelbot.com.autonotes.server.FuelRepository.GetFuels:input_type -> xelbot.com.autonotes.server.FuelFilter
+	17, // 55: xelbot.com.autonotes.server.FuelRepository.FindFuel:input_type -> xelbot.com.autonotes.server.IdRequest
+	33, // 56: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:input_type -> google.protobuf.Empty
+	33, // 57: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:input_type -> google.protobuf.Empty
+	9,  // 58: xelbot.com.autonotes.server.FuelRepository.SaveFuel:input_type -> xelbot.com.autonotes.server.Fuel
+	24, // 59: xelbot.com.autonotes.server.OrderRepository.GetOrders:input_type -> xelbot.com.autonotes.server.OrderFilter
+	17, // 60: xelbot.com.autonotes.server.OrderRepository.FindOrder:input_type -> xelbot.com.autonotes.server.IdRequest
+	33, // 61: xelbot.com.autonotes.server.OrderRepository.GetOrderTypes:input_type -> google.protobuf.Empty
+	20, // 62: xelbot.com.autonotes.server.OrderRepository.SaveOrder:input_type -> xelbot.com.autonotes.server.Order
+	25, // 63: xelbot.com.autonotes.server.OrderRepository.GetExpenses:input_type -> xelbot.com.autonotes.server.ExpenseFilter
+	17, // 64: xelbot.com.autonotes.server.OrderRepository.FindExpense:input_type -> xelbot.com.autonotes.server.IdRequest
+	22, // 65: xelbot.com.autonotes.server.OrderRepository.SaveExpense:input_type -> xelbot.com.autonotes.server.Expense
+	31, // 66: xelbot.com.autonotes.server.CarRepository.GetServices:input_type -> xelbot.com.autonotes.server.ServiceFilter
+	17, // 67: xelbot.com.autonotes.server.CarRepository.FindService:input_type -> xelbot.com.autonotes.server.IdRequest
+	29, // 68: xelbot.com.autonotes.server.CarRepository.SaveService:input_type -> xelbot.com.autonotes.server.Service
+	26, // 69: xelbot.com.autonotes.server.CarRepository.GetMileages:input_type -> xelbot.com.autonotes.server.MileageFilter
+	27, // 70: xelbot.com.autonotes.server.CarRepository.SaveMileage:input_type -> xelbot.com.autonotes.server.Mileage
+	4,  // 71: xelbot.com.autonotes.server.UserRepository.GetCars:output_type -> xelbot.com.autonotes.server.CarCollection
+	13, // 72: xelbot.com.autonotes.server.UserRepository.GetCurrencies:output_type -> xelbot.com.autonotes.server.CurrencyCollection
+	12, // 73: xelbot.com.autonotes.server.UserRepository.GetDefaultCurrency:output_type -> xelbot.com.autonotes.server.DefaultCurrency
+	15, // 74: xelbot.com.autonotes.server.UserRepository.GetUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	15, // 75: xelbot.com.autonotes.server.UserRepository.SaveUserSettings:output_type -> xelbot.com.autonotes.server.UserSettings
+	10, // 76: xelbot.com.autonotes.server.FuelRepository.GetFuels:output_type -> xelbot.com.autonotes.server.FuelCollection
+	9,  // 77: xelbot.com.autonotes.server.FuelRepository.FindFuel:output_type -> xelbot.com.autonotes.server.Fuel
+	6,  // 78: xelbot.com.autonotes.server.FuelRepository.GetFillingStations:output_type -> xelbot.com.autonotes.server.FillingStationCollection
+	8,  // 79: xelbot.com.autonotes.server.FuelRepository.GetFuelTypes:output_type -> xelbot.com.autonotes.server.FuelTypeCollection
+	9,  // 80: xelbot.com.autonotes.server.FuelRepository.SaveFuel:output_type -> xelbot.com.autonotes.server.Fuel
+	21, // 81: xelbot.com.autonotes.server.OrderRepository.GetOrders:output_type -> xelbot.com.autonotes.server.OrderCollection
+	20, // 82: xelbot.com.autonotes.server.OrderRepository.FindOrder:output_type -> xelbot.com.autonotes.server.Order
+	19, // 83: xelbot.com.autonotes.server.OrderRepository.GetOrderTypes:output_type -> xelbot.com.autonotes.server.OrderTypeCollection
+	20, // 84: xelbot.com.autonotes.server.OrderRepository.SaveOrder:output_type -> xelbot.com.autonotes.server.Order
+	23, // 85: xelbot.com.autonotes.server.OrderRepository.GetExpenses:output_type -> xelbot.com.autonotes.server.ExpenseCollection
+	22, // 86: xelbot.com.autonotes.server.OrderRepository.FindExpense:output_type -> xelbot.com.autonotes.server.Expense
+	22, // 87: xelbot.com.autonotes.server.OrderRepository.SaveExpense:output_type -> xelbot.com.autonotes.server.Expense
+	30, // 88: xelbot.com.autonotes.server.CarRepository.GetServices:output_type -> xelbot.com.autonotes.server.ServiceCollection
+	29, // 89: xelbot.com.autonotes.server.CarRepository.FindService:output_type -> xelbot.com.autonotes.server.Service
+	29, // 90: xelbot.com.autonotes.server.CarRepository.SaveService:output_type -> xelbot.com.autonotes.server.Service
+	28, // 91: xelbot.com.autonotes.server.CarRepository.GetMileages:output_type -> xelbot.com.autonotes.server.MileageCollection
+	27, // 92: xelbot.com.autonotes.server.CarRepository.SaveMileage:output_type -> xelbot.com.autonotes.server.Mileage
+	71, // [71:93] is the sub-list for method output_type
+	49, // [49:71] is the sub-list for method input_type
+	49, // [49:49] is the sub-list for extension type_name
+	49, // [49:49] is the sub-list for extension extendee
+	0,  // [0:49] is the sub-list for field type_name
 }
 
 func init() { file_server_proto_init() }

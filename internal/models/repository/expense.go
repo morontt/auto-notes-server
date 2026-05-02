@@ -209,6 +209,12 @@ func expenseListQueryExpression(userID uint, filter *filters.ExpenseFilter) *goq
 		})
 	}
 
+	if filter.HasType() {
+		ds = ds.Where(goqu.Ex{
+			"e.type": int(filter.GetType()),
+		})
+	}
+
 	return ds
 }
 

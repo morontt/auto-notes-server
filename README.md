@@ -20,4 +20,8 @@ openssl rand -base64 32
 
 ```sh
 go generate ./...
+
+# или так:
+
+make generate
 ```
