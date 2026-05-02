@@ -993,6 +993,8 @@ type FuelFilter struct {
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
+	TypeId        int32                  `protobuf:"varint,4,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
+	StationId     int32                  `protobuf:"varint,5,opt,name=station_id,json=stationId,proto3" json:"station_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1044,6 +1046,20 @@ func (x *FuelFilter) GetPage() int32 {
 func (x *FuelFilter) GetCarId() int32 {
 	if x != nil {
 		return x.CarId
+	}
+	return 0
+}
+
+func (x *FuelFilter) GetTypeId() int32 {
+	if x != nil {
+		return x.TypeId
+	}
+	return 0
+}
+
+func (x *FuelFilter) GetStationId() int32 {
+	if x != nil {
+		return x.StationId
 	}
 	return 0
 }
@@ -2090,12 +2106,15 @@ const file_server_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12Q\n" +
-	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\"M\n" +
+	"\x11default_fuel_type\x18\x06 \x01(\v2%.xelbot.com.autonotes.server.FuelTypeR\x0fdefaultFuelType\"\x85\x01\n" +
 	"\n" +
 	"FuelFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
-	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"\x1b\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\x12\x17\n" +
+	"\atype_id\x18\x04 \x01(\x05R\x06typeId\x12\x1d\n" +
+	"\n" +
+	"station_id\x18\x05 \x01(\x05R\tstationId\"\x1b\n" +
 	"\tIdRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"/\n" +
 	"\tOrderType\x12\x0e\n" +

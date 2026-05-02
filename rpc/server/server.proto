@@ -110,6 +110,8 @@ message FuelFilter {
   int32 limit = 1;
   int32 page = 2;
   int32 car_id = 3;
+  int32 type_id = 4;
+  int32 station_id = 5;
 }
 
 message IdRequest {
