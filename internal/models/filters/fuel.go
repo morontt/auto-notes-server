@@ -13,3 +13,19 @@ func NewFuelFilter(f *pb.FuelFilter) *FuelFilter {
 		commonPart: commonPart{filter: f},
 	}
 }
+
+func (p *FuelFilter) GetTypeId() int32 {
+	if p != nil {
+		return p.pbFilter.GetTypeId()
+	}
+
+	return 0
+}
+
+func (p *FuelFilter) GetStationId() int32 {
+	if p != nil {
+		return p.pbFilter.GetStationId()
+	}
+
+	return 0
+}

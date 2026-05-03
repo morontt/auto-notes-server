@@ -319,6 +319,19 @@ func fuelListQueryExpression(userID uint, filter *filters.FuelFilter) *goqu.Sele
 		})
 	}
 
+	if filter.GetStationId() > 0 {
+		ds = ds.Where(goqu.Ex{
+			"f.station_id": filter.GetStationId(),
+		})
+	}
+
+	if filter.GetTypeId() > 0 {
+		ds = ds.Where(goqu.ExOr{
+			"ft.id":        filter.GetTypeId(),
+			"ft.parent_id": filter.GetTypeId(),
+		})
+	}
+
 	return ds
 }
 
