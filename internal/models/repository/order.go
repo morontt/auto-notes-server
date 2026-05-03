@@ -316,6 +316,12 @@ func orderListQueryExpression(userID uint, filter *filters.OrderFilter) *goqu.Se
 		})
 	}
 
+	if filter.GetTypeId() > 0 {
+		ds = ds.Where(goqu.Ex{
+			"o.type_id": filter.GetTypeId(),
+		})
+	}
+
 	return ds
 }
 

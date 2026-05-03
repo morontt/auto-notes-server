@@ -13,3 +13,11 @@ func NewOrderFilter(f *pb.OrderFilter) *OrderFilter {
 		commonPart: commonPart{filter: f},
 	}
 }
+
+func (p *OrderFilter) GetTypeId() int32 {
+	if p != nil {
+		return p.pbFilter.GetTypeId()
+	}
+
+	return 0
+}

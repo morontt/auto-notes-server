@@ -1521,6 +1521,7 @@ type OrderFilter struct {
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	CarId         int32                  `protobuf:"varint,3,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"`
+	TypeId        int32                  `protobuf:"varint,4,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1572,6 +1573,13 @@ func (x *OrderFilter) GetPage() int32 {
 func (x *OrderFilter) GetCarId() int32 {
 	if x != nil {
 		return x.CarId
+	}
+	return 0
+}
+
+func (x *OrderFilter) GetTypeId() int32 {
+	if x != nil {
+		return x.TypeId
 	}
 	return 0
 }
@@ -2149,11 +2157,12 @@ const file_server_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x96\x01\n" +
 	"\x11ExpenseCollection\x12@\n" +
 	"\bexpenses\x18\x01 \x03(\v2$.xelbot.com.autonotes.server.ExpenseR\bexpenses\x12?\n" +
-	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"N\n" +
+	"\x04meta\x18\x02 \x01(\v2+.xelbot.com.autonotes.server.PaginationMetaR\x04meta\"g\n" +
 	"\vOrderFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
-	"\x06car_id\x18\x03 \x01(\x05R\x05carId\"\x8e\x01\n" +
+	"\x06car_id\x18\x03 \x01(\x05R\x05carId\x12\x17\n" +
+	"\atype_id\x18\x04 \x01(\x05R\x06typeId\"\x8e\x01\n" +
 	"\rExpenseFilter\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x15\n" +
