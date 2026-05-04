@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -236,7 +235,7 @@ func (or *OrderRepository) FindType(id uint) (*models.OrderType, error) {
 	return &obj, nil
 }
 
-func (or *OrderRepository) SaveOrder(ctx context.Context, obj *models.Order, userId uint) (uint, error) {
+func (or *OrderRepository) SaveOrder(obj *models.Order, userId uint) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = obj.Date.Format(time.DateOnly)
@@ -287,7 +286,7 @@ func (or *OrderRepository) SaveOrder(ctx context.Context, obj *models.Order, use
 		return 0, err
 	}
 
-	res, err := or.DB.ExecContext(ctx, query)
+	res, err := or.DB.Exec(query)
 	if err != nil {
 		return 0, err
 	}

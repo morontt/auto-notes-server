@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 
@@ -63,7 +62,7 @@ func (usr *UserSettingRepository) GetUserSettings(userID uint) (*models.UserSett
 	return &obj, nil
 }
 
-func (usr *UserSettingRepository) SaveUserSettings(ctx context.Context, settings *models.UserSetting, userId uint) error {
+func (usr *UserSettingRepository) SaveUserSettings(settings *models.UserSetting, userId uint) error {
 	if settings == nil {
 		return errors.New("user settings cannot be null")
 	}
@@ -98,7 +97,7 @@ func (usr *UserSettingRepository) SaveUserSettings(ctx context.Context, settings
 		return err
 	}
 
-	_, err = usr.DB.ExecContext(ctx, query)
+	_, err = usr.DB.Exec(query)
 	if err != nil {
 		return err
 	}

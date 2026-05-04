@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -171,7 +170,7 @@ func (sr *ServiceRepository) ServiceOwner(orderId uint) (uint, error) {
 	return userId, nil
 }
 
-func (sr *ServiceRepository) SaveService(ctx context.Context, obj *models.Service, userId uint) (uint, error) {
+func (sr *ServiceRepository) SaveService(obj *models.Service, userId uint) (uint, error) {
 	data := goqu.Record{}
 
 	data["date"] = obj.Date.Format(time.DateOnly)
@@ -209,7 +208,7 @@ func (sr *ServiceRepository) SaveService(ctx context.Context, obj *models.Servic
 		return 0, err
 	}
 
-	res, err := sr.DB.ExecContext(ctx, query)
+	res, err := sr.DB.Exec(query)
 	if err != nil {
 		return 0, err
 	}

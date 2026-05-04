@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 
@@ -13,7 +12,7 @@ type UserRepository struct {
 	DB *database.DB
 }
 
-func (ur *UserRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (ur *UserRepository) GetUserByUsername(username string) (*models.User, error) {
 	query := `
 		SELECT
 			u.id,
@@ -25,7 +24,7 @@ func (ur *UserRepository) GetUserByUsername(ctx context.Context, username string
 
 	obj := models.User{}
 
-	err := ur.DB.QueryRowContext(ctx, query, username).Scan(
+	err := ur.DB.QueryRow(query, username).Scan(
 		&obj.ID,
 		&obj.Username,
 		&obj.PasswordHash,

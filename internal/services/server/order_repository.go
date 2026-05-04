@@ -178,7 +178,7 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 	var mileage *models.Mileage
 	if order.Distance > 0 && car != nil && order.GetUsedAt() != nil {
 		mileageRepo := repository.MileageRepository{DB: or.app.DB}
-		mileage, err = mileageRepo.FindOrCreate(ctx, uint(order.Distance), car.ID, order.GetUsedAt().AsTime())
+		mileage, err = mileageRepo.FindOrCreate(uint(order.Distance), car.ID, order.GetUsedAt().AsTime())
 		if err != nil {
 			return nil, toTwirpError(or.app, err, ctx)
 		}
@@ -219,7 +219,7 @@ func (or *OrderRepositoryService) SaveOrder(ctx context.Context, order *pb.Order
 		Mileage:     mileage,
 	}
 
-	orderID, err := orderRepo.SaveOrder(ctx, &orderModel, user.ID)
+	orderID, err := orderRepo.SaveOrder(&orderModel, user.ID)
 	if err != nil {
 		return nil, toTwirpError(or.app, err, ctx)
 	}
@@ -362,7 +362,7 @@ func (or *OrderRepositoryService) SaveExpense(ctx context.Context, expense *pb.E
 		Type:        expense.GetType(),
 	}
 
-	expenseID, err := expenseRepo.SaveExpense(ctx, &expenseModel, user.ID)
+	expenseID, err := expenseRepo.SaveExpense(&expenseModel, user.ID)
 	if err != nil {
 		return nil, toTwirpError(or.app, err, ctx)
 	}
