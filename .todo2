@@ -63,7 +63,8 @@
     {
       "text": "Compatibility with NativePasswordHasher (from symfony/password-hasher)",
       "priority": "medium",
-      "creation": 1743240020
+      "creation": 1743240020,
+      "completion": 1777922963
     },
     {
       "text": "Save Fuel",
