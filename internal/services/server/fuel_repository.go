@@ -31,7 +31,7 @@ func (fr *FuelRepositoryService) GetFuels(ctx context.Context, pbFilter *pb.Fuel
 	filter := filters.NewFuelFilter(pbFilter)
 
 	repo := repository.FuelRepository{DB: fr.app.DB}
-	dbFuels, cntFuels, err := repo.GetFuelsByUser(ctx, user.ID, filter)
+	dbFuels, cntFuels, err := repo.GetFuelsByUser(user.ID, filter)
 	if err != nil {
 		return nil, toTwirpError(fr.app, err, ctx)
 	}
