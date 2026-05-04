@@ -56,8 +56,8 @@ func (dbw *DB) logQuery(t time.Time, query string, args ...any) {
 }
 
 func cleanQueryString(query string) string {
-	query = strings.Replace(query, "\n", " ", -1)
-	query = strings.Replace(query, "\t", " ", -1)
+	query = strings.ReplaceAll(query, "\n", " ")
+	query = strings.ReplaceAll(query, "\t", " ")
 	query = regSpaces.ReplaceAllString(query, " ")
 
 	return strings.TrimSpace(query)

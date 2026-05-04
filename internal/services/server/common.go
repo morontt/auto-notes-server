@@ -6,6 +6,7 @@ import (
 
 	"github.com/twitchtv/twirp"
 	"xelbot.com/auto-notes/server/internal/application"
+	"xelbot.com/auto-notes/server/internal/constants"
 	"xelbot.com/auto-notes/server/internal/models"
 	"xelbot.com/auto-notes/server/internal/models/filters"
 	"xelbot.com/auto-notes/server/internal/security"
@@ -20,7 +21,7 @@ func userClaimsFromContext(ctx context.Context) (*security.UserClaims, error) {
 		ok   bool
 	)
 
-	if user, ok = ctx.Value(application.CtxKeyUser).(security.UserClaims); !ok {
+	if user, ok = ctx.Value(constants.CtxKeyUser).(security.UserClaims); !ok {
 		return nil, UnAuthenticated
 	}
 
